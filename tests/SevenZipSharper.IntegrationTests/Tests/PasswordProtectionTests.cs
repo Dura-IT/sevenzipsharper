@@ -25,7 +25,8 @@ public sealed class PasswordProtectionTests
     private static byte[] LoadFixture()
     {
         var assembly = Assembly.GetExecutingAssembly();
-        var resourceName = "SevenZipSharper.IntegrationTests.Fixtures.password-protected.7z";
+        const string resourceName =
+            "SevenZipSharper.IntegrationTests.Fixtures.password-protected.7z";
         using var stream =
             assembly.GetManifestResourceStream(resourceName)
             ?? throw new InvalidOperationException(
@@ -518,7 +519,9 @@ public sealed class PasswordProtectedCompressionTests
             || zipBytes[2] != 0x03
             || zipBytes[3] != 0x04
         )
+        {
             return false;
+        }
 
         var fileNameLen = BitConverter.ToUInt16(zipBytes, 26);
         var extraFieldLen = BitConverter.ToUInt16(zipBytes, 28);

@@ -35,3 +35,6 @@ dotnet_diagnostic.CA1031.severity = none
 dotnet_diagnostic.CA1001.severity = none
 dotnet_diagnostic.CA2000.severity = none
 dotnet_diagnostic.CA2025.severity = none
+# RCS1261: "dispose asynchronously" — await using adds nothing over using for the
+# short-lived, mostly MemoryStream-backed resources in tests; pure noise here.
+dotnet_diagnostic.RCS1261.severity = none

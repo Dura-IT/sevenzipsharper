@@ -95,7 +95,9 @@ public sealed class SevenZipSharperServiceCollectionExtensionsTests
                     d.ServiceType
                     == typeof(Func<ArchiveFormat, CompressionParameters, SevenZipCompressor>)
                 )
+                {
                     captured = d;
+                }
             });
         services.Object.AddSevenZipSharper();
 

@@ -471,9 +471,7 @@ public sealed class SevenZipExtractorTests
         extractor.Dispose();
 
         await FluentActions
-            .Awaiting(() =>
-                extractor.ExtractAsync(new List<ArchiveEntry>(), _ => true, Path.GetTempPath())
-            )
+            .Awaiting(() => extractor.ExtractAsync([], _ => true, Path.GetTempPath()))
             .Should()
             .ThrowAsync<ObjectDisposedException>();
     }
@@ -495,11 +493,7 @@ public sealed class SevenZipExtractorTests
     {
         using var extractor = CreateExtractor();
 
-        var result = await extractor.ExtractAsync(
-            new List<ArchiveEntry>(),
-            _ => true,
-            Path.GetTempPath()
-        );
+        var result = await extractor.ExtractAsync([], _ => true, Path.GetTempPath());
 
         result.IsFailed.Should().BeTrue();
     }
@@ -595,7 +589,7 @@ public sealed class SevenZipExtractorTests
         await FluentActions
             .Awaiting(() =>
                 extractor.ExtractAsync(
-                    new List<ArchiveEntry>(),
+                    [],
                     _ => true,
                     Path.GetTempPath(),
                     cancellationToken: cts.Token
@@ -707,7 +701,9 @@ internal sealed partial class FakeArchiveForExtraction : IInArchive
         {
             var idx = indices != null ? indices[i] : i;
             if (_extractCallback != null)
+            {
                 _extractCallback(extractCallback, idx);
+            }
             else
             {
                 extractCallback.GetStream(idx, out _, AskMode.Extract);

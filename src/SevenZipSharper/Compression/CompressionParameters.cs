@@ -115,10 +115,10 @@ public record CompressionParameters
     /// </returns>
     public Result Validate()
     {
-        if (ThreadCount.HasValue && ThreadCount.Value < 1)
+        if (ThreadCount < 1)
             return Result.Fail("ThreadCount must be 1 or greater.");
 
-        if (EncryptionPassword is not null && EncryptionPassword.Length == 0)
+        if (EncryptionPassword?.Length == 0)
             return Result.Fail("EncryptionPassword must not be empty. Use null for no encryption.");
 
         if (EncryptHeaders && EncryptionPassword is null)
@@ -149,14 +149,18 @@ public record CompressionParameters
             const uint maxLzma = 1536 * 1024 * 1024;
 
             if (!IsPowerOfTwo(dict))
+            {
                 return Result.Fail(
                     $"DictionarySize {dict} is not a power of 2. LZMA and LZMA2 require a power-of-2 dictionary size."
                 );
+            }
 
             if (dict < minLzma || dict > maxLzma)
+            {
                 return Result.Fail(
                     $"DictionarySize {dict} is out of range for LZMA/LZMA2. Valid range: 1 KB – 1536 MB."
                 );
+            }
         }
 
         if (method is CompressionMethod.BZip2)
@@ -166,9 +170,11 @@ public record CompressionParameters
             const uint stepBzip2 = 100 * 1024;
 
             if (dict < minBzip2 || dict > maxBzip2 || dict % stepBzip2 != 0)
+            {
                 return Result.Fail(
                     $"DictionarySize {dict} is invalid for BZip2. Valid values: multiples of 100 KB between 100 KB and 900 KB."
                 );
+            }
         }
 
         return Result.Ok();
@@ -180,9 +186,11 @@ public record CompressionParameters
         const uint maxWordSize = 273;
 
         if (wordSize < minWordSize || wordSize > maxWordSize)
+        {
             return Result.Fail(
                 $"WordSize {wordSize} is out of range for LZMA/LZMA2. Valid range: 5–273."
             );
+        }
 
         return Result.Ok();
     }

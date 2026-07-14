@@ -134,7 +134,9 @@ public static class ArchiveFormatDetector
                 span.Length >= offset + bytes.Length
                 && span.Slice(offset, bytes.Length).SequenceEqual(bytes)
             )
+            {
                 return format;
+            }
         }
 
         return null;
