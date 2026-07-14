@@ -23,10 +23,12 @@ internal static class SevenZipBStr
     internal static IntPtr Alloc(string value)
     {
         if (value.Length > int.MaxValue / 4)
+        {
             throw new ArgumentException(
                 "String is too long to represent as a BSTR.",
                 nameof(value)
             );
+        }
 
         if (OperatingSystem.IsWindows())
             return Marshal.StringToBSTR(value);
@@ -38,7 +40,7 @@ internal static class SevenZipBStr
         Marshal.WriteInt32(ptr, byteLen);
         nint dataPtr = ptr + 4;
         for (int i = 0; i < numChars; i++)
-            Marshal.WriteInt32(dataPtr + (nint)i * 4, value[i]);
+            Marshal.WriteInt32(dataPtr + ((nint)i * 4), value[i]);
         Marshal.WriteInt32(dataPtr + (nint)byteLen, 0);
         return dataPtr;
     }
@@ -64,7 +66,7 @@ internal static class SevenZipBStr
         int numChars = byteLen / 4;
         var chars = new char[numChars];
         for (int i = 0; i < numChars; i++)
-            chars[i] = (char)Marshal.ReadInt32(bstr + (nint)i * 4);
+            chars[i] = (char)Marshal.ReadInt32(bstr + ((nint)i * 4));
         return new string(chars);
     }
 

@@ -149,7 +149,7 @@ public sealed class SevenZipCompressorFilesTests
 internal sealed partial class FakeOutArchiveCapturingPaths : IOutArchive
 {
     internal uint LastCount { get; private set; }
-    internal List<string> CapturedPaths { get; } = new List<string>();
+    internal List<string> CapturedPaths { get; } = [];
 
     public int UpdateItems(
         IOutStream outStream,

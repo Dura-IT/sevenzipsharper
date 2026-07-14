@@ -41,10 +41,12 @@ internal static class NativeLibraryLoader
         var path = Path.Combine(assemblyDirectory, "runtimes", rid, "native", fileName);
 
         if (!File.Exists(path))
+        {
             throw new DllNotFoundException(
                 $"7-Zip native library not found at '{path}'. "
                     + $"Ensure the SevenZipSharper NuGet package includes native assets for RID '{rid}'."
             );
+        }
 
         return path;
     }

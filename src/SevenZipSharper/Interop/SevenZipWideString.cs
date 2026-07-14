@@ -25,8 +25,8 @@ internal static class SevenZipWideString
         int numChars = value.Length;
         nint ptr = Marshal.AllocCoTaskMem((numChars + 1) * 4);
         for (int i = 0; i < numChars; i++)
-            Marshal.WriteInt32(ptr + (nint)i * 4, value[i]);
-        Marshal.WriteInt32(ptr + (nint)numChars * 4, 0);
+            Marshal.WriteInt32(ptr + ((nint)i * 4), value[i]);
+        Marshal.WriteInt32(ptr + ((nint)numChars * 4), 0);
         return ptr;
     }
 
@@ -43,12 +43,12 @@ internal static class SevenZipWideString
 
         // POSIX: wchar_t is 4 bytes; walk until null terminator.
         int length = 0;
-        while (Marshal.ReadInt32(ptr + (nint)length * 4) != 0)
+        while (Marshal.ReadInt32(ptr + ((nint)length * 4)) != 0)
             length++;
 
         var chars = new char[length];
         for (int i = 0; i < length; i++)
-            chars[i] = (char)Marshal.ReadInt32(ptr + (nint)i * 4);
+            chars[i] = (char)Marshal.ReadInt32(ptr + ((nint)i * 4));
         return new string(chars);
     }
 

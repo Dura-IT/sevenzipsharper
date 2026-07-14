@@ -55,10 +55,12 @@ internal static class CompressionParametersMapper
         // Solid mode is 7z-specific; the Zip handler rejects it with E_INVALIDARG, which
         // would abort SetProperties before em=AES is ever processed.
         if (format == ArchiveFormat.SevenZip)
+        {
             Add(
                 PropKeySolid,
                 PropVariant.FromString(parameters.SolidMode ? PropValueOn : PropValueOff)
             );
+        }
 
         if (parameters.DictionarySize.HasValue)
             Add(PropKeyDictionarySize, PropVariant.FromUInt32(parameters.DictionarySize.Value));

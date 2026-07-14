@@ -177,9 +177,11 @@ public sealed class SevenZipExtractor : IDisposable
                     }
 
                     if (count > (uint)Array.MaxLength)
+                    {
                         return Result.Fail<IReadOnlyList<ArchiveEntry>>(
                             $"Archive reports {count} entries, which exceeds the supported maximum."
                         );
+                    }
 
                     var entries = new List<ArchiveEntry>((int)count);
                     for (uint i = 0; i < count; i++)

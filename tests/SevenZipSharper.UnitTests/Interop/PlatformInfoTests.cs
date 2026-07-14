@@ -87,7 +87,7 @@ public sealed class PlatformInfoTests
     [Test]
     public void GetRuntimeIdentifier_OnHost_ReturnsValidRid()
     {
-        PlatformInfo.GetRuntimeIdentifier().Should().MatchRegex(@"^(win|osx|linux)-(x64|arm64)$");
+        PlatformInfo.GetRuntimeIdentifier().Should().MatchRegex("^(win|osx|linux)-(x64|arm64)$");
     }
 
     [Test]

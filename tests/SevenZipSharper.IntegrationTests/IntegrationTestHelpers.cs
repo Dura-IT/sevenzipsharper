@@ -29,9 +29,12 @@ internal static class IntegrationTestHelpers
         );
         var result = await compressor.CompressAsync(streamEntries, output);
         if (result.IsFailed)
+        {
             throw new InvalidOperationException(
                 $"Test fixture archive creation failed: {string.Join("; ", result.Errors)}"
             );
+        }
+
         return output.ToArray();
     }
 }

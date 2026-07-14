@@ -52,13 +52,17 @@ public sealed class CompressionParameterMatrixTests
 
         // 7z × every method × every level (30 cases)
         foreach (var method in sevenZipMethods)
+        {
             foreach (var level in levels)
+            {
                 yield return new TestCaseData(
                     ArchiveFormat.SevenZip,
                     method,
                     level,
                     (int?)null
                 ).SetName($"7z_{method}_{level}");
+            }
+        }
 
         // 7z × Copy × Store — uncompressed storage path
         yield return new TestCaseData(
@@ -89,19 +93,16 @@ public sealed class CompressionParameterMatrixTests
         ).SetName("7z_Lzma2_Normal_4Threads");
 
         // Zip × supported methods × every level (10 cases)
-        var zipMethods = new[]
-        {
-            CompressionMethod.Deflate,
-            CompressionMethod.BZip2,
-        };
+        var zipMethods = new[] { CompressionMethod.Deflate, CompressionMethod.BZip2 };
         foreach (var method in zipMethods)
+        {
             foreach (var level in levels)
-                yield return new TestCaseData(
-                    ArchiveFormat.Zip,
-                    method,
-                    level,
-                    (int?)null
-                ).SetName($"Zip_{method}_{level}");
+            {
+                yield return new TestCaseData(ArchiveFormat.Zip, method, level, (int?)null).SetName(
+                    $"Zip_{method}_{level}"
+                );
+            }
+        }
 
         // Zip × Deflate × Store — stored entries (level 0 disables compression on the codec)
         yield return new TestCaseData(
@@ -145,7 +146,9 @@ public sealed class CompressionParameterMatrixTests
                 );
         }
 
-        archive.Length.Should().BeGreaterThan(0, $"{format}/{method}/{level} archive should not be empty");
+        archive
+            .Length.Should()
+            .BeGreaterThan(0, $"{format}/{method}/{level} archive should not be empty");
 
         archive.Position = 0;
         using var extractor = new SevenZipExtractor(

@@ -553,7 +553,9 @@ public sealed class SevenZipCompressor : IDisposable
             _parameters.EncryptionPassword is not null
             && _format is not ArchiveFormat.SevenZip and not ArchiveFormat.Zip
         )
+        {
             return Result.Fail("Encryption is only supported for the 7z and Zip formats.");
+        }
 
         return Result.Ok();
     }
@@ -654,9 +656,9 @@ public sealed class SevenZipCompressor : IDisposable
         {
             var src = MemoryMarshal.AsBytes(values.AsSpan(i, 1));
             for (var b = 0; b < managedSize; b++)
-                Marshal.WriteByte(buf + i * winStride + b, src[b]);
+                Marshal.WriteByte(buf + (i * winStride) + b, src[b]);
             for (var b = managedSize; b < winStride; b++)
-                Marshal.WriteByte(buf + i * winStride + b, 0);
+                Marshal.WriteByte(buf + (i * winStride) + b, 0);
         }
         return (buf, () => Marshal.FreeCoTaskMem(buf));
     }
