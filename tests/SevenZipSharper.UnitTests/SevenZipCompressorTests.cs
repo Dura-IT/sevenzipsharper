@@ -253,6 +253,18 @@ public sealed class SevenZipCompressorTests
             .Should()
             .ThrowAsync<System.ObjectDisposedException>();
     }
+
+    [Test]
+    public async Task CompressMultiVolumeAsync_ThrowsArgumentNullException_WhenFactoryNull()
+    {
+        using var compressor = CreateCompressor();
+
+        await FluentActions
+            .Awaiting(() => compressor.CompressMultiVolumeAsync(OneEntry(), null!, 1024))
+            .Should()
+            .ThrowAsync<System.ArgumentNullException>()
+            .WithParameterName("volumeStreamFactory");
+    }
 }
 
 [GeneratedComClass]

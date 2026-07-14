@@ -78,6 +78,16 @@ public sealed class SevenZipExtractor : IDisposable
     [ExcludeFromCodeCoverage(
         Justification = "Thin try/catch around the native-constructing public constructor; exercised end-to-end by the integration test matrix."
     )]
+    [SuppressMessage(
+        "Design",
+        "CA1031:Do not catch general exception types",
+        Justification = "Factory intentionally maps any native-load failure to Result.Fail per the Result<T> expected-failure convention."
+    )]
+    [SuppressMessage(
+        "Reliability",
+        "CA2000:Dispose objects before losing scope",
+        Justification = "Ownership of the extractor transfers to the caller via Result<T>; disposing here would return a dead object."
+    )]
     public static Result<SevenZipExtractor> Create(
         Stream stream,
         ArchiveFormat format,

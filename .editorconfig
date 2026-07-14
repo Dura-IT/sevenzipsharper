@@ -13,3 +13,25 @@ indent_size = 4
 [*.{csproj,props,targets}]
 indent_style = space
 indent_size = 2
+
+# Test and benchmark projects run a relaxed ruleset. The full AnalysisMode=All
+# stack is enforced on production code under src/; several CA rules are wrong for
+# test/benchmark code and are turned off here rather than fought individually.
+[{tests,benchmarks}/**.cs]
+# CA1707: test method names use the mandated Method_Scenario_ExpectedResult convention.
+dotnet_diagnostic.CA1707.severity = none
+# CA2007: ConfigureAwait is meaningless in test/benchmark code — there is no sync context.
+dotnet_diagnostic.CA2007.severity = none
+# CA1515: NUnit fixtures and BenchmarkDotNet classes must be public to be discovered.
+dotnet_diagnostic.CA1515.severity = none
+# CA5394: non-crypto Random is fine for generating test payloads.
+dotnet_diagnostic.CA5394.severity = none
+# CA1305: invariant-culture formatting is not a concern for test assertions.
+dotnet_diagnostic.CA1305.severity = none
+# CA1031: catching general exceptions is acceptable in test/benchmark scaffolding.
+dotnet_diagnostic.CA1031.severity = none
+# CA1001/CA2000/CA2025: disposables in fixtures are owned by [GlobalSetup]/[GlobalCleanup]
+# and the short-lived test lifetime, not by IDisposable on the fixture itself.
+dotnet_diagnostic.CA1001.severity = none
+dotnet_diagnostic.CA2000.severity = none
+dotnet_diagnostic.CA2025.severity = none
