@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.InteropServices.Marshalling;
 
@@ -10,6 +11,11 @@ internal sealed partial class InStreamAdapter : SeekableStreamAdapterBase, IInSt
     internal InStreamAdapter(Stream stream)
         : base(stream) { }
 
+    [SuppressMessage(
+        "Design",
+        "CA1031:Do not catch general exception types",
+        Justification = "COM callback must translate every managed exception into an HRESULT; exceptions cannot cross the native 7-Zip boundary."
+    )]
     int ISequentialInStream.Read(byte[] data, uint size, out uint processedSize)
     {
         if (size > int.MaxValue)

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.InteropServices.Marshalling;
 using SevenZipSharper.Interop;
@@ -21,6 +22,11 @@ internal sealed partial class FileEntryStream : ISequentialOutStream, IDisposabl
         _file = new FileStream(fullPath, FileMode.Create, FileAccess.Write, FileShare.None);
     }
 
+    [SuppressMessage(
+        "Design",
+        "CA1031:Do not catch general exception types",
+        Justification = "COM callback must translate every managed exception into an HRESULT; exceptions cannot cross the native 7-Zip boundary."
+    )]
     public int Write(byte[] data, uint size, out uint processedSize)
     {
         try

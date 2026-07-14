@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -13,6 +14,11 @@ internal abstract class SeekableStreamAdapterBase
         _stream = stream;
     }
 
+    [SuppressMessage(
+        "Design",
+        "CA1031:Do not catch general exception types",
+        Justification = "COM callback must translate every managed exception into an HRESULT; exceptions cannot cross the native 7-Zip boundary."
+    )]
     protected int SeekStream(long offset, uint seekOrigin, nint newPosition)
     {
         if (seekOrigin > 2)

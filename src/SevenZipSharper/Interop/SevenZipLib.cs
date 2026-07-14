@@ -11,6 +11,7 @@ namespace SevenZipSharper.Interop;
 internal static partial class SevenZipLib
 {
     [LibraryImport(NativeLibraryLoader.LibraryName, EntryPoint = "CreateObject")]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
     private static partial int CreateObject(
         in Guid classId,
         in Guid interfaceId,
