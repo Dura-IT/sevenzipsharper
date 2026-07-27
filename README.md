@@ -183,6 +183,29 @@ var progress = new Progress<CompressionProgress>(p =>
 await compressor.CompressAsync(entries, outputStream, progress: progress);
 ```
 
+### Write pacing for large extractions
+
+When extracting to files, output is flushed to physical disk every 64 MiB by
+default. This bounds how far decompression can run ahead of the OS write-back
+cache — important for sustained, high-throughput batch extraction, where an
+unbounded dirty-page backlog can cause severe kernel I/O contention. Tune or
+disable it via `ExtractionOptions`:
+
+```csharp
+// Flush every 128 MiB instead of the 64 MiB default
+var options = new ExtractionOptions { FlushIntervalBytes = 128L * 1024 * 1024 };
+await extractor.ExtractAllAsync("/path/to/output", options: options);
+
+// Disable periodic flushing (rely on OS write-back caching alone)
+await extractor.ExtractAllAsync(
+    "/path/to/output",
+    options: new ExtractionOptions { FlushIntervalBytes = 0 });
+```
+
+`ExtractionOptions` applies to `ExtractAllAsync` and the `ExtractAsync` overloads,
+which write files to disk. `ExtractEntryAsync` writes to a caller-provided stream
+and is unaffected.
+
 ### Password-protected archives
 
 ```csharp

@@ -106,4 +106,43 @@ public sealed class ExtractionIntegrationTests
         result.IsSuccess.Should().BeTrue();
         output.ToArray().Should().BeEquivalentTo(EntryContent);
     }
+
+    [Test]
+    public async Task ExtractAllAsync_WithSmallFlushInterval_WritesCompleteContent()
+    {
+        // Payload larger than the flush interval so the periodic flush-to-disk path fires
+        // repeatedly through the real native decompression callback; verifies pacing does
+        // not truncate or corrupt the output.
+        var payload = new byte[256 * 1024];
+        for (var i = 0; i < payload.Length; i++)
+            payload[i] = (byte)(i % 251);
+        var archive = await IntegrationTestHelpers.BuildArchiveAsync(
+            ArchiveFormat.SevenZip,
+            CompressionParameters.Default,
+            ("big/payload.bin", payload)
+        );
+        using var extractor = new SevenZipExtractor(
+            new MemoryStream(archive),
+            ArchiveFormat.SevenZip,
+            NullLogger<SevenZipExtractor>.Instance
+        );
+        await extractor.OpenAsync();
+
+        var outDir = IntegrationTestHelpers.UniqueTempDir("extractFlush");
+        try
+        {
+            var options = new ExtractionOptions { FlushIntervalBytes = 64 * 1024 };
+            var result = await extractor.ExtractAllAsync(outDir, options: options);
+
+            result.IsSuccess.Should().BeTrue();
+            var extracted = Path.Combine(outDir, "big", "payload.bin");
+            File.Exists(extracted).Should().BeTrue();
+            (await File.ReadAllBytesAsync(extracted)).Should().Equal(payload);
+        }
+        finally
+        {
+            if (Directory.Exists(outDir))
+                Directory.Delete(outDir, recursive: true);
+        }
+    }
 }

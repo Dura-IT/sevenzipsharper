@@ -202,6 +202,7 @@ public sealed class SevenZipExtractor : IDisposable
     /// </summary>
     /// <param name="outputPath">Directory to write extracted files into; created if it does not exist.</param>
     /// <param name="progress">Optional progress sink; receives a snapshot after each block of bytes is processed.</param>
+    /// <param name="options">Controls how entries are written to disk; <see langword="null"/> uses defaults (periodic flush-to-disk enabled).</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>A successful result on completion, or a failed result if extraction fails or any entry has errors.</returns>
     /// <remarks>Entries whose paths resolve outside <paramref name="outputPath"/> (zip-slip) are silently skipped.</remarks>
@@ -217,12 +218,14 @@ public sealed class SevenZipExtractor : IDisposable
     public async Task<Result> ExtractAllAsync(
         string outputPath,
         IProgress<ExtractionProgress>? progress = null,
+        ExtractionOptions? options = null,
         CancellationToken cancellationToken = default
     )
     {
         ObjectDisposedException.ThrowIf(_disposed != 0, this);
         if (!_opened)
             return Result.Fail(NotOpenedMessage);
+        var flushIntervalBytes = (options ?? new ExtractionOptions()).FlushIntervalBytes;
         return await Task.Run(
                 () =>
                 {
@@ -231,7 +234,7 @@ public sealed class SevenZipExtractor : IDisposable
                         return Result.Fail($"Failed to get item count (HRESULT: 0x{hr:X8}).");
 
                     var handler = new ExtractionHandler(
-                        CreateFileEntryProvider(outputPath),
+                        CreateFileEntryProvider(outputPath, flushIntervalBytes),
                         progress,
                         (int)count,
                         cancellationToken,
@@ -332,9 +335,10 @@ public sealed class SevenZipExtractor : IDisposable
     /// <param name="filter">Predicate applied to each entry; only matching entries are extracted.</param>
     /// <param name="outputPath">Directory to write extracted files into; created if it does not exist.</param>
     /// <param name="progress">Optional progress sink; receives a snapshot after each block of bytes is processed.</param>
+    /// <param name="options">Controls how entries are written to disk; <see langword="null"/> uses defaults (periodic flush-to-disk enabled).</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>A successful result on completion, or a failed result if extraction fails or any matched entry has errors.</returns>
-    /// <remarks>Calls <see cref="ListEntriesAsync"/> internally. Use the <see cref="ExtractAsync(IReadOnlyList{ArchiveEntry},Func{ArchiveEntry,bool},string,IProgress{ExtractionProgress}?,CancellationToken)"/> overload to avoid the extra round-trip when you already have the entry list.</remarks>
+    /// <remarks>Calls <see cref="ListEntriesAsync"/> internally. Use the <see cref="ExtractAsync(IReadOnlyList{ArchiveEntry},Func{ArchiveEntry,bool},string,IProgress{ExtractionProgress}?,ExtractionOptions?,CancellationToken)"/> overload to avoid the extra round-trip when you already have the entry list.</remarks>
     /// <example>
     /// <code>
     /// await extractor.OpenAsync();
@@ -348,6 +352,7 @@ public sealed class SevenZipExtractor : IDisposable
         Func<ArchiveEntry, bool> filter,
         string outputPath,
         IProgress<ExtractionProgress>? progress = null,
+        ExtractionOptions? options = null,
         CancellationToken cancellationToken = default
     )
     {
@@ -362,6 +367,7 @@ public sealed class SevenZipExtractor : IDisposable
                 filter,
                 outputPath,
                 progress,
+                options,
                 cancellationToken
             )
             .ConfigureAwait(false);
@@ -374,6 +380,7 @@ public sealed class SevenZipExtractor : IDisposable
     /// <param name="filter">Predicate applied to each entry; only matching entries are extracted.</param>
     /// <param name="outputPath">Directory to write extracted files into; created if it does not exist.</param>
     /// <param name="progress">Optional progress sink; receives a snapshot after each block of bytes is processed.</param>
+    /// <param name="options">Controls how entries are written to disk; <see langword="null"/> uses defaults (periodic flush-to-disk enabled).</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>A successful result on completion, or a failed result if extraction fails or any matched entry has errors.</returns>
     /// <exception cref="ObjectDisposedException">Thrown if the extractor has been disposed.</exception>
@@ -382,12 +389,14 @@ public sealed class SevenZipExtractor : IDisposable
         Func<ArchiveEntry, bool> filter,
         string outputPath,
         IProgress<ExtractionProgress>? progress = null,
+        ExtractionOptions? options = null,
         CancellationToken cancellationToken = default
     )
     {
         ObjectDisposedException.ThrowIf(_disposed != 0, this);
         if (!_opened)
             return Result.Fail(NotOpenedMessage);
+        var flushIntervalBytes = (options ?? new ExtractionOptions()).FlushIntervalBytes;
         return await Task.Run(
                 () =>
                 {
@@ -397,7 +406,7 @@ public sealed class SevenZipExtractor : IDisposable
                         return Result.Ok();
 
                     var handler = new ExtractionHandler(
-                        CreateFileEntryProvider(outputPath),
+                        CreateFileEntryProvider(outputPath, flushIntervalBytes),
                         progress,
                         indices.Length,
                         cancellationToken,
@@ -593,7 +602,8 @@ public sealed class SevenZipExtractor : IDisposable
     }
 
     private Func<uint, (ISequentialOutStream? Stream, string EntryPath)> CreateFileEntryProvider(
-        string outputPath
+        string outputPath,
+        long flushIntervalBytes
     )
     {
         var canonicalOutput =
@@ -621,7 +631,7 @@ public sealed class SevenZipExtractor : IDisposable
                 return (null, path);
             }
 
-            return (new FileEntryStream(fullPath), path);
+            return (new FileEntryStream(fullPath, flushIntervalBytes), path);
         };
     }
 
