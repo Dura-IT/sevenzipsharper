@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `ExtractionOptions` with `FlushIntervalBytes` (default 64 MiB) to control how
+  extracted entries are written to disk. When extracting to files, the output is
+  now flushed to physical disk every `FlushIntervalBytes`, bounding how far
+  decompression can run ahead of OS write-back. Set to `0` to disable and rely on
+  OS write-back caching alone (#9).
+
+### Changed
+
+- **Breaking:** `ExtractAllAsync` and both `ExtractAsync` overloads take a new
+  optional `ExtractionOptions?` parameter, positioned before `cancellationToken`.
+  Callers passing `cancellationToken` positionally must switch to a named argument
+  (`cancellationToken:`) or supply the options argument (#9).
+
+### Fixed
+
+- Sustained large-entry extraction no longer lets decompression outrun disk
+  write-back without bound: dirty pages could previously accumulate far ahead of
+  physical flush, causing severe kernel I/O/memory contention under high-throughput
+  batch extraction. Writes are now paced to disk via periodic `Flush(true)` (#9).
+
 ## [1.0.2] - 2026-06-29
 
 ### Changed

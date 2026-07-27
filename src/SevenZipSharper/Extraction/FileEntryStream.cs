@@ -12,14 +12,16 @@ namespace SevenZipSharper.Extraction;
 internal sealed partial class FileEntryStream : ISequentialOutStream, IDisposable
 {
     private readonly FileStream _file;
+    private readonly WriteFlushPacer _flushPacer;
 
-    internal FileEntryStream(string fullPath)
+    internal FileEntryStream(string fullPath, long flushIntervalBytes)
     {
         var directory = Path.GetDirectoryName(fullPath);
         if (!string.IsNullOrEmpty(directory))
             Directory.CreateDirectory(directory);
 
         _file = new FileStream(fullPath, FileMode.Create, FileAccess.Write, FileShare.None);
+        _flushPacer = new WriteFlushPacer(flushIntervalBytes);
     }
 
     [SuppressMessage(
@@ -32,6 +34,13 @@ internal sealed partial class FileEntryStream : ISequentialOutStream, IDisposabl
         try
         {
             _file.Write(data, 0, (int)size);
+
+            // Pace decompression to physical disk throughput: force a flush every N bytes so
+            // dirty pages cannot accumulate unboundedly ahead of write-back during sustained
+            // large-entry extraction. Inside the try so a flush failure surfaces as HResult.Fail.
+            if (_flushPacer.ShouldFlush((int)size))
+                _file.Flush(flushToDisk: true);
+
             processedSize = size;
             return HResult.Ok;
         }
