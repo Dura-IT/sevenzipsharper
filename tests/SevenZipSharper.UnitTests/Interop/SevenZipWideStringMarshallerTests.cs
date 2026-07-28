@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using AwesomeAssertions;
 using NUnit.Framework;
 using SevenZipSharper.Interop;
@@ -5,6 +6,12 @@ using SevenZipSharper.Interop;
 namespace SevenZipSharper.UnitTests.Interop;
 
 [TestOf(typeof(SevenZipWideStringMarshaller))]
+[SuppressMessage(
+    "Security",
+    "S6640:Make sure that using \"unsafe\" is safe here.",
+    Justification = "The test class is unsafe only to invoke SevenZipWideStringMarshaller's raw-pointer "
+        + "methods; every pointer originates from and is freed by the marshaller under test."
+)]
 public sealed unsafe class SevenZipWideStringMarshallerTests
 {
     [Test]
