@@ -17,7 +17,7 @@
     <PackageProjectUrl>https://github.com/Dura-IT/SevenZipSharper</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Dura-IT/SevenZipSharper</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Description>Native 7-Zip binaries for DuraIT.SevenZipSharper — Windows, macOS, and Linux (x64 + Arm64).</Description>
+    <Description>Native 7-Zip binaries for DuraIT.SevenZipSharper — Windows (x64, Arm64, x86/WOW64), macOS, and Linux (x64 + Arm64).</Description>
     <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
 

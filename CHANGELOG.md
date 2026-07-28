@@ -7,8 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-07-28
+
 ### Added
 
+- `win-x86` native RID support — the bundled `7z.dll` now covers 32-bit and
+  AnyCPU-32-bit .NET processes running under WOW64 on 64-bit Windows. `linux-x64`,
+  `linux-arm64`, `win-x64`, `win-arm64`, `win-x86`, `osx-arm64`, and `osx-x64` are
+  now all covered by CI integration tests against the real native library (#6).
 - `ExtractionOptions` with `FlushIntervalBytes` (default 64 MiB) to control how
   extracted entries are written to disk. When extracting to files, the output is
   now flushed to physical disk every `FlushIntervalBytes`, bounding how far
@@ -24,6 +30,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Windows PROPVARIANT stride on `win-x86`: the native PROPVARIANT is 16 bytes on
+  32-bit Windows versus 24 bytes on x64/Arm64. `ISetProperties.SetProperties`
+  previously assumed the 24-byte stride on all Windows architectures, which would
+  misalign multi-parameter compression calls on x86 (#6).
 - Sustained large-entry extraction no longer lets decompression outrun disk
   write-back without bound: dirty pages could previously accumulate far ahead of
   physical flush, causing severe kernel I/O/memory contention under high-throughput
@@ -160,7 +170,8 @@ published as pre-release pending native library compilation for all supported pl
   `osx-x64`, `linux-x64`, `linux-arm64` via `NativeLibrary.SetDllImportResolver`
 - GitHub Actions CI: build + test on Ubuntu, Windows, macOS; pack job
 
-[Unreleased]: https://github.com/Dura-IT/SevenZipSharper/compare/v1.0.2...HEAD
+[Unreleased]: https://github.com/Dura-IT/SevenZipSharper/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/Dura-IT/SevenZipSharper/compare/v1.0.2...v2.0.0
 [1.0.2]: https://github.com/Dura-IT/SevenZipSharper/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/Dura-IT/SevenZipSharper/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/Dura-IT/SevenZipSharper/releases/tag/v1.0.0

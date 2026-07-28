@@ -67,7 +67,7 @@ Both [squid-box's SevenZipSharp](https://github.com/squid-box/SevenZipSharp) and
 
 **.NET Framework and .NET Standard are not supported.** The COM interop layer requires `[GeneratedComInterface]`/`[GeneratedComClass]` (.NET 7+) and native library resolution requires `NativeLibrary.SetDllImportResolver` (.NET Core 3.0+). Neither API exists on .NET Framework or any version of .NET Standard.
 
-Native 7-Zip libraries for Windows x64/Arm64, macOS Arm64/x64, and Linux x64/Arm64 are bundled as RID-specific NuGet assets under `runtimes/<RID>/native/`. .NET resolves the correct binary automatically at runtime — no system 7-Zip installation required.
+Native 7-Zip libraries for Windows x64/Arm64/x86, macOS Arm64/x64, and Linux x64/Arm64 are bundled as RID-specific NuGet assets under `runtimes/<RID>/native/`. .NET resolves the correct binary automatically at runtime — no system 7-Zip installation required. `win-x86` covers 32-bit/AnyCPU-32-bit .NET processes running under WOW64 on 64-bit Windows — not 32-bit Windows itself, which has no current edition.
 
 ---
 
@@ -264,7 +264,7 @@ The bundled `7z.dll` / `7z.dylib` / `7z.so` binaries are built from the official
 3. Run the appropriate fetch script:
    - **macOS / Linux:** `bash scripts/fetch-natives.sh`
    - **Windows:** `.\scripts\fetch-natives.ps1`
-4. Commit the updated binaries and hash file; the `build-natives.yml` workflow builds all six RID targets on GitHub Actions.
+4. Commit the updated binaries and hash file; the `build-natives.yml` workflow builds all seven RID targets on GitHub Actions.
 
 ---
 
