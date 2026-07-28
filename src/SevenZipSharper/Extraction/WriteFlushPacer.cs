@@ -1,9 +1,11 @@
 namespace SevenZipSharper.Extraction;
 
-// Decides when accumulated writes to a single output file warrant a flush to physical disk,
-// bounding how far decompression can run ahead of OS write-back. Not thread-safe: each
-// FileEntryStream is written sequentially by one 7-Zip decompression callback.
-internal sealed class WriteFlushPacer
+// Decides when accumulated writes warrant a flush to physical disk, bounding how far
+// decompression can run ahead of OS write-back. A single pacer is shared across every entry of
+// one extraction, so the flush cadence bounds the aggregate write backlog — not just the backlog
+// within a single large file. Not thread-safe, and does not need to be: 7-Zip opens, writes, and
+// closes entry streams strictly one at a time on the extraction thread.
+internal sealed class WriteFlushPacer : IWriteFlushPacer
 {
     private readonly long _intervalBytes;
     private long _pendingBytes;
@@ -12,7 +14,7 @@ internal sealed class WriteFlushPacer
 
     // Accumulates bytesWritten and returns true — resetting the counter — once the accumulated
     // total reaches the interval. Always false when the interval is zero or negative (disabled).
-    internal bool ShouldFlush(int bytesWritten)
+    public bool ShouldFlush(long bytesWritten)
     {
         if (_intervalBytes <= 0)
             return false;

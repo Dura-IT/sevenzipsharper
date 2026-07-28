@@ -81,9 +81,14 @@ public sealed class CompressionParametersMapperTests
     }
 
     [Test]
-    public void ToSetProperties_AddsDictionaryKey_WhenDictionarySizeSet()
+    public void ToSetProperties_AddsDictionaryKeyAsByteSuffixedString_WhenDictionarySizeSet()
     {
-        var p = CompressionParameters.Default with { DictionarySize = 64 * 1024 * 1024u };
+        // #12: the dictionary size must be a byte-suffixed string ("<n>b"), not a number — 7-Zip
+        // reads a numeric "d" as a log2 exponent and rejects any real byte count with E_INVALIDARG.
+        var p = CompressionParameters.Default with
+        {
+            DictionarySize = 64 * 1024 * 1024u,
+        };
         var (names, values) = CompressionParametersMapper.ToSetProperties(
             p,
             ArchiveFormat.SevenZip
@@ -91,7 +96,7 @@ public sealed class CompressionParametersMapperTests
 
         var dictIndex = System.Array.IndexOf(names, "d");
         dictIndex.Should().BeGreaterThanOrEqualTo(0);
-        values[dictIndex].ToUInt32().Should().Be(64 * 1024 * 1024u);
+        values[dictIndex].ToStringValue().Should().Be($"{64 * 1024 * 1024u}b");
     }
 
     [Test]

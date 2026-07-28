@@ -225,7 +225,8 @@ public sealed class SevenZipExtractor : IDisposable
         ObjectDisposedException.ThrowIf(_disposed != 0, this);
         if (!_opened)
             return Result.Fail(NotOpenedMessage);
-        var flushIntervalBytes = (options ?? new ExtractionOptions()).FlushIntervalBytes;
+        var flushIntervalBytes =
+            options?.FlushIntervalBytes ?? ExtractionOptions.DefaultFlushIntervalBytes;
         return await Task.Run(
                 () =>
                 {
@@ -396,7 +397,8 @@ public sealed class SevenZipExtractor : IDisposable
         ObjectDisposedException.ThrowIf(_disposed != 0, this);
         if (!_opened)
             return Result.Fail(NotOpenedMessage);
-        var flushIntervalBytes = (options ?? new ExtractionOptions()).FlushIntervalBytes;
+        var flushIntervalBytes =
+            options?.FlushIntervalBytes ?? ExtractionOptions.DefaultFlushIntervalBytes;
         return await Task.Run(
                 () =>
                 {
@@ -611,6 +613,11 @@ public sealed class SevenZipExtractor : IDisposable
                 .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
             + Path.DirectorySeparatorChar;
 
+        // One pacer shared by every entry in this extraction so the flush cadence bounds the
+        // aggregate write backlog, not just the backlog within a single large file. No locking
+        // needed: 7-Zip opens, writes, and closes entry streams one at a time (ExtractionHandler).
+        var flushPacer = new WriteFlushPacer(flushIntervalBytes);
+
         return index =>
         {
             var path = ReadStringProp(index, ItemPropId.Path) ?? string.Empty;
@@ -631,7 +638,7 @@ public sealed class SevenZipExtractor : IDisposable
                 return (null, path);
             }
 
-            return (new FileEntryStream(fullPath, flushIntervalBytes), path);
+            return (new FileEntryStream(fullPath, flushPacer), path);
         };
     }
 

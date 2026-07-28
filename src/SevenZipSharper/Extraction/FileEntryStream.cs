@@ -12,16 +12,16 @@ namespace SevenZipSharper.Extraction;
 internal sealed partial class FileEntryStream : ISequentialOutStream, IDisposable
 {
     private readonly FileStream _file;
-    private readonly WriteFlushPacer _flushPacer;
+    private readonly IWriteFlushPacer _flushPacer;
 
-    internal FileEntryStream(string fullPath, long flushIntervalBytes)
+    internal FileEntryStream(string fullPath, IWriteFlushPacer flushPacer)
     {
         var directory = Path.GetDirectoryName(fullPath);
         if (!string.IsNullOrEmpty(directory))
             Directory.CreateDirectory(directory);
 
         _file = new FileStream(fullPath, FileMode.Create, FileAccess.Write, FileShare.None);
-        _flushPacer = new WriteFlushPacer(flushIntervalBytes);
+        _flushPacer = flushPacer;
     }
 
     [SuppressMessage(
@@ -31,22 +31,25 @@ internal sealed partial class FileEntryStream : ISequentialOutStream, IDisposabl
     )]
     public int Write(byte[] data, uint size, out uint processedSize)
     {
+        processedSize = 0;
         try
         {
             _file.Write(data, 0, (int)size);
 
+            // The bytes are accepted once Write returns; record the count before the durability
+            // flush so a flush failure still reports what was written rather than zero.
+            processedSize = size;
+
             // Pace decompression to physical disk throughput: force a flush every N bytes so
             // dirty pages cannot accumulate unboundedly ahead of write-back during sustained
             // large-entry extraction. Inside the try so a flush failure surfaces as HResult.Fail.
-            if (_flushPacer.ShouldFlush((int)size))
+            if (_flushPacer.ShouldFlush(size))
                 _file.Flush(flushToDisk: true);
 
-            processedSize = size;
             return HResult.Ok;
         }
         catch (Exception)
         {
-            processedSize = 0;
             return HResult.Fail;
         }
     }

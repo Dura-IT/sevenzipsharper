@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Globalization;
 using SevenZipSharper;
 using SevenZipSharper.Compression;
 using SevenZipSharper.Interop;
@@ -62,8 +63,16 @@ internal static class CompressionParametersMapper
             );
         }
 
+        // Dictionary size must be a byte-suffixed string, not a number: 7-Zip reads a numeric "d"
+        // as a log2 exponent (dict = 2^value) and rejects any exponent >= 32 with E_INVALIDARG, so
+        // a real byte count like 128 MB always fails. The "<n>b" string form is parsed as n bytes.
         if (parameters.DictionarySize.HasValue)
-            Add(PropKeyDictionarySize, PropVariant.FromUInt32(parameters.DictionarySize.Value));
+        {
+            var dictionaryBytes = parameters.DictionarySize.Value.ToString(
+                CultureInfo.InvariantCulture
+            );
+            Add(PropKeyDictionarySize, PropVariant.FromString(dictionaryBytes + "b"));
+        }
 
         if (parameters.WordSize.HasValue)
             Add(PropKeyWordSize, PropVariant.FromUInt32(parameters.WordSize.Value));

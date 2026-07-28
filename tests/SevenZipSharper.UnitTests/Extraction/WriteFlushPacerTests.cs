@@ -66,4 +66,14 @@ public sealed class WriteFlushPacerTests
 
         pacer.ShouldFlush(int.MaxValue).Should().BeFalse();
     }
+
+    [Test]
+    public void ShouldFlush_HandlesByteCountLargerThanInt32_WithoutWrappingNegative()
+    {
+        // A single write above int.MaxValue must accumulate as a long. Were the boundary an int,
+        // this value would wrap to a negative count and the interval would never be reached.
+        var pacer = new WriteFlushPacer(100);
+
+        pacer.ShouldFlush((long)int.MaxValue + 1).Should().BeTrue();
+    }
 }
