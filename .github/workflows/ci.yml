@@ -63,8 +63,10 @@ jobs:
   # Compiles the full solution and runs integration tests against the real
   # native 7-Zip library on each supported OS/RID. No Sonar wrap and no
   # coverage — this matrix exists to catch cross-platform interop regressions.
-  # Covers all six shipped RIDs: linux-x64, linux-arm64, win-x64, win-arm64,
-  # osx-arm64, osx-x64.
+  # Covers all seven shipped RIDs: linux-x64, linux-arm64, win-x64, win-arm64,
+  # win-x86, osx-arm64, osx-x64. win-x86 runs as a 32-bit process under WOW64
+  # on windows-latest via dotnet_arch: x86 — this is what actually exercises
+  # the win-x86 PROPVARIANT stride path against the real 32-bit 7z.dll.
   integration-tests:
     name: build + integration-tests (${{ matrix.rid }})
     strategy:
@@ -77,6 +79,9 @@ jobs:
             rid: linux-arm64
           - os: windows-latest
             rid: win-x64
+          - os: windows-latest
+            rid: win-x86
+            dotnet_arch: x86
           - os: windows-11-arm
             rid: win-arm64
           - os: macos-latest
