@@ -205,4 +205,81 @@ public sealed class CompressionParameterMatrixTests
                 "Copy method should produce ~uncompressed archive — a small archive indicates LZMA2 fallback (F1 regression)"
             );
     }
+
+    public static IEnumerable<uint> DictionarySizes()
+    {
+        yield return 1u * 1024 * 1024; // 1 MB
+        yield return 4u * 1024 * 1024; // 4 MB
+        yield return 64u * 1024 * 1024; // 64 MB
+        yield return 128u * 1024 * 1024; // 128 MB
+    }
+
+    /// <summary>
+    /// Regression for #12: an explicit DictionarySize was passed to 7-Zip as a numeric PROPVARIANT,
+    /// which 7-Zip reads as a log2 exponent and rejects with E_INVALIDARG for any real byte count.
+    /// Every value here failed identically before the fix; all must now round-trip.
+    /// </summary>
+    [TestCaseSource(nameof(DictionarySizes))]
+    public async Task SevenZip_WithExplicitDictionarySize_RoundTripSucceeds(uint dictionarySize)
+    {
+        var parameters = new CompressionParameters
+        {
+            Method = CompressionMethod.Lzma2,
+            Level = CompressionLevel.Ultra,
+            DictionarySize = dictionarySize,
+        };
+
+        await AssertRoundTripsAsync(ArchiveFormat.SevenZip, parameters);
+    }
+
+    /// <summary>
+    /// Regression for #12: the built-in MaximumLzma2 preset sets DictionarySize = 128 MB, so the
+    /// preset advertised as "smallest possible 7z archives" was completely unusable before the fix.
+    /// </summary>
+    [Test]
+    public async Task MaximumLzma2Preset_RoundTripSucceeds()
+    {
+        await AssertRoundTripsAsync(ArchiveFormat.SevenZip, CompressionParameters.MaximumLzma2);
+    }
+
+    private static async Task AssertRoundTripsAsync(
+        ArchiveFormat format,
+        CompressionParameters parameters
+    )
+    {
+        using var archive = new MemoryStream();
+        using (
+            var compressor = new SevenZipCompressor(
+                format,
+                parameters,
+                NullLogger<SevenZipCompressor>.Instance
+            )
+        )
+        {
+            var entries = new[] { ("payload.bin", (Stream)new MemoryStream(CompressibleContent)) };
+            var result = await compressor.CompressAsync(entries, archive);
+            result
+                .IsSuccess.Should()
+                .BeTrue($"compression failed: {string.Join("; ", result.Errors)}");
+        }
+
+        archive.Position = 0;
+        using var extractor = new SevenZipExtractor(
+            archive,
+            format,
+            NullLogger<SevenZipExtractor>.Instance
+        );
+
+        (await extractor.OpenAsync()).IsSuccess.Should().BeTrue("open");
+        var entriesResult = await extractor.ListEntriesAsync();
+        entriesResult.IsSuccess.Should().BeTrue();
+        entriesResult.Value.Should().HaveCount(1);
+
+        using var output = new MemoryStream();
+        (await extractor.ExtractEntryAsync(entriesResult.Value[0], output))
+            .IsSuccess.Should()
+            .BeTrue("extract");
+
+        output.ToArray().Should().BeEquivalentTo(CompressibleContent, "content should round-trip");
+    }
 }
