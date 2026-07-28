@@ -12,6 +12,7 @@ public sealed class PlatformInfoTests
 {
     [TestCase(Architecture.X64, "win-x64")]
     [TestCase(Architecture.Arm64, "win-arm64")]
+    [TestCase(Architecture.X86, "win-x86")]
     public void BuildRuntimeIdentifier_Windows_ReturnsExpectedRid(
         Architecture arch,
         string expected
@@ -34,7 +35,6 @@ public sealed class PlatformInfoTests
         PlatformInfo.BuildRuntimeIdentifier(OSPlatform.Linux, arch).Should().Be(expected);
     }
 
-    [TestCase(Architecture.X86)]
     [TestCase(Architecture.Arm)]
     [TestCase(Architecture.Wasm)]
     public void BuildRuntimeIdentifier_UnsupportedArchitecture_Throws(Architecture arch)
@@ -87,7 +87,10 @@ public sealed class PlatformInfoTests
     [Test]
     public void GetRuntimeIdentifier_OnHost_ReturnsValidRid()
     {
-        PlatformInfo.GetRuntimeIdentifier().Should().MatchRegex("^(win|osx|linux)-(x64|arm64)$");
+        PlatformInfo
+            .GetRuntimeIdentifier()
+            .Should()
+            .MatchRegex("^(win|osx|linux)-(x64|arm64|x86)$");
     }
 
     [Test]

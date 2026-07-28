@@ -1,5 +1,6 @@
-# fetch-natives.ps1 — Download 7-Zip native DLLs for Windows (x64 + arm64).
+# fetch-natives.ps1 — Download 7-Zip native DLLs for Windows (x64, arm64, x86).
 # Places them in src/SevenZipSharper.Native/runtimes/<RID>/native/.
+# The suffix-less installer (7z<version>.exe) is the 32-bit x86 build.
 #
 # Usage:
 #   .\scripts\fetch-natives.ps1           # uses version from scripts\7zip-version
@@ -82,3 +83,4 @@ function Fetch-WindowsDll {
 
 Fetch-WindowsDll -Arch "x64"   -InstallerSuffix "-x64"
 Fetch-WindowsDll -Arch "arm64" -InstallerSuffix "-arm64"
+Fetch-WindowsDll -Arch "x86"   -InstallerSuffix ""      # suffix-less installer is the 32-bit x86 build

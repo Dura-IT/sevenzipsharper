@@ -13,6 +13,12 @@
       <TargetPath>runtimes/win-arm64/native/7z.dll</TargetPath>
     </None>
 
+    <None Include="$(MSBuildThisFileDirectory)../runtimes/win-x86/native/7z.dll"
+          Condition="Exists('$(MSBuildThisFileDirectory)../runtimes/win-x86/native/7z.dll')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>runtimes/win-x86/native/7z.dll</TargetPath>
+    </None>
+
     <None Include="$(MSBuildThisFileDirectory)../runtimes/osx-arm64/native/7z.dylib"
           Condition="Exists('$(MSBuildThisFileDirectory)../runtimes/osx-arm64/native/7z.dylib')">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
