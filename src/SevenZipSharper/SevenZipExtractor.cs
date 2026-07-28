@@ -225,7 +225,8 @@ public sealed class SevenZipExtractor : IDisposable
         ObjectDisposedException.ThrowIf(_disposed != 0, this);
         if (!_opened)
             return Result.Fail(NotOpenedMessage);
-        var flushIntervalBytes = (options ?? new ExtractionOptions()).FlushIntervalBytes;
+        var flushIntervalBytes =
+            options?.FlushIntervalBytes ?? ExtractionOptions.DefaultFlushIntervalBytes;
         return await Task.Run(
                 () =>
                 {
@@ -396,7 +397,8 @@ public sealed class SevenZipExtractor : IDisposable
         ObjectDisposedException.ThrowIf(_disposed != 0, this);
         if (!_opened)
             return Result.Fail(NotOpenedMessage);
-        var flushIntervalBytes = (options ?? new ExtractionOptions()).FlushIntervalBytes;
+        var flushIntervalBytes =
+            options?.FlushIntervalBytes ?? ExtractionOptions.DefaultFlushIntervalBytes;
         return await Task.Run(
                 () =>
                 {
