@@ -90,14 +90,14 @@ public sealed class FileEntryStreamTests
     public void Write_DelegatesFlushDecisionToPacer()
     {
         var pacer = new Mock<IWriteFlushPacer>();
-        pacer.Setup(p => p.ShouldFlush(It.IsAny<int>())).Returns(true);
+        pacer.Setup(p => p.ShouldFlush(It.IsAny<long>())).Returns(true);
         var path = Path.Combine(_tempDir, "delegated.bin");
         var data = new byte[] { 1, 2, 3, 4 };
         using var stream = new FileEntryStream(path, pacer.Object);
 
         stream.Write(data, (uint)data.Length, out _).Should().Be(HResult.Ok);
 
-        pacer.Verify(p => p.ShouldFlush(data.Length), Times.Once);
+        pacer.Verify(p => p.ShouldFlush((long)data.Length), Times.Once);
         stream.Dispose();
         File.ReadAllBytes(path).Should().Equal(data);
     }
@@ -114,7 +114,24 @@ public sealed class FileEntryStreamTests
             b.Write(chunk, (uint)chunk.Length, out _).Should().Be(HResult.Ok);
 
         // Both streams routed their write through the one shared pacer instance.
-        pacer.Verify(p => p.ShouldFlush(chunk.Length), Times.Exactly(2));
+        pacer.Verify(p => p.ShouldFlush((long)chunk.Length), Times.Exactly(2));
+    }
+
+    [Test]
+    public void Write_WhenPostWriteFlushThrows_ReturnsFailButReportsBytesProcessed()
+    {
+        // A durability step failing after the bytes are already accepted must still report the
+        // accurate processed count, not zero — the pacer here stands in for the flush decision.
+        var pacer = new Mock<IWriteFlushPacer>();
+        pacer.Setup(p => p.ShouldFlush(It.IsAny<long>())).Throws(new IOException("disk full"));
+        var path = Path.Combine(_tempDir, "flush-throws.bin");
+        var data = new byte[] { 1, 2, 3, 4, 5 };
+        using var stream = new FileEntryStream(path, pacer.Object);
+
+        var hr = stream.Write(data, (uint)data.Length, out var processedSize);
+
+        hr.Should().Be(HResult.Fail);
+        processedSize.Should().Be((uint)data.Length);
     }
 
     [Test]

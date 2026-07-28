@@ -14,7 +14,7 @@ internal sealed class WriteFlushPacer : IWriteFlushPacer
 
     // Accumulates bytesWritten and returns true — resetting the counter — once the accumulated
     // total reaches the interval. Always false when the interval is zero or negative (disabled).
-    public bool ShouldFlush(int bytesWritten)
+    public bool ShouldFlush(long bytesWritten)
     {
         if (_intervalBytes <= 0)
             return false;

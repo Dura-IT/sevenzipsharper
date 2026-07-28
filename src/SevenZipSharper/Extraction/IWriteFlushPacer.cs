@@ -6,5 +6,6 @@ internal interface IWriteFlushPacer
 {
     // Accumulates bytesWritten and returns true — resetting the counter — once the accumulated
     // total reaches the interval. Always false when the interval is zero or negative (disabled).
-    bool ShouldFlush(int bytesWritten);
+    // Takes a long so a single write above int.MaxValue cannot wrap negative at the boundary.
+    bool ShouldFlush(long bytesWritten);
 }
