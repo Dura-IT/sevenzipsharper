@@ -637,28 +637,31 @@ public sealed class SevenZipCompressor : IDisposable
     }
 
     // Returns a pointer to a contiguous array of PROPVARIANT values laid out at the platform's
-    // native stride, plus a freer to release any unmanaged allocation. On POSIX the managed
-    // 16-byte PropVariant[] array layout already matches 7-Zip's MyWindows.h PROPVARIANT, so
-    // we just pin it. On Windows we allocate a fresh buffer at 24-byte stride and copy each
-    // 16-byte PropVariant into the head of its slot, leaving the trailing 8 bytes zeroed.
+    // native stride, plus a freer to release any unmanaged allocation. When the native stride
+    // equals the managed PropVariant size (POSIX and win-x86) the managed PropVariant[] layout
+    // already matches 7-Zip's PROPVARIANT, so we just pin it. Otherwise (win-x64/arm64) we
+    // allocate a fresh buffer at the wider PROPVARIANT stride and copy each 16-byte PropVariant
+    // into the head of its slot, leaving the trailing bytes zeroed.
     private static (nint Ptr, Action Free) AllocPlatformValuesBuffer(PropVariant[] values)
     {
-        if (!OperatingSystem.IsWindows())
+        var stride = PropVariantLayout.GetPropVariantStride(
+            OperatingSystem.IsWindows(),
+            IntPtr.Size
+        );
+        if (stride == PropVariantLayout.ManagedSize)
         {
             var handle = GCHandle.Alloc(values, GCHandleType.Pinned);
             return (handle.AddrOfPinnedObject(), () => handle.Free());
         }
 
-        const int winStride = 24;
-        const int managedSize = 16;
-        var buf = Marshal.AllocCoTaskMem(values.Length * winStride);
+        var buf = Marshal.AllocCoTaskMem(values.Length * stride);
         for (var i = 0; i < values.Length; i++)
         {
             var src = MemoryMarshal.AsBytes(values.AsSpan(i, 1));
-            for (var b = 0; b < managedSize; b++)
-                Marshal.WriteByte(buf + (i * winStride) + b, src[b]);
-            for (var b = managedSize; b < winStride; b++)
-                Marshal.WriteByte(buf + (i * winStride) + b, 0);
+            for (var b = 0; b < PropVariantLayout.ManagedSize; b++)
+                Marshal.WriteByte(buf + (i * stride) + b, src[b]);
+            for (var b = PropVariantLayout.ManagedSize; b < stride; b++)
+                Marshal.WriteByte(buf + (i * stride) + b, 0);
         }
         return (buf, () => Marshal.FreeCoTaskMem(buf));
     }
