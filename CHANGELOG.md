@@ -27,6 +27,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   optional `ExtractionOptions?` parameter, positioned before `cancellationToken`.
   Callers passing `cancellationToken` positionally must switch to a named argument
   (`cancellationToken:`) or supply the options argument (#9).
+- Bumped NuGet dependencies to latest stable: `SonarAnalyzer.CSharp`,
+  `Microsoft.Extensions.DependencyInjection.Abstractions`,
+  `Microsoft.Extensions.Logging.Abstractions`, `AwesomeAssertions`,
+  `Microsoft.NET.Test.Sdk`, `coverlet.collector` (major, 6→10), and
+  `SharpSevenZip` (benchmarks only).
 
 ### Fixed
 
