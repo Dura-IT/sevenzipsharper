@@ -598,7 +598,7 @@ public sealed class SevenZipCompressor : IDisposable
                     // POSIX; on Windows we must repack into a 24-byte-stride buffer or
                     // ISetProperties reads the wrong VARTYPE for values[1..] and returns
                     // E_INVALIDARG.
-                    var (valuesPtr, freeValues) = AllocPlatformValuesBuffer(values);
+                    var (valuesPtr, freeValues) = PropVariantMarshaller.AllocValuesBuffer(values);
                     try
                     {
                         var hr = setProps.SetProperties(
@@ -634,36 +634,6 @@ public sealed class SevenZipCompressor : IDisposable
         }
 
         return Result.Ok();
-    }
-
-    // Returns a pointer to a contiguous array of PROPVARIANT values laid out at the platform's
-    // native stride, plus a freer to release any unmanaged allocation. When the native stride
-    // equals the managed PropVariant size (POSIX and win-x86) the managed PropVariant[] layout
-    // already matches 7-Zip's PROPVARIANT, so we just pin it. Otherwise (win-x64/arm64) we
-    // allocate a fresh buffer at the wider PROPVARIANT stride and copy each 16-byte PropVariant
-    // into the head of its slot, leaving the trailing bytes zeroed.
-    private static (nint Ptr, Action Free) AllocPlatformValuesBuffer(PropVariant[] values)
-    {
-        var stride = PropVariantLayout.GetPropVariantStride(
-            OperatingSystem.IsWindows(),
-            IntPtr.Size
-        );
-        if (stride == PropVariantLayout.ManagedSize)
-        {
-            var handle = GCHandle.Alloc(values, GCHandleType.Pinned);
-            return (handle.AddrOfPinnedObject(), () => handle.Free());
-        }
-
-        var buf = Marshal.AllocCoTaskMem(values.Length * stride);
-        for (var i = 0; i < values.Length; i++)
-        {
-            var src = MemoryMarshal.AsBytes(values.AsSpan(i, 1));
-            for (var b = 0; b < PropVariantLayout.ManagedSize; b++)
-                Marshal.WriteByte(buf + (i * stride) + b, src[b]);
-            for (var b = PropVariantLayout.ManagedSize; b < stride; b++)
-                Marshal.WriteByte(buf + (i * stride) + b, 0);
-        }
-        return (buf, () => Marshal.FreeCoTaskMem(buf));
     }
 
     // Opens the underlying FileStream lazily on the first Seek or Read call so
