@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using AwesomeAssertions;
+using Moq;
 using NUnit.Framework;
 using SevenZipSharper.Extraction;
 using SevenZipSharper.Interop;
@@ -31,7 +32,7 @@ public sealed class FileEntryStreamTests
     {
         var path = Path.Combine(_tempDir, "out.bin");
         var data = new byte[] { 1, 2, 3, 4, 5 };
-        using var stream = new FileEntryStream(path, flushIntervalBytes: 0);
+        using var stream = new FileEntryStream(path, new WriteFlushPacer(0));
 
         var hr = stream.Write(data, (uint)data.Length, out var processedSize);
 
@@ -45,7 +46,7 @@ public sealed class FileEntryStreamTests
     public void Write_WhenStreamIsDisposed_ReturnsFailAndZeroProcessedSize()
     {
         var path = Path.Combine(_tempDir, "disposed.bin");
-        var stream = new FileEntryStream(path, flushIntervalBytes: 0);
+        var stream = new FileEntryStream(path, new WriteFlushPacer(0));
         stream.Dispose();
 
         var hr = stream.Write(new byte[] { 1 }, 1, out var processedSize);
@@ -59,7 +60,7 @@ public sealed class FileEntryStreamTests
     {
         var path = Path.Combine(_tempDir, "flushed.bin");
         var data = new byte[] { 10, 20, 30, 40, 50, 60, 70, 80 };
-        using var stream = new FileEntryStream(path, flushIntervalBytes: 4);
+        using var stream = new FileEntryStream(path, new WriteFlushPacer(4));
 
         var hr = stream.Write(data, (uint)data.Length, out var processedSize);
 
@@ -76,7 +77,7 @@ public sealed class FileEntryStreamTests
         var first = new byte[] { 1, 2, 3 };
         var second = new byte[] { 4, 5, 6 };
         var expected = new byte[] { 1, 2, 3, 4, 5, 6 };
-        using var stream = new FileEntryStream(path, flushIntervalBytes: 4);
+        using var stream = new FileEntryStream(path, new WriteFlushPacer(4));
 
         stream.Write(first, (uint)first.Length, out _).Should().Be(HResult.Ok);
         stream.Write(second, (uint)second.Length, out _).Should().Be(HResult.Ok);
@@ -86,11 +87,42 @@ public sealed class FileEntryStreamTests
     }
 
     [Test]
+    public void Write_DelegatesFlushDecisionToPacer()
+    {
+        var pacer = new Mock<IWriteFlushPacer>();
+        pacer.Setup(p => p.ShouldFlush(It.IsAny<int>())).Returns(true);
+        var path = Path.Combine(_tempDir, "delegated.bin");
+        var data = new byte[] { 1, 2, 3, 4 };
+        using var stream = new FileEntryStream(path, pacer.Object);
+
+        stream.Write(data, (uint)data.Length, out _).Should().Be(HResult.Ok);
+
+        pacer.Verify(p => p.ShouldFlush(data.Length), Times.Once);
+        stream.Dispose();
+        File.ReadAllBytes(path).Should().Equal(data);
+    }
+
+    [Test]
+    public void Write_TwoStreamsSharingPacer_BothDelegateToSameInstance()
+    {
+        var pacer = new Mock<IWriteFlushPacer>();
+        var chunk = new byte[] { 1, 2, 3, 4 };
+
+        using (var a = new FileEntryStream(Path.Combine(_tempDir, "share-a.bin"), pacer.Object))
+            a.Write(chunk, (uint)chunk.Length, out _).Should().Be(HResult.Ok);
+        using (var b = new FileEntryStream(Path.Combine(_tempDir, "share-b.bin"), pacer.Object))
+            b.Write(chunk, (uint)chunk.Length, out _).Should().Be(HResult.Ok);
+
+        // Both streams routed their write through the one shared pacer instance.
+        pacer.Verify(p => p.ShouldFlush(chunk.Length), Times.Exactly(2));
+    }
+
+    [Test]
     public void Constructor_CreatesNestedDirectories()
     {
         var nested = Path.Combine(_tempDir, "a", "b", "file.txt");
 
-        using var stream = new FileEntryStream(nested, flushIntervalBytes: 0);
+        using var stream = new FileEntryStream(nested, new WriteFlushPacer(0));
 
         Directory.Exists(Path.Combine(_tempDir, "a", "b")).Should().BeTrue();
     }
@@ -99,7 +131,7 @@ public sealed class FileEntryStreamTests
     public void Dispose_WhenStreamIsOpen_AllowsAnotherWriterToOpen()
     {
         var path = Path.Combine(_tempDir, "reopen.bin");
-        var stream = new FileEntryStream(path, flushIntervalBytes: 0);
+        var stream = new FileEntryStream(path, new WriteFlushPacer(0));
         stream.Dispose();
 
         var act = () =>

@@ -12,16 +12,16 @@ namespace SevenZipSharper.Extraction;
 internal sealed partial class FileEntryStream : ISequentialOutStream, IDisposable
 {
     private readonly FileStream _file;
-    private readonly WriteFlushPacer _flushPacer;
+    private readonly IWriteFlushPacer _flushPacer;
 
-    internal FileEntryStream(string fullPath, long flushIntervalBytes)
+    internal FileEntryStream(string fullPath, IWriteFlushPacer flushPacer)
     {
         var directory = Path.GetDirectoryName(fullPath);
         if (!string.IsNullOrEmpty(directory))
             Directory.CreateDirectory(directory);
 
         _file = new FileStream(fullPath, FileMode.Create, FileAccess.Write, FileShare.None);
-        _flushPacer = new WriteFlushPacer(flushIntervalBytes);
+        _flushPacer = flushPacer;
     }
 
     [SuppressMessage(

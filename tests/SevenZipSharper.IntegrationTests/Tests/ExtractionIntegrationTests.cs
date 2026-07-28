@@ -145,4 +145,57 @@ public sealed class ExtractionIntegrationTests
                 Directory.Delete(outDir, recursive: true);
         }
     }
+
+    [Test]
+    public async Task ExtractAllAsync_ManySmallFilesBelowFlushInterval_WritesAllContent()
+    {
+        // Each entry is smaller than the flush interval, but the entries together exceed it. A
+        // per-file pacer would never flush; the shared pacer must accumulate across entries and
+        // pace without truncating or corrupting any of the small files.
+        const int fileCount = 32;
+        const int fileSize = 8 * 1024;
+        var entries = new (string Path, byte[] Content)[fileCount];
+        for (var f = 0; f < fileCount; f++)
+        {
+            var payload = new byte[fileSize];
+            for (var i = 0; i < payload.Length; i++)
+                payload[i] = (byte)((i + f) % 251);
+            entries[f] = ($"small/file-{f:D2}.bin", payload);
+        }
+        var archive = await IntegrationTestHelpers.BuildArchiveAsync(
+            ArchiveFormat.SevenZip,
+            CompressionParameters.Default,
+            entries
+        );
+        using var extractor = new SevenZipExtractor(
+            new MemoryStream(archive),
+            ArchiveFormat.SevenZip,
+            NullLogger<SevenZipExtractor>.Instance
+        );
+        await extractor.OpenAsync();
+
+        var outDir = IntegrationTestHelpers.UniqueTempDir("extractManySmall");
+        try
+        {
+            // 16 KiB interval: below the 256 KiB total, above any single 8 KiB file.
+            var options = new ExtractionOptions { FlushIntervalBytes = 16 * 1024 };
+            var result = await extractor.ExtractAllAsync(outDir, options: options);
+
+            result.IsSuccess.Should().BeTrue();
+            foreach (var (path, content) in entries)
+            {
+                var extracted = Path.Combine(
+                    outDir,
+                    path.Replace('/', Path.DirectorySeparatorChar)
+                );
+                File.Exists(extracted).Should().BeTrue();
+                (await File.ReadAllBytesAsync(extracted)).Should().Equal(content);
+            }
+        }
+        finally
+        {
+            if (Directory.Exists(outDir))
+                Directory.Delete(outDir, recursive: true);
+        }
+    }
 }

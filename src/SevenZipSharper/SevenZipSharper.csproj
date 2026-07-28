@@ -46,6 +46,8 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="SevenZipSharper.UnitTests"/>
+    <!-- Lets Moq (Castle DynamicProxy) mock internal interfaces such as IWriteFlushPacer. -->
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2"/>
   </ItemGroup>
 
 </Project>
