@@ -598,7 +598,7 @@ public sealed class SevenZipCompressor : IDisposable
                     // POSIX; on Windows we must repack into a 24-byte-stride buffer or
                     // ISetProperties reads the wrong VARTYPE for values[1..] and returns
                     // E_INVALIDARG.
-                    var (valuesPtr, freeValues) = AllocPlatformValuesBuffer(values);
+                    var (valuesPtr, freeValues) = PropVariantMarshaller.AllocValuesBuffer(values);
                     try
                     {
                         var hr = setProps.SetProperties(
@@ -634,33 +634,6 @@ public sealed class SevenZipCompressor : IDisposable
         }
 
         return Result.Ok();
-    }
-
-    // Returns a pointer to a contiguous array of PROPVARIANT values laid out at the platform's
-    // native stride, plus a freer to release any unmanaged allocation. On POSIX the managed
-    // 16-byte PropVariant[] array layout already matches 7-Zip's MyWindows.h PROPVARIANT, so
-    // we just pin it. On Windows we allocate a fresh buffer at 24-byte stride and copy each
-    // 16-byte PropVariant into the head of its slot, leaving the trailing 8 bytes zeroed.
-    private static (nint Ptr, Action Free) AllocPlatformValuesBuffer(PropVariant[] values)
-    {
-        if (!OperatingSystem.IsWindows())
-        {
-            var handle = GCHandle.Alloc(values, GCHandleType.Pinned);
-            return (handle.AddrOfPinnedObject(), () => handle.Free());
-        }
-
-        const int winStride = 24;
-        const int managedSize = 16;
-        var buf = Marshal.AllocCoTaskMem(values.Length * winStride);
-        for (var i = 0; i < values.Length; i++)
-        {
-            var src = MemoryMarshal.AsBytes(values.AsSpan(i, 1));
-            for (var b = 0; b < managedSize; b++)
-                Marshal.WriteByte(buf + (i * winStride) + b, src[b]);
-            for (var b = managedSize; b < winStride; b++)
-                Marshal.WriteByte(buf + (i * winStride) + b, 0);
-        }
-        return (buf, () => Marshal.FreeCoTaskMem(buf));
     }
 
     // Opens the underlying FileStream lazily on the first Seek or Read call so
