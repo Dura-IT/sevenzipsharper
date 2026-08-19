@@ -1,11 +1,9 @@
+![SevenZipSharper](https://raw.githubusercontent.com/Dura-IT/sevenzipsharper/main/assets/icon.png)
+
 # SevenZipSharper
 
-<p align="center">
-  <img src="assets/icon@2x.png" width="128" alt="SevenZipSharper logo" />
-</p>
-
 [![NuGet](https://img.shields.io/nuget/v/DuraIT.SevenZipSharper.svg)](https://www.nuget.org/packages/DuraIT.SevenZipSharper/)
-[![CI](https://github.com/Dura-IT/SevenZipSharper/actions/workflows/ci.yml/badge.svg)](https://github.com/Dura-IT/SevenZipSharper/actions/workflows/ci.yml)
+[![CI](https://github.com/Dura-IT/sevenzipsharper/actions/workflows/ci.yml/badge.svg)](https://github.com/Dura-IT/sevenzipsharper/actions/workflows/ci.yml)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=Dura-IT_SevenZipSharper&metric=alert_status)](https://sonarcloud.io/summary/overall?id=Dura-IT_SevenZipSharper)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Dura-IT_SevenZipSharper&metric=coverage)](https://sonarcloud.io/summary/overall?id=Dura-IT_SevenZipSharper)
 
@@ -311,4 +309,4 @@ Results on x64 hardware and Linux/Windows may differ — the relative ordering s
 
 SevenZipSharper is licensed under the **GNU Lesser General Public License v3.0 or later** (LGPL-3.0-or-later).
 
-See [LICENSE](LICENSE) for details.
+See [LICENSE](https://github.com/Dura-IT/sevenzipsharper/blob/main/LICENSE) for details.
