@@ -4,7 +4,6 @@ using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using NUnit.Framework;
-using SevenZipSharper;
 using SevenZipSharper.Compression;
 
 namespace SevenZipSharper.UnitTests.DependencyInjection;

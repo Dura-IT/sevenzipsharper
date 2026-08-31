@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 using Microsoft.Extensions.Logging.Abstractions;
-using SevenZipSharper;
 using SevenZipSharper.Compression;
 
 namespace SevenZipSharper.Benchmarks;
@@ -35,7 +34,7 @@ public class CompressionBenchmarks
     private MemoryStream _outputBuffer = null!;
     private MemoryStream _payloadStream = null!;
     private SevenZipCompressor _compressor = null!;
-    private global::SharpSevenZip.SharpSevenZipCompressor _sharpCompressor = null!;
+    private SharpSevenZip.SharpSevenZipCompressor _sharpCompressor = null!;
 
     [GlobalSetup]
     public void GlobalSetup()
@@ -49,10 +48,8 @@ public class CompressionBenchmarks
             NullLogger<SevenZipCompressor>.Instance
         );
 
-        global::SharpSevenZip.SharpSevenZipCompressor.SetLibraryPath(
-            ExtractionBenchmarks.NativeLibPath
-        );
-        _sharpCompressor = new global::SharpSevenZip.SharpSevenZipCompressor
+        SharpSevenZip.SharpSevenZipCompressor.SetLibraryPath(ExtractionBenchmarks.NativeLibPath);
+        _sharpCompressor = new SharpSevenZip.SharpSevenZipCompressor
         {
             CompressionLevel = MapLevel(Level),
         };
@@ -85,18 +82,18 @@ public class CompressionBenchmarks
 
     /// <summary>
     /// Maps <see cref="CompressionLevel"/> (Store=0, Fastest=1, Fast=3, Normal=5, Maximum=7, Ultra=9)
-    /// to <see cref="global::SharpSevenZip.CompressionLevel"/> (None=0, Fast=1, Low=2, Normal=3, High=4, Ultra=5)
+    /// to <see cref="SharpSevenZip.CompressionLevel"/> (None=0, Fast=1, Low=2, Normal=3, High=4, Ultra=5)
     /// so both libraries do equivalent work at each measured level.
     /// </summary>
-    private static global::SharpSevenZip.CompressionLevel MapLevel(CompressionLevel level) =>
+    private static SharpSevenZip.CompressionLevel MapLevel(CompressionLevel level) =>
         level switch
         {
-            CompressionLevel.Store => global::SharpSevenZip.CompressionLevel.None,
-            CompressionLevel.Fastest => global::SharpSevenZip.CompressionLevel.Fast,
-            CompressionLevel.Fast => global::SharpSevenZip.CompressionLevel.Low,
-            CompressionLevel.Normal => global::SharpSevenZip.CompressionLevel.Normal,
-            CompressionLevel.Maximum => global::SharpSevenZip.CompressionLevel.High,
-            CompressionLevel.Ultra => global::SharpSevenZip.CompressionLevel.Ultra,
+            CompressionLevel.Store => SharpSevenZip.CompressionLevel.None,
+            CompressionLevel.Fastest => SharpSevenZip.CompressionLevel.Fast,
+            CompressionLevel.Fast => SharpSevenZip.CompressionLevel.Low,
+            CompressionLevel.Normal => SharpSevenZip.CompressionLevel.Normal,
+            CompressionLevel.Maximum => SharpSevenZip.CompressionLevel.High,
+            CompressionLevel.Ultra => SharpSevenZip.CompressionLevel.Ultra,
             _ => throw new ArgumentOutOfRangeException(nameof(level), level, "Unknown level"),
         };
 }

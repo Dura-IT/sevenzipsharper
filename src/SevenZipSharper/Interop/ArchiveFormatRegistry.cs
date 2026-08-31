@@ -23,6 +23,9 @@ internal static class ArchiveFormatRegistry
         [ArchiveFormat.Wim] = ArchiveClassIds.Wim,
     };
 
+    /// <summary>
+    /// Maps an archive format to the 7-Zip COM class id that handles it.
+    /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="format"/> is not a recognised value.</exception>
     internal static Guid GetClassId(ArchiveFormat format)
     {

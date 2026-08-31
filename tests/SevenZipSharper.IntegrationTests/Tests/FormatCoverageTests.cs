@@ -19,7 +19,7 @@ public sealed class FormatCoverageTests
     [TestCase(ArchiveFormat.Zip)]
     public async Task Compress_ThenExtract_RoundTripSucceeds(ArchiveFormat format)
     {
-        var entries = new[] { ("file.txt", (Stream)new MemoryStream(Content)) };
+        var entries = new (string, Stream)[] { ("file.txt", new MemoryStream(Content)) };
 
         using var archive = new MemoryStream();
         using (
@@ -61,10 +61,10 @@ public sealed class FormatCoverageTests
         ArchiveFormat format
     )
     {
-        var entries = new[]
+        var entries = new (string, Stream)[]
         {
-            ("docs/readme.txt", (Stream)new MemoryStream(new byte[] { 1, 2, 3 })),
-            ("src/main.cs", (Stream)new MemoryStream(new byte[] { 4, 5, 6, 7 })),
+            ("docs/readme.txt", new MemoryStream(new byte[] { 1, 2, 3 })),
+            ("src/main.cs", new MemoryStream(new byte[] { 4, 5, 6, 7 })),
         };
 
         using var archive = new MemoryStream();

@@ -18,7 +18,7 @@ public sealed class CompressionRoundTripTests
         var original = System.Text.Encoding.UTF8.GetBytes(
             "Round-trip test content — SevenZipSharper"
         );
-        var entries = new[] { ("roundtrip.txt", (Stream)new MemoryStream(original)) };
+        var entries = new (string, Stream)[] { ("roundtrip.txt", new MemoryStream(original)) };
 
         using var archive = new MemoryStream();
         using (
@@ -50,11 +50,11 @@ public sealed class CompressionRoundTripTests
     [Test]
     public async Task CompressAsync_MultipleEntries_AllRoundTripCorrectly()
     {
-        var entries = new[]
+        var entries = new (string, Stream)[]
         {
-            ("alpha.txt", (Stream)new MemoryStream(new byte[] { 1, 2, 3 })),
-            ("beta.txt", (Stream)new MemoryStream(new byte[] { 4, 5, 6, 7, 8 })),
-            ("gamma.txt", (Stream)new MemoryStream(new byte[] { 9 })),
+            ("alpha.txt", new MemoryStream(new byte[] { 1, 2, 3 })),
+            ("beta.txt", new MemoryStream(new byte[] { 4, 5, 6, 7, 8 })),
+            ("gamma.txt", new MemoryStream(new byte[] { 9 })),
         };
 
         using var archive = new MemoryStream();
@@ -95,7 +95,7 @@ public sealed class CompressionRoundTripTests
         var progress = new SynchronousProgress<CompressionProgress>(p => progressReports.Add(p));
         var content = new byte[64 * 1024];
         new Random(42).NextBytes(content);
-        var entries = new[] { ("big.bin", (Stream)new MemoryStream(content)) };
+        var entries = new (string, Stream)[] { ("big.bin", new MemoryStream(content)) };
 
         using var archive = new MemoryStream();
         using var compressor = new SevenZipCompressor(

@@ -55,12 +55,9 @@ public sealed class CompressionParameterMatrixTests
         {
             foreach (var level in levels)
             {
-                yield return new TestCaseData(
-                    ArchiveFormat.SevenZip,
-                    method,
-                    level,
-                    (int?)null
-                ).SetName($"7z_{method}_{level}");
+                yield return new TestCaseData(ArchiveFormat.SevenZip, method, level, null).SetName(
+                    $"7z_{method}_{level}"
+                );
             }
         }
 
@@ -69,7 +66,7 @@ public sealed class CompressionParameterMatrixTests
             ArchiveFormat.SevenZip,
             CompressionMethod.Copy,
             CompressionLevel.Store,
-            (int?)null
+            null
         ).SetName("7z_Copy_Store");
 
         // 7z × Lzma2 × varying thread counts — exercises the multi-thread codec path
@@ -98,7 +95,7 @@ public sealed class CompressionParameterMatrixTests
         {
             foreach (var level in levels)
             {
-                yield return new TestCaseData(ArchiveFormat.Zip, method, level, (int?)null).SetName(
+                yield return new TestCaseData(ArchiveFormat.Zip, method, level, null).SetName(
                     $"Zip_{method}_{level}"
                 );
             }
@@ -109,7 +106,7 @@ public sealed class CompressionParameterMatrixTests
             ArchiveFormat.Zip,
             CompressionMethod.Deflate,
             CompressionLevel.Store,
-            (int?)null
+            null
         ).SetName("Zip_Deflate_Store");
     }
 

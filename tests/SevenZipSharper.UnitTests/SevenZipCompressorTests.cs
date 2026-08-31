@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices.Marshalling;
 using System.Threading;
@@ -232,7 +231,7 @@ public sealed class SevenZipCompressorTests
             .Awaiting(() =>
                 compressor.CompressFilesAsync(
                     _singleFilePath,
-                    System.IO.Path.GetTempPath(),
+                    Path.GetTempPath(),
                     new MemoryStream()
                 )
             )

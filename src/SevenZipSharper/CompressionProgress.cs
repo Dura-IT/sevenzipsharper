@@ -1,7 +1,7 @@
 namespace SevenZipSharper;
 
 /// <summary>
-/// Progress snapshot reported to <see cref="IProgress{T}"/> during a compression operation.
+/// Progress snapshot reported to <see cref="System.IProgress{T}"/> during a compression operation.
 /// </summary>
 public readonly record struct CompressionProgress
 {

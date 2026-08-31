@@ -45,6 +45,8 @@ public sealed class InStreamAdapterTests
         ISequentialInStream adapter = new InStreamAdapter(stream);
         var buffer = new byte[1];
 
+        // ReSharper disable once RedundantCast — the cast documents uint arithmetic, not int overflow.
+
         var hr = adapter.Read(buffer, (uint)int.MaxValue + 1u, out var processed);
 
         hr.Should().Be(HResult.InvalidArg);

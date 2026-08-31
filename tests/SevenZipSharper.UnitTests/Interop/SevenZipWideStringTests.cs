@@ -1,5 +1,3 @@
-using System;
-using System.Runtime.InteropServices;
 using AwesomeAssertions;
 using NUnit.Framework;
 using SevenZipSharper.Interop;

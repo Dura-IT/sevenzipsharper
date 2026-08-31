@@ -1,8 +1,6 @@
 using System;
-using System.Linq;
 using AwesomeAssertions;
 using NUnit.Framework;
-using SevenZipSharper;
 using SevenZipSharper.Compression;
 
 namespace SevenZipSharper.UnitTests.Compression;
@@ -34,7 +32,7 @@ public sealed class CompressionParametersMapperTests
             CompressionParameters.Default,
             ArchiveFormat.SevenZip
         );
-        var levelIndex = System.Array.IndexOf(names, "x");
+        var levelIndex = Array.IndexOf(names, "x");
 
         values[levelIndex].ToUInt32().Should().Be((uint)CompressionLevel.Normal);
     }
@@ -46,7 +44,7 @@ public sealed class CompressionParametersMapperTests
             CompressionParameters.Default,
             ArchiveFormat.SevenZip
         );
-        var methodIndex = System.Array.IndexOf(names, "0");
+        var methodIndex = Array.IndexOf(names, "0");
 
         values[methodIndex].ToStringValue().Should().Be("LZMA2");
     }
@@ -58,7 +56,7 @@ public sealed class CompressionParametersMapperTests
             CompressionParameters.Default,
             ArchiveFormat.SevenZip
         );
-        var solidIndex = System.Array.IndexOf(names, "s");
+        var solidIndex = Array.IndexOf(names, "s");
 
         values[solidIndex].ToStringValue().Should().Be("on");
     }
@@ -71,9 +69,9 @@ public sealed class CompressionParametersMapperTests
             ArchiveFormat.SevenZip
         );
 
-        var levelIndex = System.Array.IndexOf(names, "x");
-        var methodIndex = System.Array.IndexOf(names, "0");
-        var solidIndex = System.Array.IndexOf(names, "s");
+        var levelIndex = Array.IndexOf(names, "x");
+        var methodIndex = Array.IndexOf(names, "0");
+        var solidIndex = Array.IndexOf(names, "s");
 
         values[levelIndex].ToUInt32().Should().Be(0u);
         values[methodIndex].ToStringValue().Should().Be("Copy");
@@ -94,7 +92,7 @@ public sealed class CompressionParametersMapperTests
             ArchiveFormat.SevenZip
         );
 
-        var dictIndex = System.Array.IndexOf(names, "d");
+        var dictIndex = Array.IndexOf(names, "d");
         dictIndex.Should().BeGreaterThanOrEqualTo(0);
         values[dictIndex].ToStringValue().Should().Be($"{64 * 1024 * 1024u}b");
     }
@@ -108,7 +106,7 @@ public sealed class CompressionParametersMapperTests
             ArchiveFormat.SevenZip
         );
 
-        var fbIndex = System.Array.IndexOf(names, "fb");
+        var fbIndex = Array.IndexOf(names, "fb");
         fbIndex.Should().BeGreaterThanOrEqualTo(0);
         values[fbIndex].ToUInt32().Should().Be(64u);
     }
@@ -122,7 +120,7 @@ public sealed class CompressionParametersMapperTests
             ArchiveFormat.SevenZip
         );
 
-        var mtIndex = System.Array.IndexOf(names, "mt");
+        var mtIndex = Array.IndexOf(names, "mt");
         mtIndex.Should().BeGreaterThanOrEqualTo(0);
         values[mtIndex].ToUInt32().Should().Be(4u);
     }
@@ -166,7 +164,7 @@ public sealed class CompressionParametersMapperTests
         var p = CompressionParameters.Default with { EncryptionPassword = "secret" };
         var (names, values) = CompressionParametersMapper.ToSetProperties(p, ArchiveFormat.Zip);
 
-        var emIndex = System.Array.IndexOf(names, "em");
+        var emIndex = Array.IndexOf(names, "em");
         emIndex.Should().BeGreaterThanOrEqualTo(0);
         values[emIndex].ToStringValue().Should().Be("AES");
     }
@@ -273,7 +271,7 @@ public sealed class CompressionParametersMapperTests
         var p = new CompressionParameters { Method = method };
         var (names, values) = CompressionParametersMapper.ToSetProperties(p, ArchiveFormat.Zip);
 
-        var methodIndex = System.Array.IndexOf(names, "0");
+        var methodIndex = Array.IndexOf(names, "0");
         methodIndex.Should().BeGreaterThanOrEqualTo(0);
         values[methodIndex]
             .ToStringValue()

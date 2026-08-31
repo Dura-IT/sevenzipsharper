@@ -88,7 +88,7 @@ public sealed class AppendUpdateHandlerTests
     [Test]
     public void GetProperty_ExistingIndex_DelegatesToInArchive()
     {
-        var existing = new FakeInArchiveForAppend(1, path: "existing.bin");
+        var existing = new FakeInArchiveForAppend(path: "existing.bin");
         var handler = CreateHandler(existingArchive: existing, existingCount: 1);
         IArchiveUpdateCallback cb = handler;
         var prop = new PropVariant();
@@ -141,7 +141,7 @@ public sealed class AppendUpdateHandlerTests
     public void CryptoGetTextPassword2_WithPasswordSet_ReturnsPasswordWithIsDefinedOne()
     {
         var handler = new AppendUpdateHandler(
-            new FakeInArchiveForAppend(1),
+            new FakeInArchiveForAppend(),
             existingCount: 1,
             newEntries: new[] { ("new.txt", (Stream)new MemoryStream(new byte[] { 1 })) },
             progress: null,
@@ -253,11 +253,9 @@ internal sealed partial class FakeInArchiveForAppend : IInArchive
             ItemPropId.IsDirectory => PropVariant.FromBoolean(false),
             _ => new PropVariant(),
         };
-        var bytes = System.Runtime.InteropServices.MemoryMarshal.AsBytes(
-            System.Runtime.InteropServices.MemoryMarshal.CreateSpan(ref prop, 1)
-        );
+        var bytes = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref prop, 1));
         for (var i = 0; i < bytes.Length; i++)
-            System.Runtime.InteropServices.Marshal.WriteByte(value, i, bytes[i]);
+            Marshal.WriteByte(value, i, bytes[i]);
         return HResult.Ok;
     }
 

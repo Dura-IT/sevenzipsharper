@@ -13,7 +13,7 @@ using SevenZipSharper.Compression;
 namespace SevenZipSharper.IntegrationTests;
 
 /// <summary>
-/// Exercises <see cref="IPasswordProvider"/> — directly verifies the BSTR fix for
+/// Exercises <c>IPasswordProvider</c> — directly verifies the BSTR fix for
 /// managed→native <c>out string</c> marshalling on non-Windows platforms.
 /// </summary>
 [TestFixture]
