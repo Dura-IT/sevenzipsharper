@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-08-31
+
 ### Changed
 
 - Package icon, README logo and social preview now use the framed Dura IT mark: the
@@ -182,7 +184,8 @@ published as pre-release pending native library compilation for all supported pl
   `osx-x64`, `linux-x64`, `linux-arm64` via `NativeLibrary.SetDllImportResolver`
 - GitHub Actions CI: build + test on Ubuntu, Windows, macOS; pack job
 
-[Unreleased]: https://github.com/Dura-IT/SevenZipSharper/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/Dura-IT/SevenZipSharper/compare/v2.0.1...HEAD
+[2.0.1]: https://github.com/Dura-IT/SevenZipSharper/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/Dura-IT/SevenZipSharper/compare/v1.0.2...v2.0.0
 [1.0.2]: https://github.com/Dura-IT/SevenZipSharper/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/Dura-IT/SevenZipSharper/compare/v1.0.0...v1.0.1
