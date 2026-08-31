@@ -27,9 +27,7 @@ public class CompressionBenchmarks
     [Params(CompressionLevel.Fastest, CompressionLevel.Normal, CompressionLevel.Ultra)]
     public CompressionLevel Level { get; set; }
 
-    private static readonly byte[] TestPayload = ExtractionBenchmarks.GenerateCompressiblePayload(
-        1024 * 1024
-    );
+    private static readonly byte[] TestPayload = ExtractionBenchmarks.GenerateCompressiblePayload(1024 * 1024);
 
     private MemoryStream _outputBuffer = null!;
     private MemoryStream _payloadStream = null!;
@@ -42,17 +40,10 @@ public class CompressionBenchmarks
         _outputBuffer = new MemoryStream(capacity: 2 * 1024 * 1024);
 
         var parameters = CompressionParameters.Default with { Level = Level };
-        _compressor = new SevenZipCompressor(
-            ArchiveFormat.SevenZip,
-            parameters,
-            NullLogger<SevenZipCompressor>.Instance
-        );
+        _compressor = new SevenZipCompressor(ArchiveFormat.SevenZip, parameters, NullLogger<SevenZipCompressor>.Instance);
 
         SharpSevenZip.SharpSevenZipCompressor.SetLibraryPath(ExtractionBenchmarks.NativeLibPath);
-        _sharpCompressor = new SharpSevenZip.SharpSevenZipCompressor
-        {
-            CompressionLevel = MapLevel(Level),
-        };
+        _sharpCompressor = new SharpSevenZip.SharpSevenZipCompressor { CompressionLevel = MapLevel(Level) };
     }
 
     [IterationSetup]
@@ -73,12 +64,10 @@ public class CompressionBenchmarks
     }
 
     [Benchmark(Description = "SevenZipSharper")]
-    public Task CompressWithSevenZipSharper() =>
-        _compressor.CompressAsync(new[] { ("payload.bin", (Stream)_payloadStream) }, _outputBuffer);
+    public Task CompressWithSevenZipSharper() => _compressor.CompressAsync(new[] { ("payload.bin", (Stream)_payloadStream) }, _outputBuffer);
 
     [Benchmark(Description = "SharpSevenZip", Baseline = true)]
-    public void CompressWithSharpSevenZip() =>
-        _sharpCompressor.CompressStream(_payloadStream, _outputBuffer);
+    public void CompressWithSharpSevenZip() => _sharpCompressor.CompressStream(_payloadStream, _outputBuffer);
 
     /// <summary>
     /// Maps <see cref="CompressionLevel"/> (Store=0, Fastest=1, Fast=3, Normal=5, Maximum=7, Ultra=9)

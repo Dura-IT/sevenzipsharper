@@ -35,25 +35,13 @@ public sealed class FormatFallbackBehaviorTests
     [Test]
     public async Task Zip_WithLzma2Method_FallsBackToDeflate()
     {
-        var parameters = new CompressionParameters
-        {
-            Method = CompressionMethod.Lzma2,
-            Level = CompressionLevel.Normal,
-        };
+        var parameters = new CompressionParameters { Method = CompressionMethod.Lzma2, Level = CompressionLevel.Normal };
 
         using var archive = new MemoryStream();
-        using (
-            var compressor = new SevenZipCompressor(
-                ArchiveFormat.Zip,
-                parameters,
-                NullLogger<SevenZipCompressor>.Instance
-            )
-        )
+        using (var compressor = new SevenZipCompressor(ArchiveFormat.Zip, parameters, NullLogger<SevenZipCompressor>.Instance))
         {
             var entries = new[] { ("fallback.bin", (Stream)new MemoryStream(CompressibleContent)) };
-            (await compressor.CompressAsync(entries, archive))
-                .IsSuccess.Should()
-                .BeTrue("Zip + LZMA2 should succeed via silent Deflate fallback");
+            (await compressor.CompressAsync(entries, archive)).IsSuccess.Should().BeTrue("Zip + LZMA2 should succeed via silent Deflate fallback");
         }
 
         // Verify the written method code is Deflate (8), not any LZMA variant.
@@ -63,24 +51,16 @@ public sealed class FormatFallbackBehaviorTests
         reader.ReadUInt16(); // version needed
         reader.ReadUInt16(); // general purpose bit flag
         var methodCode = reader.ReadUInt16();
-        methodCode
-            .Should()
-            .Be(8, "LZMA2 has no ZIP method code — 7-Zip must substitute Deflate (8)");
+        methodCode.Should().Be(8, "LZMA2 has no ZIP method code — 7-Zip must substitute Deflate (8)");
 
         // Confirm roundtrip.
         archive.Position = 0;
-        using var extractor = new SevenZipExtractor(
-            archive,
-            ArchiveFormat.Zip,
-            NullLogger<SevenZipExtractor>.Instance
-        );
+        using var extractor = new SevenZipExtractor(archive, ArchiveFormat.Zip, NullLogger<SevenZipExtractor>.Instance);
         (await extractor.OpenAsync()).IsSuccess.Should().BeTrue();
         var entriesResult = await extractor.ListEntriesAsync();
         entriesResult.IsSuccess.Should().BeTrue();
         using var output = new MemoryStream();
-        (await extractor.ExtractEntryAsync(entriesResult.Value[0], output))
-            .IsSuccess.Should()
-            .BeTrue();
+        (await extractor.ExtractEntryAsync(entriesResult.Value[0], output)).IsSuccess.Should().BeTrue();
         output.ToArray().Should().BeEquivalentTo(CompressibleContent);
     }
 
@@ -93,30 +73,15 @@ public sealed class FormatFallbackBehaviorTests
     [TestCase(CompressionMethod.Lzma, (ushort)14)]
     [TestCase(CompressionMethod.BZip2, (ushort)12)]
     [TestCase(CompressionMethod.Ppmd, (ushort)98)]
-    public async Task Zip_WithNativeZipMethod_WritesCorrectMethodCode(
-        CompressionMethod method,
-        ushort expectedMethodCode
-    )
+    public async Task Zip_WithNativeZipMethod_WritesCorrectMethodCode(CompressionMethod method, ushort expectedMethodCode)
     {
-        var parameters = new CompressionParameters
-        {
-            Method = method,
-            Level = CompressionLevel.Normal,
-        };
+        var parameters = new CompressionParameters { Method = method, Level = CompressionLevel.Normal };
 
         using var archive = new MemoryStream();
-        using (
-            var compressor = new SevenZipCompressor(
-                ArchiveFormat.Zip,
-                parameters,
-                NullLogger<SevenZipCompressor>.Instance
-            )
-        )
+        using (var compressor = new SevenZipCompressor(ArchiveFormat.Zip, parameters, NullLogger<SevenZipCompressor>.Instance))
         {
             var entries = new[] { ("payload.bin", (Stream)new MemoryStream(CompressibleContent)) };
-            (await compressor.CompressAsync(entries, archive))
-                .IsSuccess.Should()
-                .BeTrue($"Zip + {method} should succeed without error");
+            (await compressor.CompressAsync(entries, archive)).IsSuccess.Should().BeTrue($"Zip + {method} should succeed without error");
         }
 
         // Verify the local file header contains the expected ZIP method code.
@@ -128,25 +93,16 @@ public sealed class FormatFallbackBehaviorTests
         var methodCode = reader.ReadUInt16();
         methodCode
             .Should()
-            .Be(
-                expectedMethodCode,
-                $"{method} is a registered ZIP method — 7-Zip should use code {expectedMethodCode}, not fall back to Deflate"
-            );
+            .Be(expectedMethodCode, $"{method} is a registered ZIP method — 7-Zip should use code {expectedMethodCode}, not fall back to Deflate");
 
         // Confirm roundtrip.
         archive.Position = 0;
-        using var extractor = new SevenZipExtractor(
-            archive,
-            ArchiveFormat.Zip,
-            NullLogger<SevenZipExtractor>.Instance
-        );
+        using var extractor = new SevenZipExtractor(archive, ArchiveFormat.Zip, NullLogger<SevenZipExtractor>.Instance);
         (await extractor.OpenAsync()).IsSuccess.Should().BeTrue();
         var entriesResult = await extractor.ListEntriesAsync();
         entriesResult.IsSuccess.Should().BeTrue();
         using var output = new MemoryStream();
-        (await extractor.ExtractEntryAsync(entriesResult.Value[0], output))
-            .IsSuccess.Should()
-            .BeTrue();
+        (await extractor.ExtractEntryAsync(entriesResult.Value[0], output)).IsSuccess.Should().BeTrue();
         output.ToArray().Should().BeEquivalentTo(CompressibleContent);
     }
 
@@ -160,26 +116,14 @@ public sealed class FormatFallbackBehaviorTests
     public async Task SingleFileFormat_Compression_Succeeds(ArchiveFormat format)
     {
         using var archive = new MemoryStream();
-        using (
-            var compressor = new SevenZipCompressor(
-                format,
-                CompressionParameters.Default,
-                NullLogger<SevenZipCompressor>.Instance
-            )
-        )
+        using (var compressor = new SevenZipCompressor(format, CompressionParameters.Default, NullLogger<SevenZipCompressor>.Instance))
         {
             var entries = new[] { ("only.bin", (Stream)new MemoryStream(CompressibleContent)) };
             var result = await compressor.CompressAsync(entries, archive);
-            result
-                .IsSuccess.Should()
-                .BeTrue(
-                    $"{format} should support single-entry compression with its built-in codec"
-                );
+            result.IsSuccess.Should().BeTrue($"{format} should support single-entry compression with its built-in codec");
         }
 
-        archive
-            .Length.Should()
-            .BeGreaterThan(0, $"{format} archive should contain compressed bytes");
+        archive.Length.Should().BeGreaterThan(0, $"{format} archive should contain compressed bytes");
     }
 
     /// <summary>
@@ -190,13 +134,7 @@ public sealed class FormatFallbackBehaviorTests
     public async Task Tar_Compression_Succeeds_AsUncompressedContainer()
     {
         using var archive = new MemoryStream();
-        using (
-            var compressor = new SevenZipCompressor(
-                ArchiveFormat.Tar,
-                CompressionParameters.Default,
-                NullLogger<SevenZipCompressor>.Instance
-            )
-        )
+        using (var compressor = new SevenZipCompressor(ArchiveFormat.Tar, CompressionParameters.Default, NullLogger<SevenZipCompressor>.Instance))
         {
             var entries = new[] { ("only.bin", (Stream)new MemoryStream(CompressibleContent)) };
             (await compressor.CompressAsync(entries, archive)).IsSuccess.Should().BeTrue();
@@ -204,10 +142,7 @@ public sealed class FormatFallbackBehaviorTests
 
         archive
             .Length.Should()
-            .BeGreaterThanOrEqualTo(
-                CompressibleContent.Length,
-                "Tar is a container — output must be at least as large as the input (plus headers)"
-            );
+            .BeGreaterThanOrEqualTo(CompressibleContent.Length, "Tar is a container — output must be at least as large as the input (plus headers)");
     }
 
     /// <summary>
@@ -219,17 +154,9 @@ public sealed class FormatFallbackBehaviorTests
     public void Xz_CompressorConstruction_Throws()
     {
         FluentActions
-            .Invoking(() =>
-                new SevenZipCompressor(
-                    ArchiveFormat.Xz,
-                    CompressionParameters.Default,
-                    NullLogger<SevenZipCompressor>.Instance
-                )
-            )
+            .Invoking(() => new SevenZipCompressor(ArchiveFormat.Xz, CompressionParameters.Default, NullLogger<SevenZipCompressor>.Instance))
             .Should()
-            .Throw<Exception>(
-                "Xz write handler is not registered — compression must fail loudly at construction"
-            );
+            .Throw<Exception>("Xz write handler is not registered — compression must fail loudly at construction");
     }
 
     /// <summary>
@@ -247,11 +174,7 @@ public sealed class FormatFallbackBehaviorTests
     {
         var parameters = new CompressionParameters { Method = method };
         using var archive = new MemoryStream();
-        using var compressor = new SevenZipCompressor(
-            ArchiveFormat.SevenZip,
-            parameters,
-            NullLogger<SevenZipCompressor>.Instance
-        );
+        using var compressor = new SevenZipCompressor(ArchiveFormat.SevenZip, parameters, NullLogger<SevenZipCompressor>.Instance);
 
         var entries = new[] { ("payload.bin", (Stream)new MemoryStream(CompressibleContent)) };
         var result = await compressor.CompressAsync(entries, archive);

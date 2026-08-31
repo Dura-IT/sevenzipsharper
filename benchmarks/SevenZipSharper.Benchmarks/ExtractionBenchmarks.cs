@@ -42,17 +42,10 @@ public class ExtractionBenchmarks
     {
         var payload = GenerateCompressiblePayload(1024 * 1024);
 
-        using var compressor = new SevenZipCompressor(
-            Format,
-            CompressionParameters.Default,
-            NullLogger<SevenZipCompressor>.Instance
-        );
+        using var compressor = new SevenZipCompressor(Format, CompressionParameters.Default, NullLogger<SevenZipCompressor>.Instance);
 
         var ms = new MemoryStream();
-        await compressor.CompressAsync(
-            new[] { ("payload.bin", (Stream)new MemoryStream(payload)) },
-            ms
-        );
+        await compressor.CompressAsync(new[] { ("payload.bin", (Stream)new MemoryStream(payload)) }, ms);
         _archive = ms.ToArray();
         _outputBuffer = new MemoryStream(capacity: 2 * 1024 * 1024);
 
@@ -65,11 +58,7 @@ public class ExtractionBenchmarks
         _outputBuffer.SetLength(0);
 
         _oursStream = new MemoryStream(_archive, writable: false);
-        _oursExtractor = new SevenZipExtractor(
-            _oursStream,
-            Format,
-            NullLogger<SevenZipExtractor>.Instance
-        );
+        _oursExtractor = new SevenZipExtractor(_oursStream, Format, NullLogger<SevenZipExtractor>.Instance);
         _oursExtractor.OpenAsync().GetAwaiter().GetResult();
         _oursEntries = _oursExtractor.ListEntriesAsync().GetAwaiter().GetResult().Value;
 
@@ -90,20 +79,12 @@ public class ExtractionBenchmarks
     public void GlobalCleanup() => _outputBuffer.Dispose();
 
     [Benchmark(Description = "SevenZipSharper")]
-    public Task ExtractWithSevenZipSharper() =>
-        _oursExtractor.ExtractEntryAsync(_oursEntries[0], _outputBuffer);
+    public Task ExtractWithSevenZipSharper() => _oursExtractor.ExtractEntryAsync(_oursEntries[0], _outputBuffer);
 
     [Benchmark(Description = "SharpSevenZip", Baseline = true)]
     public void ExtractWithSharpSevenZip() => _sharpExtractor.ExtractFile(0, _outputBuffer);
 
-    internal static string NativeLibPath =>
-        Path.Combine(
-            AppContext.BaseDirectory,
-            "runtimes",
-            BaseRuntimeIdentifier(),
-            "native",
-            NativeLibName()
-        );
+    internal static string NativeLibPath => Path.Combine(AppContext.BaseDirectory, "runtimes", BaseRuntimeIdentifier(), "native", NativeLibName());
 
     private static string BaseRuntimeIdentifier()
     {
@@ -111,9 +92,7 @@ public class ExtractionBenchmarks
         {
             Architecture.X64 => "x64",
             Architecture.Arm64 => "arm64",
-            _ => throw new PlatformNotSupportedException(
-                $"Unsupported architecture: {RuntimeInformation.ProcessArchitecture}"
-            ),
+            _ => throw new PlatformNotSupportedException($"Unsupported architecture: {RuntimeInformation.ProcessArchitecture}"),
         };
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             return $"win-{arch}";
@@ -126,8 +105,7 @@ public class ExtractionBenchmarks
     {
         // Repeating ASCII text — high compressibility, realistic for document archives.
         const string pattern =
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
-            + "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ";
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " + "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ";
         var patternBytes = System.Text.Encoding.ASCII.GetBytes(pattern);
         var data = new byte[size];
         for (var i = 0; i < data.Length; i++)

@@ -12,8 +12,5 @@ internal partial interface IArchiveOpenVolumeCallback
     int GetProperty(ItemPropId propId, ref PropVariant value);
 
     [PreserveSig]
-    int GetStream(
-        [MarshalUsing(typeof(SevenZipWideStringMarshaller))] string name,
-        out IInStream? inStream
-    );
+    int GetStream([MarshalUsing(typeof(SevenZipWideStringMarshaller))] string name, out IInStream? inStream);
 }

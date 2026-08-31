@@ -36,6 +36,5 @@ internal sealed partial class InStreamAdapter : SeekableStreamAdapterBase, IInSt
         }
     }
 
-    int IInStream.Seek(long offset, uint seekOrigin, nint newPosition) =>
-        SeekStream(offset, seekOrigin, newPosition);
+    int IInStream.Seek(long offset, uint seekOrigin, nint newPosition) => SeekStream(offset, seekOrigin, newPosition);
 }

@@ -17,12 +17,7 @@ namespace SevenZipSharper.UnitTests;
 public sealed class SevenZipExtractorTests
 {
     private static SevenZipExtractor CreateExtractor(IInArchive? archive = null) =>
-        new SevenZipExtractor(
-            Stream.Null,
-            ArchiveFormat.SevenZip,
-            archive ?? new FakeArchiveForExtraction(),
-            NullLogger<SevenZipExtractor>.Instance
-        );
+        new SevenZipExtractor(Stream.Null, ArchiveFormat.SevenZip, archive ?? new FakeArchiveForExtraction(), NullLogger<SevenZipExtractor>.Instance);
 
     private static ArchiveEntry TestEntry(int index = 0, string path = "entry.txt") =>
         new ArchiveEntry
@@ -41,9 +36,7 @@ public sealed class SevenZipExtractorTests
     [Test]
     public async Task OpenAsync_ReturnsFail_WhenArchiveOpenReturnsError()
     {
-        using var extractor = CreateExtractor(
-            new FakeArchiveForExtraction(openHResult: HResult.NotImplemented)
-        );
+        using var extractor = CreateExtractor(new FakeArchiveForExtraction(openHResult: HResult.NotImplemented));
 
         var result = await extractor.OpenAsync();
 
@@ -65,9 +58,7 @@ public sealed class SevenZipExtractorTests
     [Test]
     public async Task ListEntriesAsync_ReturnsEntry_ForEachItemInArchive()
     {
-        using var extractor = CreateExtractor(
-            new FakeArchiveForExtraction(entries: new[] { ("file.txt", false) })
-        );
+        using var extractor = CreateExtractor(new FakeArchiveForExtraction(entries: new[] { ("file.txt", false) }));
         await extractor.OpenAsync();
 
         var result = await extractor.ListEntriesAsync();
@@ -226,10 +217,7 @@ public sealed class SevenZipExtractorTests
     [Test]
     public async Task ExtractEntryAsync_ReturnsFail_WhenExtractReturnsError()
     {
-        var archive = new FakeArchiveForExtraction(
-            entries: new[] { ("entry.txt", false) },
-            extractHResult: HResult.NotImplemented
-        );
+        var archive = new FakeArchiveForExtraction(entries: new[] { ("entry.txt", false) }, extractHResult: HResult.NotImplemented);
         using var extractor = CreateExtractor(archive);
         await extractor.OpenAsync();
 
@@ -380,17 +368,9 @@ public sealed class SevenZipExtractorTests
             );
             using var extractor = CreateExtractor(archive);
             await extractor.OpenAsync();
-            var prebuiltEntries = new List<ArchiveEntry>
-            {
-                TestEntry(0, "a.txt"),
-                TestEntry(1, "b.txt"),
-            };
+            var prebuiltEntries = new List<ArchiveEntry> { TestEntry(0, "a.txt"), TestEntry(1, "b.txt") };
 
-            var result = await extractor.ExtractAsync(
-                prebuiltEntries,
-                e => e.Path == "a.txt",
-                tempDir
-            );
+            var result = await extractor.ExtractAsync(prebuiltEntries, e => e.Path == "a.txt", tempDir);
 
             result.IsSuccess.Should().BeTrue();
             File.Exists(Path.Combine(tempDir, "a.txt")).Should().BeTrue();
@@ -410,10 +390,7 @@ public sealed class SevenZipExtractorTests
         var extractor = CreateExtractor();
         extractor.Dispose();
 
-        await FluentActions
-            .Awaiting(() => extractor.OpenAsync())
-            .Should()
-            .ThrowAsync<ObjectDisposedException>();
+        await FluentActions.Awaiting(() => extractor.OpenAsync()).Should().ThrowAsync<ObjectDisposedException>();
     }
 
     [Test]
@@ -422,10 +399,7 @@ public sealed class SevenZipExtractorTests
         var extractor = CreateExtractor();
         extractor.Dispose();
 
-        await FluentActions
-            .Awaiting(() => extractor.ListEntriesAsync())
-            .Should()
-            .ThrowAsync<ObjectDisposedException>();
+        await FluentActions.Awaiting(() => extractor.ListEntriesAsync()).Should().ThrowAsync<ObjectDisposedException>();
     }
 
     [Test]
@@ -434,10 +408,7 @@ public sealed class SevenZipExtractorTests
         var extractor = CreateExtractor();
         extractor.Dispose();
 
-        await FluentActions
-            .Awaiting(() => extractor.ExtractAllAsync(Path.GetTempPath()))
-            .Should()
-            .ThrowAsync<ObjectDisposedException>();
+        await FluentActions.Awaiting(() => extractor.ExtractAllAsync(Path.GetTempPath())).Should().ThrowAsync<ObjectDisposedException>();
     }
 
     [Test]
@@ -446,10 +417,7 @@ public sealed class SevenZipExtractorTests
         var extractor = CreateExtractor();
         extractor.Dispose();
 
-        await FluentActions
-            .Awaiting(() => extractor.ExtractEntryAsync(TestEntry(), new MemoryStream()))
-            .Should()
-            .ThrowAsync<ObjectDisposedException>();
+        await FluentActions.Awaiting(() => extractor.ExtractEntryAsync(TestEntry(), new MemoryStream())).Should().ThrowAsync<ObjectDisposedException>();
     }
 
     [Test]
@@ -458,10 +426,7 @@ public sealed class SevenZipExtractorTests
         var extractor = CreateExtractor();
         extractor.Dispose();
 
-        await FluentActions
-            .Awaiting(() => extractor.ExtractAsync(_ => true, Path.GetTempPath()))
-            .Should()
-            .ThrowAsync<ObjectDisposedException>();
+        await FluentActions.Awaiting(() => extractor.ExtractAsync(_ => true, Path.GetTempPath())).Should().ThrowAsync<ObjectDisposedException>();
     }
 
     [Test]
@@ -470,10 +435,7 @@ public sealed class SevenZipExtractorTests
         var extractor = CreateExtractor();
         extractor.Dispose();
 
-        await FluentActions
-            .Awaiting(() => extractor.ExtractAsync([], _ => true, Path.GetTempPath()))
-            .Should()
-            .ThrowAsync<ObjectDisposedException>();
+        await FluentActions.Awaiting(() => extractor.ExtractAsync([], _ => true, Path.GetTempPath())).Should().ThrowAsync<ObjectDisposedException>();
     }
 
     // ── Not-opened guards ─────────────────────────────────────────────────
@@ -503,9 +465,7 @@ public sealed class SevenZipExtractorTests
     [Test]
     public async Task ListEntriesAsync_ReturnsFail_WhenGetNumberOfItemsFails()
     {
-        using var extractor = CreateExtractor(
-            new FakeArchiveForExtraction(getNumberOfItemsHResult: HResult.NotImplemented)
-        );
+        using var extractor = CreateExtractor(new FakeArchiveForExtraction(getNumberOfItemsHResult: HResult.NotImplemented));
         await extractor.OpenAsync();
 
         var result = await extractor.ListEntriesAsync();
@@ -516,9 +476,7 @@ public sealed class SevenZipExtractorTests
     [Test]
     public async Task ExtractAllAsync_ReturnsFail_WhenGetNumberOfItemsFails()
     {
-        using var extractor = CreateExtractor(
-            new FakeArchiveForExtraction(getNumberOfItemsHResult: HResult.NotImplemented)
-        );
+        using var extractor = CreateExtractor(new FakeArchiveForExtraction(getNumberOfItemsHResult: HResult.NotImplemented));
         await extractor.OpenAsync();
 
         var result = await extractor.ExtractAllAsync(Path.GetTempPath());
@@ -531,12 +489,7 @@ public sealed class SevenZipExtractorTests
     [Test]
     public async Task ExtractAllAsync_ReturnsFail_WhenExtractReturnsError()
     {
-        using var extractor = CreateExtractor(
-            new FakeArchiveForExtraction(
-                entries: new[] { ("file.txt", false) },
-                extractHResult: HResult.NotImplemented
-            )
-        );
+        using var extractor = CreateExtractor(new FakeArchiveForExtraction(entries: new[] { ("file.txt", false) }, extractHResult: HResult.NotImplemented));
         await extractor.OpenAsync();
 
         var result = await extractor.ExtractAllAsync(Path.GetTempPath());
@@ -555,9 +508,7 @@ public sealed class SevenZipExtractorTests
         await cts.CancelAsync().ConfigureAwait(false);
 
         await FluentActions
-            .Awaiting(() =>
-                extractor.ExtractAllAsync(Path.GetTempPath(), cancellationToken: cts.Token)
-            )
+            .Awaiting(() => extractor.ExtractAllAsync(Path.GetTempPath(), cancellationToken: cts.Token))
             .Should()
             .ThrowAsync<OperationCanceledException>();
     }
@@ -571,9 +522,7 @@ public sealed class SevenZipExtractorTests
         await cts.CancelAsync().ConfigureAwait(false);
 
         await FluentActions
-            .Awaiting(() =>
-                extractor.ExtractAsync(_ => true, Path.GetTempPath(), cancellationToken: cts.Token)
-            )
+            .Awaiting(() => extractor.ExtractAsync(_ => true, Path.GetTempPath(), cancellationToken: cts.Token))
             .Should()
             .ThrowAsync<OperationCanceledException>();
     }
@@ -587,14 +536,7 @@ public sealed class SevenZipExtractorTests
         await cts.CancelAsync().ConfigureAwait(false);
 
         await FluentActions
-            .Awaiting(() =>
-                extractor.ExtractAsync(
-                    [],
-                    _ => true,
-                    Path.GetTempPath(),
-                    cancellationToken: cts.Token
-                )
-            )
+            .Awaiting(() => extractor.ExtractAsync([], _ => true, Path.GetTempPath(), cancellationToken: cts.Token))
             .Should()
             .ThrowAsync<OperationCanceledException>();
     }
@@ -604,10 +546,7 @@ public sealed class SevenZipExtractorTests
     [Test]
     public async Task ExtractAsync_WithPrebuiltEntries_ReturnsFail_WhenExtractFails()
     {
-        var archive = new FakeArchiveForExtraction(
-            entries: new[] { ("file.txt", false) },
-            extractHResult: HResult.NotImplemented
-        );
+        var archive = new FakeArchiveForExtraction(entries: new[] { ("file.txt", false) }, extractHResult: HResult.NotImplemented);
         using var extractor = CreateExtractor(archive);
         await extractor.OpenAsync();
         var entries = new List<ArchiveEntry> { TestEntry(0, "file.txt") };
@@ -656,11 +595,7 @@ internal sealed partial class FakeArchiveForExtraction : IInArchive
         _extractCallback = extractCallback;
     }
 
-    public int Open(
-        IInStream stream,
-        IntPtr maxCheckStartPosition,
-        IArchiveOpenCallback? openArchiveCallback
-    ) => _openHResult;
+    public int Open(IInStream stream, IntPtr maxCheckStartPosition, IArchiveOpenCallback? openArchiveCallback) => _openHResult;
 
     public int Close() => HResult.Ok;
 
@@ -681,20 +616,13 @@ internal sealed partial class FakeArchiveForExtraction : IInArchive
             ItemPropId.IsDirectory => PropVariant.FromBoolean(_entries[index].IsDirectory),
             _ => new PropVariant(),
         };
-        var bytes = System.Runtime.InteropServices.MemoryMarshal.AsBytes(
-            System.Runtime.InteropServices.MemoryMarshal.CreateSpan(ref prop, 1)
-        );
+        var bytes = System.Runtime.InteropServices.MemoryMarshal.AsBytes(System.Runtime.InteropServices.MemoryMarshal.CreateSpan(ref prop, 1));
         for (var i = 0; i < bytes.Length; i++)
             System.Runtime.InteropServices.Marshal.WriteByte(value, i, bytes[i]);
         return HResult.Ok;
     }
 
-    public int Extract(
-        uint[]? indices,
-        uint numItems,
-        int testMode,
-        IArchiveExtractCallback extractCallback
-    )
+    public int Extract(uint[]? indices, uint numItems, int testMode, IArchiveExtractCallback extractCallback)
     {
         var count = indices != null ? (uint)indices.Length : (uint)_entries.Length;
         for (uint i = 0; i < count; i++)
@@ -730,13 +658,8 @@ internal sealed partial class FakeArchiveForExtraction : IInArchive
         return HResult.Ok;
     }
 
-    public int GetNumberOfArchiveProperties(out uint numProps) =>
-        GetNumberOfProperties(out numProps);
+    public int GetNumberOfArchiveProperties(out uint numProps) => GetNumberOfProperties(out numProps);
 
-    public int GetArchivePropertyInfo(
-        uint index,
-        out string? name,
-        out uint propId,
-        out ushort varType
-    ) => GetPropertyInfo(index, out name, out propId, out varType);
+    public int GetArchivePropertyInfo(uint index, out string? name, out uint propId, out ushort varType) =>
+        GetPropertyInfo(index, out name, out propId, out varType);
 }

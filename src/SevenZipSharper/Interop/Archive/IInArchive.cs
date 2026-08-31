@@ -10,11 +10,7 @@ namespace SevenZipSharper.Interop.Archive;
 internal partial interface IInArchive
 {
     [PreserveSig]
-    int Open(
-        IInStream stream,
-        IntPtr maxCheckStartPosition,
-        IArchiveOpenCallback? openArchiveCallback
-    );
+    int Open(IInStream stream, IntPtr maxCheckStartPosition, IArchiveOpenCallback? openArchiveCallback);
 
     [PreserveSig]
     int Close();
@@ -32,12 +28,7 @@ internal partial interface IInArchive
     int GetProperty(uint index, ItemPropId propId, nint value);
 
     [PreserveSig]
-    int Extract(
-        [In, MarshalUsing(CountElementName = "numItems")] uint[]? indices,
-        uint numItems,
-        int testMode,
-        IArchiveExtractCallback extractCallback
-    );
+    int Extract([In, MarshalUsing(CountElementName = "numItems")] uint[]? indices, uint numItems, int testMode, IArchiveExtractCallback extractCallback);
 
     // See GetProperty for why this takes nint, not ref PropVariant.
     [PreserveSig]
@@ -47,21 +38,11 @@ internal partial interface IInArchive
     int GetNumberOfProperties(out uint numProps);
 
     [PreserveSig]
-    int GetPropertyInfo(
-        uint index,
-        [MarshalUsing(typeof(SevenZipBStrMarshaller))] out string? name,
-        out uint propId,
-        out ushort varType
-    );
+    int GetPropertyInfo(uint index, [MarshalUsing(typeof(SevenZipBStrMarshaller))] out string? name, out uint propId, out ushort varType);
 
     [PreserveSig]
     int GetNumberOfArchiveProperties(out uint numProps);
 
     [PreserveSig]
-    int GetArchivePropertyInfo(
-        uint index,
-        [MarshalUsing(typeof(SevenZipBStrMarshaller))] out string? name,
-        out uint propId,
-        out ushort varType
-    );
+    int GetArchivePropertyInfo(uint index, [MarshalUsing(typeof(SevenZipBStrMarshaller))] out string? name, out uint propId, out ushort varType);
 }

@@ -39,29 +39,18 @@ public sealed class SevenZipCompressor : IDisposable
     [ExcludeFromCodeCoverage(
         Justification = "Loads the native 7-Zip library and creates a native COM archive object; exercised end-to-end by the integration test matrix."
     )]
-    public SevenZipCompressor(
-        ArchiveFormat format,
-        CompressionParameters parameters,
-        ILogger<SevenZipCompressor> logger
-    )
+    public SevenZipCompressor(ArchiveFormat format, CompressionParameters parameters, ILogger<SevenZipCompressor> logger)
     {
         NativeLibraryLoader.Register();
         _format = format;
         _parameters = parameters;
         _logger = logger;
-        _archive = SevenZipLib.CreateArchiveObject<IOutArchive>(
-            ArchiveFormatRegistry.GetClassId(format)
-        );
+        _archive = SevenZipLib.CreateArchiveObject<IOutArchive>(ArchiveFormatRegistry.GetClassId(format));
         _applyNativeParameters = true;
     }
 
     // For unit testing — bypasses native library creation and parameter application.
-    internal SevenZipCompressor(
-        ArchiveFormat format,
-        CompressionParameters parameters,
-        IOutArchive archive,
-        ILogger<SevenZipCompressor> logger
-    )
+    internal SevenZipCompressor(ArchiveFormat format, CompressionParameters parameters, IOutArchive archive, ILogger<SevenZipCompressor> logger)
     {
         _format = format;
         _parameters = parameters;
@@ -90,11 +79,7 @@ public sealed class SevenZipCompressor : IDisposable
         "CA2000:Dispose objects before losing scope",
         Justification = "Ownership of the compressor transfers to the caller via Result<T>; disposing here would return a dead object."
     )]
-    public static Result<SevenZipCompressor> Create(
-        ArchiveFormat format,
-        CompressionParameters parameters,
-        ILogger<SevenZipCompressor> logger
-    )
+    public static Result<SevenZipCompressor> Create(ArchiveFormat format, CompressionParameters parameters, ILogger<SevenZipCompressor> logger)
     {
         try
         {
@@ -137,8 +122,7 @@ public sealed class SevenZipCompressor : IDisposable
     {
         ObjectDisposedException.ThrowIf(_disposed != 0, this);
         var entryList = entries.ToList();
-        return await CompressInternalAsync(entryList, output, progress, cancellationToken)
-            .ConfigureAwait(false);
+        return await CompressInternalAsync(entryList, output, progress, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -180,14 +164,7 @@ public sealed class SevenZipCompressor : IDisposable
                 })
                 .ToList();
 
-            return await CompressInternalAsync(
-                    entries,
-                    output,
-                    progress,
-                    cancellationToken,
-                    ownsEntryStreams: true
-                )
-                .ConfigureAwait(false);
+            return await CompressInternalAsync(entries, output, progress, cancellationToken, ownsEntryStreams: true).ConfigureAwait(false);
         }
         finally
         {
@@ -226,14 +203,7 @@ public sealed class SevenZipCompressor : IDisposable
         ObjectDisposedException.ThrowIf(_disposed != 0, this);
         ArgumentNullException.ThrowIfNull(volumeStreamFactory);
         var entryList = entries.ToList();
-        return await CompressMultiVolumeInternalAsync(
-                entryList,
-                volumeStreamFactory,
-                maxVolumeBytes,
-                progress,
-                cancellationToken
-            )
-            .ConfigureAwait(false);
+        return await CompressMultiVolumeInternalAsync(entryList, volumeStreamFactory, maxVolumeBytes, progress, cancellationToken).ConfigureAwait(false);
     }
 
     // For unit testing — bypasses native library and parameter application.
@@ -256,13 +226,7 @@ public sealed class SevenZipCompressor : IDisposable
             password: _parameters.EncryptionPassword
         );
         var firstVolume = new OutStreamAdapter(volumeStreamFactory(0));
-        return RunUpdateItemsAsync(
-            archive,
-            firstVolume,
-            (uint)entryList.Count,
-            handler,
-            cancellationToken
-        );
+        return RunUpdateItemsAsync(archive, firstVolume, (uint)entryList.Count, handler, cancellationToken);
     }
 
     /// <summary>
@@ -307,17 +271,11 @@ public sealed class SevenZipCompressor : IDisposable
 
         var newEntryList = newEntries.ToList();
 
-        var inArchive = SevenZipLib.CreateArchiveObject<IInArchive>(
-            ArchiveFormatRegistry.GetClassId(_format)
-        );
+        var inArchive = SevenZipLib.CreateArchiveObject<IInArchive>(ArchiveFormatRegistry.GetClassId(_format));
 
         try
         {
-            var openHr = inArchive.Open(
-                new InStreamAdapter(existingArchive),
-                IntPtr.Zero,
-                new ArchiveOpenHandler(_parameters.EncryptionPassword)
-            );
+            var openHr = inArchive.Open(new InStreamAdapter(existingArchive), IntPtr.Zero, new ArchiveOpenHandler(_parameters.EncryptionPassword));
             if (openHr != HResult.Ok)
             {
                 OpenExistingFailed(_logger, openHr);
@@ -336,16 +294,7 @@ public sealed class SevenZipCompressor : IDisposable
             if (applyResult.IsFailed)
                 return applyResult;
 
-            return await AppendCoreAsync(
-                    inArchive,
-                    outArchive,
-                    existingCount,
-                    newEntryList,
-                    output,
-                    progress,
-                    cancellationToken
-                )
-                .ConfigureAwait(false);
+            return await AppendCoreAsync(inArchive, outArchive, existingCount, newEntryList, output, progress, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
@@ -368,15 +317,7 @@ public sealed class SevenZipCompressor : IDisposable
         if (validation.IsFailed)
             return Task.FromResult(validation);
 
-        return AppendCoreAsync(
-            inArchive,
-            outArchive,
-            existingCount,
-            newEntries.ToList(),
-            output,
-            progress,
-            cancellationToken
-        );
+        return AppendCoreAsync(inArchive, outArchive, existingCount, newEntries.ToList(), output, progress, cancellationToken);
     }
 
     /// <summary>
@@ -410,22 +351,9 @@ public sealed class SevenZipCompressor : IDisposable
         }
 
         var outAdapter = new OutStreamAdapter(output);
-        var handler = new CompressionHandler(
-            entries,
-            progress,
-            cancellationToken,
-            ownsEntryStreams,
-            password: _parameters.EncryptionPassword
-        );
+        var handler = new CompressionHandler(entries, progress, cancellationToken, ownsEntryStreams, password: _parameters.EncryptionPassword);
 
-        var result = await RunUpdateItemsAsync(
-                _archive,
-                outAdapter,
-                (uint)entries.Count,
-                handler,
-                cancellationToken
-            )
-            .ConfigureAwait(false);
+        var result = await RunUpdateItemsAsync(_archive, outAdapter, (uint)entries.Count, handler, cancellationToken).ConfigureAwait(false);
 
         if (result.IsSuccess)
             CompressionCompleted(_logger, (uint)entries.Count, _format);
@@ -462,14 +390,7 @@ public sealed class SevenZipCompressor : IDisposable
         );
         var firstVolume = new OutStreamAdapter(volumeStreamFactory(0));
 
-        var result = await RunUpdateItemsAsync(
-                _archive,
-                firstVolume,
-                (uint)entries.Count,
-                handler,
-                cancellationToken
-            )
-            .ConfigureAwait(false);
+        var result = await RunUpdateItemsAsync(_archive, firstVolume, (uint)entries.Count, handler, cancellationToken).ConfigureAwait(false);
 
         if (result.IsSuccess)
             MultiVolumeCompleted(_logger, _format, (uint)entries.Count);
@@ -487,25 +408,11 @@ public sealed class SevenZipCompressor : IDisposable
         CancellationToken cancellationToken
     )
     {
-        var handler = new AppendUpdateHandler(
-            inArchive,
-            existingCount,
-            newEntries,
-            progress,
-            cancellationToken,
-            password: _parameters.EncryptionPassword
-        );
+        var handler = new AppendUpdateHandler(inArchive, existingCount, newEntries, progress, cancellationToken, password: _parameters.EncryptionPassword);
         var outAdapter = new OutStreamAdapter(output);
         var totalCount = existingCount + (uint)newEntries.Count;
 
-        var result = await RunUpdateItemsAsync(
-                outArchive,
-                outAdapter,
-                totalCount,
-                handler,
-                cancellationToken
-            )
-            .ConfigureAwait(false);
+        var result = await RunUpdateItemsAsync(outArchive, outAdapter, totalCount, handler, cancellationToken).ConfigureAwait(false);
 
         if (result.IsSuccess)
             AppendCompleted(_logger, _format, existingCount, newEntries.Count);
@@ -549,10 +456,7 @@ public sealed class SevenZipCompressor : IDisposable
         if (_parameters.EncryptHeaders && _format != ArchiveFormat.SevenZip)
             return Result.Fail("EncryptHeaders is only supported for the 7z format.");
 
-        if (
-            _parameters.EncryptionPassword is not null
-            && _format is not ArchiveFormat.SevenZip and not ArchiveFormat.Zip
-        )
+        if (_parameters.EncryptionPassword is not null && _format is not ArchiveFormat.SevenZip and not ArchiveFormat.Zip)
         {
             return Result.Fail("Encryption is only supported for the 7z and Zip formats.");
         }
@@ -601,17 +505,11 @@ public sealed class SevenZipCompressor : IDisposable
                     var (valuesPtr, freeValues) = PropVariantMarshaller.AllocValuesBuffer(values);
                     try
                     {
-                        var hr = setProps.SetProperties(
-                            nameHandle.AddrOfPinnedObject(),
-                            valuesPtr,
-                            (uint)names.Length
-                        );
+                        var hr = setProps.SetProperties(nameHandle.AddrOfPinnedObject(), valuesPtr, (uint)names.Length);
                         if (hr != HResult.Ok)
                         {
                             SetPropertiesFailed(_logger, hr);
-                            return Result.Fail(
-                                $"Failed to apply compression parameters (HRESULT: 0x{hr:X8})."
-                            );
+                            return Result.Fail($"Failed to apply compression parameters (HRESULT: 0x{hr:X8}).");
                         }
                     }
                     finally
@@ -648,8 +546,7 @@ public sealed class SevenZipCompressor : IDisposable
             _path = path;
         }
 
-        private FileStream Inner =>
-            _inner ??= new FileStream(_path, FileMode.Open, FileAccess.Read, FileShare.Read);
+        private FileStream Inner => _inner ??= new FileStream(_path, FileMode.Open, FileAccess.Read, FileShare.Read);
 
         public override bool CanRead => true;
 
@@ -665,8 +562,7 @@ public sealed class SevenZipCompressor : IDisposable
             set => Inner.Position = value;
         }
 
-        public override int Read(byte[] buffer, int offset, int count) =>
-            Inner.Read(buffer, offset, count);
+        public override int Read(byte[] buffer, int offset, int count) => Inner.Read(buffer, offset, count);
 
         public override long Seek(long offset, SeekOrigin origin) => Inner.Seek(offset, origin);
 
@@ -680,8 +576,7 @@ public sealed class SevenZipCompressor : IDisposable
         [ExcludeFromCodeCoverage(
             Justification = "Defensive throw on a read-only Stream override; never invoked because LazyFileStream is only consumed by 7-Zip's input-stream path."
         )]
-        public override void Write(byte[] buffer, int offset, int count) =>
-            throw new NotSupportedException();
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
 
         protected override void Dispose(bool disposing)
         {

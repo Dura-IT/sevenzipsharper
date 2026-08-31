@@ -75,10 +75,7 @@ public sealed class ArchiveFormatDetectorTests
     [Test]
     public void FromExtension_WorksWithFullPath()
     {
-        ArchiveFormatDetector
-            .FromExtension("/home/user/downloads/backup.7z")
-            .Should()
-            .Be(ArchiveFormat.SevenZip);
+        ArchiveFormatDetector.FromExtension("/home/user/downloads/backup.7z").Should().Be(ArchiveFormat.SevenZip);
     }
 
     #endregion
@@ -87,43 +84,18 @@ public sealed class ArchiveFormatDetectorTests
 
     private static IEnumerable<TestCaseData> MagicByteCases()
     {
-        yield return new TestCaseData(
-            new byte[] { 0x4D, 0x53, 0x57, 0x49, 0x4D, 0x00, 0x00, 0x00 },
-            ArchiveFormat.Wim
-        ).SetName("Wim");
-        yield return new TestCaseData(
-            new byte[] { 0x37, 0x7A, 0xBC, 0xAF, 0x27, 0x1C },
-            ArchiveFormat.SevenZip
-        ).SetName("SevenZip");
-        yield return new TestCaseData(
-            new byte[] { 0xFD, 0x37, 0x7A, 0x58, 0x5A, 0x00 },
-            ArchiveFormat.Xz
-        ).SetName("Xz");
-        yield return new TestCaseData(
-            new byte[] { 0x4D, 0x53, 0x43, 0x46, 0x00, 0x00 },
-            ArchiveFormat.Cab
-        ).SetName("Cab");
-        yield return new TestCaseData(
-            new byte[] { 0x42, 0x5A, 0x68, 0x39 },
-            ArchiveFormat.BZip2
-        ).SetName("BZip2");
-        yield return new TestCaseData(
-            new byte[] { 0x50, 0x4B, 0x03, 0x04 },
-            ArchiveFormat.Zip
-        ).SetName("Zip");
-        yield return new TestCaseData(new byte[] { 0x1F, 0x8B, 0x08 }, ArchiveFormat.GZip).SetName(
-            "GZip"
-        );
-        yield return new TestCaseData(new byte[] { 0x60, 0xEA, 0x00 }, ArchiveFormat.Arj).SetName(
-            "Arj"
-        );
+        yield return new TestCaseData(new byte[] { 0x4D, 0x53, 0x57, 0x49, 0x4D, 0x00, 0x00, 0x00 }, ArchiveFormat.Wim).SetName("Wim");
+        yield return new TestCaseData(new byte[] { 0x37, 0x7A, 0xBC, 0xAF, 0x27, 0x1C }, ArchiveFormat.SevenZip).SetName("SevenZip");
+        yield return new TestCaseData(new byte[] { 0xFD, 0x37, 0x7A, 0x58, 0x5A, 0x00 }, ArchiveFormat.Xz).SetName("Xz");
+        yield return new TestCaseData(new byte[] { 0x4D, 0x53, 0x43, 0x46, 0x00, 0x00 }, ArchiveFormat.Cab).SetName("Cab");
+        yield return new TestCaseData(new byte[] { 0x42, 0x5A, 0x68, 0x39 }, ArchiveFormat.BZip2).SetName("BZip2");
+        yield return new TestCaseData(new byte[] { 0x50, 0x4B, 0x03, 0x04 }, ArchiveFormat.Zip).SetName("Zip");
+        yield return new TestCaseData(new byte[] { 0x1F, 0x8B, 0x08 }, ArchiveFormat.GZip).SetName("GZip");
+        yield return new TestCaseData(new byte[] { 0x60, 0xEA, 0x00 }, ArchiveFormat.Arj).SetName("Arj");
     }
 
     [TestCaseSource(nameof(MagicByteCases))]
-    public async Task FromStreamAsync_ReturnsFormat_ForMagicBytes(
-        byte[] header,
-        ArchiveFormat expected
-    )
+    public async Task FromStreamAsync_ReturnsFormat_ForMagicBytes(byte[] header, ArchiveFormat expected)
     {
         using var stream = new MemoryStream(header);
 
@@ -251,11 +223,9 @@ public sealed class ArchiveFormatDetectorTests
 
         public override void Flush() { }
 
-        public override int Read(byte[] buffer, int offset, int count) =>
-            throw new NotSupportedException();
+        public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();
 
-        public override long Seek(long offset, SeekOrigin origin) =>
-            throw new NotSupportedException();
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
 
         public override void SetLength(long value) => throw new NotSupportedException();
 

@@ -30,10 +30,7 @@ internal static class CompressionParametersMapper
     private const string MethodNamePpmd = "PPMd";
     private const string MethodNameCopy = "Copy";
 
-    internal static (string[] Names, PropVariant[] Values) ToSetProperties(
-        CompressionParameters parameters,
-        ArchiveFormat format
-    )
+    internal static (string[] Names, PropVariant[] Values) ToSetProperties(CompressionParameters parameters, ArchiveFormat format)
     {
         var names = new List<string>();
         var values = new List<PropVariant>();
@@ -55,10 +52,7 @@ internal static class CompressionParametersMapper
         // would abort SetProperties before em=AES is ever processed.
         if (format == ArchiveFormat.SevenZip)
         {
-            Add(
-                PropKeySolid,
-                PropVariant.FromString(parameters.SolidMode ? PropValueOn : PropValueOff)
-            );
+            Add(PropKeySolid, PropVariant.FromString(parameters.SolidMode ? PropValueOn : PropValueOff));
         }
 
         // Dictionary size must be a byte-suffixed string, not a number: 7-Zip reads a numeric "d"
@@ -66,9 +60,7 @@ internal static class CompressionParametersMapper
         // a real byte count like 128 MB always fails. The "<n>b" string form is parsed as n bytes.
         if (parameters.DictionarySize.HasValue)
         {
-            var dictionaryBytes = parameters.DictionarySize.Value.ToString(
-                CultureInfo.InvariantCulture
-            );
+            var dictionaryBytes = parameters.DictionarySize.Value.ToString(CultureInfo.InvariantCulture);
             Add(PropKeyDictionarySize, PropVariant.FromString(dictionaryBytes + "b"));
         }
 

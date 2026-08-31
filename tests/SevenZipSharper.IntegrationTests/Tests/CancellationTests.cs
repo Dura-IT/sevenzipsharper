@@ -19,11 +19,7 @@ public sealed class CancellationTests
     {
         var content = new byte[128 * 1024];
         new Random(0).NextBytes(content);
-        return await IntegrationTestHelpers.BuildArchiveAsync(
-            ArchiveFormat.SevenZip,
-            CompressionParameters.Default,
-            ("large.bin", content)
-        );
+        return await IntegrationTestHelpers.BuildArchiveAsync(ArchiveFormat.SevenZip, CompressionParameters.Default, ("large.bin", content));
     }
 
     [Test]
@@ -33,11 +29,7 @@ public sealed class CancellationTests
         using var cts = new CancellationTokenSource();
         await cts.CancelAsync();
 
-        using var extractor = new SevenZipExtractor(
-            new MemoryStream(archive),
-            ArchiveFormat.SevenZip,
-            NullLogger<SevenZipExtractor>.Instance
-        );
+        using var extractor = new SevenZipExtractor(new MemoryStream(archive), ArchiveFormat.SevenZip, NullLogger<SevenZipExtractor>.Instance);
         await extractor.OpenAsync();
 
         var outDir = IntegrationTestHelpers.UniqueTempDir("cancel_extractAll");
@@ -62,16 +54,9 @@ public sealed class CancellationTests
         using var cts = new CancellationTokenSource();
         await cts.CancelAsync();
 
-        using var extractor = new SevenZipExtractor(
-            new MemoryStream(archive),
-            ArchiveFormat.SevenZip,
-            NullLogger<SevenZipExtractor>.Instance
-        );
+        using var extractor = new SevenZipExtractor(new MemoryStream(archive), ArchiveFormat.SevenZip, NullLogger<SevenZipExtractor>.Instance);
         await extractor.OpenAsync();
 
-        await FluentActions
-            .Awaiting(() => extractor.ListEntriesAsync(cts.Token))
-            .Should()
-            .ThrowAsync<OperationCanceledException>();
+        await FluentActions.Awaiting(() => extractor.ListEntriesAsync(cts.Token)).Should().ThrowAsync<OperationCanceledException>();
     }
 }

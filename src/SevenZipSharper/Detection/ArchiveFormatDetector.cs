@@ -46,10 +46,7 @@ public static class ArchiveFormatDetector
     // Covers all signatures above: TAR offset 257 + 5 bytes = 262.
     private const int BufferSize = 262;
 
-    private static readonly Dictionary<string, ArchiveFormat> ExtensionMap = new Dictionary<
-        string,
-        ArchiveFormat
-    >(StringComparer.OrdinalIgnoreCase)
+    private static readonly Dictionary<string, ArchiveFormat> ExtensionMap = new Dictionary<string, ArchiveFormat>(StringComparer.OrdinalIgnoreCase)
     {
         [".7z"] = ArchiveFormat.SevenZip,
         [".zip"] = ArchiveFormat.Zip,
@@ -100,10 +97,7 @@ public static class ArchiveFormatDetector
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="stream"/> is <see langword="null"/>.</exception>
     /// <exception cref="ArgumentException">Thrown if <paramref name="stream"/> is not readable.</exception>
     /// <exception cref="OperationCanceledException">Thrown if <paramref name="cancellationToken"/> is triggered before the read completes.</exception>
-    public static async Task<ArchiveFormat?> FromStreamAsync(
-        Stream stream,
-        CancellationToken cancellationToken = default
-    )
+    public static async Task<ArchiveFormat?> FromStreamAsync(Stream stream, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(stream);
         if (!stream.CanRead)
@@ -112,8 +106,7 @@ public static class ArchiveFormatDetector
         var originalPosition = stream.CanSeek ? stream.Position : -1L;
 
         var buffer = new byte[BufferSize];
-        var bytesRead = await ReadFullyAsync(stream, buffer, cancellationToken)
-            .ConfigureAwait(false);
+        var bytesRead = await ReadFullyAsync(stream, buffer, cancellationToken).ConfigureAwait(false);
 
         if (stream.CanSeek)
             stream.Position = originalPosition;
@@ -130,10 +123,7 @@ public static class ArchiveFormatDetector
 
         foreach (var (format, offset, bytes) in Signatures)
         {
-            if (
-                span.Length >= offset + bytes.Length
-                && span.Slice(offset, bytes.Length).SequenceEqual(bytes)
-            )
+            if (span.Length >= offset + bytes.Length && span.Slice(offset, bytes.Length).SequenceEqual(bytes))
             {
                 return format;
             }
@@ -142,18 +132,12 @@ public static class ArchiveFormatDetector
         return null;
     }
 
-    private static async Task<int> ReadFullyAsync(
-        Stream stream,
-        byte[] buffer,
-        CancellationToken cancellationToken
-    )
+    private static async Task<int> ReadFullyAsync(Stream stream, byte[] buffer, CancellationToken cancellationToken)
     {
         var totalRead = 0;
         while (totalRead < buffer.Length)
         {
-            var read = await stream
-                .ReadAsync(buffer.AsMemory(totalRead), cancellationToken)
-                .ConfigureAwait(false);
+            var read = await stream.ReadAsync(buffer.AsMemory(totalRead), cancellationToken).ConfigureAwait(false);
             if (read == 0)
                 break;
             totalRead += read;

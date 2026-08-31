@@ -17,17 +17,11 @@ public class NativeLibraryGuard
         try
         {
             using var ms = new System.IO.MemoryStream(new byte[1]);
-            using var _ = new SevenZipExtractor(
-                ms,
-                ArchiveFormat.SevenZip,
-                NullLogger<SevenZipExtractor>.Instance
-            );
+            using var _ = new SevenZipExtractor(ms, ArchiveFormat.SevenZip, NullLogger<SevenZipExtractor>.Instance);
         }
         catch (Exception ex)
         {
-            Assert.Ignore(
-                $"Native 7-Zip library not available — integration tests skipped. ({ex.GetType().Name}: {ex.Message})"
-            );
+            Assert.Ignore($"Native 7-Zip library not available — integration tests skipped. ({ex.GetType().Name}: {ex.Message})");
         }
     }
 }

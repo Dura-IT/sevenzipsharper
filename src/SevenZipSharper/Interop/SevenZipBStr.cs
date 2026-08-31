@@ -24,10 +24,7 @@ internal static class SevenZipBStr
     {
         if (value.Length > int.MaxValue / 4)
         {
-            throw new ArgumentException(
-                "String is too long to represent as a BSTR.",
-                nameof(value)
-            );
+            throw new ArgumentException("String is too long to represent as a BSTR.", nameof(value));
         }
 
         if (OperatingSystem.IsWindows())

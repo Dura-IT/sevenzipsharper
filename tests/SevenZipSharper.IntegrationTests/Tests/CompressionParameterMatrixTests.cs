@@ -41,53 +41,24 @@ public sealed class CompressionParameterMatrixTests
             CompressionMethod.Copy,
         };
 
-        var levels = new[]
-        {
-            CompressionLevel.Fastest,
-            CompressionLevel.Fast,
-            CompressionLevel.Normal,
-            CompressionLevel.Maximum,
-            CompressionLevel.Ultra,
-        };
+        var levels = new[] { CompressionLevel.Fastest, CompressionLevel.Fast, CompressionLevel.Normal, CompressionLevel.Maximum, CompressionLevel.Ultra };
 
         // 7z × every method × every level (30 cases)
         foreach (var method in sevenZipMethods)
         {
             foreach (var level in levels)
             {
-                yield return new TestCaseData(ArchiveFormat.SevenZip, method, level, null).SetName(
-                    $"7z_{method}_{level}"
-                );
+                yield return new TestCaseData(ArchiveFormat.SevenZip, method, level, null).SetName($"7z_{method}_{level}");
             }
         }
 
         // 7z × Copy × Store — uncompressed storage path
-        yield return new TestCaseData(
-            ArchiveFormat.SevenZip,
-            CompressionMethod.Copy,
-            CompressionLevel.Store,
-            null
-        ).SetName("7z_Copy_Store");
+        yield return new TestCaseData(ArchiveFormat.SevenZip, CompressionMethod.Copy, CompressionLevel.Store, null).SetName("7z_Copy_Store");
 
         // 7z × Lzma2 × varying thread counts — exercises the multi-thread codec path
-        yield return new TestCaseData(
-            ArchiveFormat.SevenZip,
-            CompressionMethod.Lzma2,
-            CompressionLevel.Normal,
-            (int?)1
-        ).SetName("7z_Lzma2_Normal_1Thread");
-        yield return new TestCaseData(
-            ArchiveFormat.SevenZip,
-            CompressionMethod.Lzma2,
-            CompressionLevel.Normal,
-            (int?)2
-        ).SetName("7z_Lzma2_Normal_2Threads");
-        yield return new TestCaseData(
-            ArchiveFormat.SevenZip,
-            CompressionMethod.Lzma2,
-            CompressionLevel.Normal,
-            (int?)4
-        ).SetName("7z_Lzma2_Normal_4Threads");
+        yield return new TestCaseData(ArchiveFormat.SevenZip, CompressionMethod.Lzma2, CompressionLevel.Normal, (int?)1).SetName("7z_Lzma2_Normal_1Thread");
+        yield return new TestCaseData(ArchiveFormat.SevenZip, CompressionMethod.Lzma2, CompressionLevel.Normal, (int?)2).SetName("7z_Lzma2_Normal_2Threads");
+        yield return new TestCaseData(ArchiveFormat.SevenZip, CompressionMethod.Lzma2, CompressionLevel.Normal, (int?)4).SetName("7z_Lzma2_Normal_4Threads");
 
         // Zip × supported methods × every level (10 cases)
         var zipMethods = new[] { CompressionMethod.Deflate, CompressionMethod.BZip2 };
@@ -95,28 +66,16 @@ public sealed class CompressionParameterMatrixTests
         {
             foreach (var level in levels)
             {
-                yield return new TestCaseData(ArchiveFormat.Zip, method, level, null).SetName(
-                    $"Zip_{method}_{level}"
-                );
+                yield return new TestCaseData(ArchiveFormat.Zip, method, level, null).SetName($"Zip_{method}_{level}");
             }
         }
 
         // Zip × Deflate × Store — stored entries (level 0 disables compression on the codec)
-        yield return new TestCaseData(
-            ArchiveFormat.Zip,
-            CompressionMethod.Deflate,
-            CompressionLevel.Store,
-            null
-        ).SetName("Zip_Deflate_Store");
+        yield return new TestCaseData(ArchiveFormat.Zip, CompressionMethod.Deflate, CompressionLevel.Store, null).SetName("Zip_Deflate_Store");
     }
 
     [TestCaseSource(nameof(MatrixCases))]
-    public async Task Compress_ThenExtract_RoundTripSucceeds(
-        ArchiveFormat format,
-        CompressionMethod method,
-        CompressionLevel level,
-        int? threadCount
-    )
+    public async Task Compress_ThenExtract_RoundTripSucceeds(ArchiveFormat format, CompressionMethod method, CompressionLevel level, int? threadCount)
     {
         var parameters = new CompressionParameters
         {
@@ -126,33 +85,19 @@ public sealed class CompressionParameterMatrixTests
         };
 
         using var archive = new MemoryStream();
-        using (
-            var compressor = new SevenZipCompressor(
-                format,
-                parameters,
-                NullLogger<SevenZipCompressor>.Instance
-            )
-        )
+        using (var compressor = new SevenZipCompressor(format, parameters, NullLogger<SevenZipCompressor>.Instance))
         {
             var entries = new[] { ("payload.bin", (Stream)new MemoryStream(CompressibleContent)) };
             var result = await compressor.CompressAsync(entries, archive);
             result
                 .IsSuccess.Should()
-                .BeTrue(
-                    $"{format}/{method}/{level} (threads={threadCount?.ToString() ?? "default"}) compression failed: {string.Join("; ", result.Errors)}"
-                );
+                .BeTrue($"{format}/{method}/{level} (threads={threadCount?.ToString() ?? "default"}) compression failed: {string.Join("; ", result.Errors)}");
         }
 
-        archive
-            .Length.Should()
-            .BeGreaterThan(0, $"{format}/{method}/{level} archive should not be empty");
+        archive.Length.Should().BeGreaterThan(0, $"{format}/{method}/{level} archive should not be empty");
 
         archive.Position = 0;
-        using var extractor = new SevenZipExtractor(
-            archive,
-            format,
-            NullLogger<SevenZipExtractor>.Instance
-        );
+        using var extractor = new SevenZipExtractor(archive, format, NullLogger<SevenZipExtractor>.Instance);
 
         (await extractor.OpenAsync()).IsSuccess.Should().BeTrue($"{format}/{method}/{level} open");
         var entriesResult = await extractor.ListEntriesAsync();
@@ -160,17 +105,9 @@ public sealed class CompressionParameterMatrixTests
         entriesResult.Value.Should().HaveCount(1);
 
         using var output = new MemoryStream();
-        (await extractor.ExtractEntryAsync(entriesResult.Value[0], output))
-            .IsSuccess.Should()
-            .BeTrue($"{format}/{method}/{level} extract");
+        (await extractor.ExtractEntryAsync(entriesResult.Value[0], output)).IsSuccess.Should().BeTrue($"{format}/{method}/{level} extract");
 
-        output
-            .ToArray()
-            .Should()
-            .BeEquivalentTo(
-                CompressibleContent,
-                $"{format}/{method}/{level} content should round-trip byte-for-byte"
-            );
+        output.ToArray().Should().BeEquivalentTo(CompressibleContent, $"{format}/{method}/{level} content should round-trip byte-for-byte");
     }
 
     /// <summary>
@@ -183,13 +120,7 @@ public sealed class CompressionParameterMatrixTests
     public async Task SevenZip_CopyMethod_ProducesUncompressedArchive()
     {
         using var archive = new MemoryStream();
-        using (
-            var compressor = new SevenZipCompressor(
-                ArchiveFormat.SevenZip,
-                CompressionParameters.Store,
-                NullLogger<SevenZipCompressor>.Instance
-            )
-        )
+        using (var compressor = new SevenZipCompressor(ArchiveFormat.SevenZip, CompressionParameters.Store, NullLogger<SevenZipCompressor>.Instance))
         {
             var entries = new[] { ("data.bin", (Stream)new MemoryStream(CompressibleContent)) };
             (await compressor.CompressAsync(entries, archive)).IsSuccess.Should().BeTrue();
@@ -239,33 +170,18 @@ public sealed class CompressionParameterMatrixTests
         await AssertRoundTripsAsync(ArchiveFormat.SevenZip, CompressionParameters.MaximumLzma2);
     }
 
-    private static async Task AssertRoundTripsAsync(
-        ArchiveFormat format,
-        CompressionParameters parameters
-    )
+    private static async Task AssertRoundTripsAsync(ArchiveFormat format, CompressionParameters parameters)
     {
         using var archive = new MemoryStream();
-        using (
-            var compressor = new SevenZipCompressor(
-                format,
-                parameters,
-                NullLogger<SevenZipCompressor>.Instance
-            )
-        )
+        using (var compressor = new SevenZipCompressor(format, parameters, NullLogger<SevenZipCompressor>.Instance))
         {
             var entries = new[] { ("payload.bin", (Stream)new MemoryStream(CompressibleContent)) };
             var result = await compressor.CompressAsync(entries, archive);
-            result
-                .IsSuccess.Should()
-                .BeTrue($"compression failed: {string.Join("; ", result.Errors)}");
+            result.IsSuccess.Should().BeTrue($"compression failed: {string.Join("; ", result.Errors)}");
         }
 
         archive.Position = 0;
-        using var extractor = new SevenZipExtractor(
-            archive,
-            format,
-            NullLogger<SevenZipExtractor>.Instance
-        );
+        using var extractor = new SevenZipExtractor(archive, format, NullLogger<SevenZipExtractor>.Instance);
 
         (await extractor.OpenAsync()).IsSuccess.Should().BeTrue("open");
         var entriesResult = await extractor.ListEntriesAsync();
@@ -273,9 +189,7 @@ public sealed class CompressionParameterMatrixTests
         entriesResult.Value.Should().HaveCount(1);
 
         using var output = new MemoryStream();
-        (await extractor.ExtractEntryAsync(entriesResult.Value[0], output))
-            .IsSuccess.Should()
-            .BeTrue("extract");
+        (await extractor.ExtractEntryAsync(entriesResult.Value[0], output)).IsSuccess.Should().BeTrue("extract");
 
         output.ToArray().Should().BeEquivalentTo(CompressibleContent, "content should round-trip");
     }

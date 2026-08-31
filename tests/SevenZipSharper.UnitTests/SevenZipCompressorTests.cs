@@ -22,19 +22,13 @@ public sealed class SevenZipCompressorTests
     )
     {
         archive ??= new FakeOutArchive();
-        return new SevenZipCompressor(
-            format,
-            parameters ?? CompressionParameters.Default,
-            archive,
-            NullLogger<SevenZipCompressor>.Instance
-        );
+        return new SevenZipCompressor(format, parameters ?? CompressionParameters.Default, archive, NullLogger<SevenZipCompressor>.Instance);
     }
 
     private static readonly byte[] _sampleContent = { 1, 2, 3 };
     private static readonly string[] _singleFilePath = { "anything" };
 
-    private static (string EntryPath, Stream Data)[] OneEntry() =>
-        new[] { ("file.txt", (Stream)new MemoryStream(_sampleContent)) };
+    private static (string EntryPath, Stream Data)[] OneEntry() => new[] { ("file.txt", (Stream)new MemoryStream(_sampleContent)) };
 
     [Test]
     public async Task CompressAsync_CallsUpdateItems_WithCorrectCount()
@@ -87,11 +81,7 @@ public sealed class SevenZipCompressorTests
     [Test]
     public async Task CompressAsync_EncryptHeadersOnZip_ReturnsFailure()
     {
-        var parameters = CompressionParameters.Default with
-        {
-            EncryptionPassword = "secret",
-            EncryptHeaders = true,
-        };
+        var parameters = CompressionParameters.Default with { EncryptionPassword = "secret", EncryptHeaders = true };
         using var compressor = CreateCompressor(parameters: parameters, format: ArchiveFormat.Zip);
 
         var result = await compressor.CompressAsync(OneEntry(), new MemoryStream());
@@ -134,9 +124,7 @@ public sealed class SevenZipCompressorTests
         var output = new MemoryStream();
 
         await FluentActions
-            .Awaiting(() =>
-                compressor.CompressAsync(OneEntry(), output, cancellationToken: cts.Token)
-            )
+            .Awaiting(() => compressor.CompressAsync(OneEntry(), output, cancellationToken: cts.Token))
             .Should()
             .ThrowAsync<System.OperationCanceledException>();
     }
@@ -159,15 +147,9 @@ public sealed class SevenZipCompressorTests
     [TestCase(ArchiveFormat.GZip)]
     [TestCase(ArchiveFormat.BZip2)]
     [TestCase(ArchiveFormat.Xz)]
-    public async Task CompressAsync_EncryptHeadersOnNonSevenZipFormat_ReturnsFailure(
-        ArchiveFormat format
-    )
+    public async Task CompressAsync_EncryptHeadersOnNonSevenZipFormat_ReturnsFailure(ArchiveFormat format)
     {
-        var parameters = CompressionParameters.Default with
-        {
-            EncryptionPassword = "secret",
-            EncryptHeaders = true,
-        };
+        var parameters = CompressionParameters.Default with { EncryptionPassword = "secret", EncryptHeaders = true };
         using var compressor = CreateCompressor(parameters: parameters, format: format);
 
         var result = await compressor.CompressAsync(OneEntry(), new MemoryStream());
@@ -215,10 +197,7 @@ public sealed class SevenZipCompressorTests
         var compressor = CreateCompressor();
         compressor.Dispose();
 
-        await FluentActions
-            .Awaiting(() => compressor.CompressAsync(OneEntry(), new MemoryStream()))
-            .Should()
-            .ThrowAsync<System.ObjectDisposedException>();
+        await FluentActions.Awaiting(() => compressor.CompressAsync(OneEntry(), new MemoryStream())).Should().ThrowAsync<System.ObjectDisposedException>();
     }
 
     [Test]
@@ -228,13 +207,7 @@ public sealed class SevenZipCompressorTests
         compressor.Dispose();
 
         await FluentActions
-            .Awaiting(() =>
-                compressor.CompressFilesAsync(
-                    _singleFilePath,
-                    Path.GetTempPath(),
-                    new MemoryStream()
-                )
-            )
+            .Awaiting(() => compressor.CompressFilesAsync(_singleFilePath, Path.GetTempPath(), new MemoryStream()))
             .Should()
             .ThrowAsync<System.ObjectDisposedException>();
     }
@@ -246,9 +219,7 @@ public sealed class SevenZipCompressorTests
         compressor.Dispose();
 
         await FluentActions
-            .Awaiting(() =>
-                compressor.CompressMultiVolumeAsync(OneEntry(), _ => new MemoryStream(), 1024)
-            )
+            .Awaiting(() => compressor.CompressMultiVolumeAsync(OneEntry(), _ => new MemoryStream(), 1024))
             .Should()
             .ThrowAsync<System.ObjectDisposedException>();
     }
@@ -278,11 +249,7 @@ internal sealed partial class FakeOutArchive : IOutArchive
 
     public uint LastCount { get; private set; }
 
-    public int UpdateItems(
-        IOutStream outStream,
-        uint numItems,
-        IArchiveUpdateCallback updateCallback
-    )
+    public int UpdateItems(IOutStream outStream, uint numItems, IArchiveUpdateCallback updateCallback)
     {
         LastCount = numItems;
         return _hResult;

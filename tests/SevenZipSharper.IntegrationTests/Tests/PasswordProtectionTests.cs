@@ -25,13 +25,9 @@ public sealed class PasswordProtectionTests
     private static byte[] LoadFixture()
     {
         var assembly = Assembly.GetExecutingAssembly();
-        const string resourceName =
-            "SevenZipSharper.IntegrationTests.Fixtures.password-protected.7z";
+        const string resourceName = "SevenZipSharper.IntegrationTests.Fixtures.password-protected.7z";
         using var stream =
-            assembly.GetManifestResourceStream(resourceName)
-            ?? throw new InvalidOperationException(
-                $"Embedded resource '{resourceName}' not found."
-            );
+            assembly.GetManifestResourceStream(resourceName) ?? throw new InvalidOperationException($"Embedded resource '{resourceName}' not found.");
         using var ms = new MemoryStream();
         stream.CopyTo(ms);
         return ms.ToArray();
@@ -40,11 +36,7 @@ public sealed class PasswordProtectionTests
     [Test]
     public async Task OpenAsync_WithCorrectPassword_Succeeds()
     {
-        using var extractor = new SevenZipExtractor(
-            new MemoryStream(_archiveBytes.Value),
-            ArchiveFormat.SevenZip,
-            NullLogger<SevenZipExtractor>.Instance
-        );
+        using var extractor = new SevenZipExtractor(new MemoryStream(_archiveBytes.Value), ArchiveFormat.SevenZip, NullLogger<SevenZipExtractor>.Instance);
 
         var result = await extractor.OpenAsync(password: "TestPassword123");
 
@@ -54,11 +46,7 @@ public sealed class PasswordProtectionTests
     [Test]
     public async Task OpenAsync_WithWrongPassword_FailsOrExtractFails()
     {
-        using var extractor = new SevenZipExtractor(
-            new MemoryStream(_archiveBytes.Value),
-            ArchiveFormat.SevenZip,
-            NullLogger<SevenZipExtractor>.Instance
-        );
+        using var extractor = new SevenZipExtractor(new MemoryStream(_archiveBytes.Value), ArchiveFormat.SevenZip, NullLogger<SevenZipExtractor>.Instance);
 
         // 7-Zip may succeed at Open with a wrong password (metadata is not encrypted by default)
         // but extraction will fail with DataError / CrcError.
@@ -70,19 +58,13 @@ public sealed class PasswordProtectionTests
         var entries = (await extractor.ListEntriesAsync()).Value;
         var extractResult = await extractor.ExtractEntryAsync(entries[0], output);
 
-        extractResult
-            .IsFailed.Should()
-            .BeTrue("extraction with wrong password should produce a CRC / data error");
+        extractResult.IsFailed.Should().BeTrue("extraction with wrong password should produce a CRC / data error");
     }
 
     [Test]
     public async Task ExtractAsync_WithCorrectPassword_ContentIsReadable()
     {
-        using var extractor = new SevenZipExtractor(
-            new MemoryStream(_archiveBytes.Value),
-            ArchiveFormat.SevenZip,
-            NullLogger<SevenZipExtractor>.Instance
-        );
+        using var extractor = new SevenZipExtractor(new MemoryStream(_archiveBytes.Value), ArchiveFormat.SevenZip, NullLogger<SevenZipExtractor>.Instance);
         await extractor.OpenAsync(password: "TestPassword123");
         var entries = (await extractor.ListEntriesAsync()).Value;
         using var output = new MemoryStream();
@@ -100,38 +82,21 @@ public sealed class PasswordProtectionTests
 [TestOf(typeof(SevenZipCompressor))]
 public sealed class PasswordProtectedCompressionTests
 {
-    private static readonly byte[] Content = Encoding.UTF8.GetBytes(
-        "Password-protected test content — SevenZipSharper"
-    );
+    private static readonly byte[] Content = Encoding.UTF8.GetBytes("Password-protected test content — SevenZipSharper");
     private const string Password = "TestPassword123!";
 
-    private static CompressionParameters WithPassword(
-        string password,
-        bool encryptHeaders = false
-    ) =>
+    private static CompressionParameters WithPassword(string password, bool encryptHeaders = false) =>
         CompressionParameters.Default with
         {
             EncryptionPassword = password,
             EncryptHeaders = encryptHeaders,
         };
 
-    private static async Task<byte[]> CompressWithPasswordAsync(
-        ArchiveFormat format,
-        string password,
-        bool encryptHeaders = false
-    ) =>
-        await IntegrationTestHelpers.BuildArchiveAsync(
-            format,
-            WithPassword(password, encryptHeaders),
-            ("content.txt", Content)
-        );
+    private static async Task<byte[]> CompressWithPasswordAsync(ArchiveFormat format, string password, bool encryptHeaders = false) =>
+        await IntegrationTestHelpers.BuildArchiveAsync(format, WithPassword(password, encryptHeaders), ("content.txt", Content));
 
     private static SevenZipExtractor OpenExtractor(byte[] archiveBytes, ArchiveFormat format) =>
-        new SevenZipExtractor(
-            new MemoryStream(archiveBytes),
-            format,
-            NullLogger<SevenZipExtractor>.Instance
-        );
+        new SevenZipExtractor(new MemoryStream(archiveBytes), format, NullLogger<SevenZipExtractor>.Instance);
 
     // ── Positive round-trips ─────────────────────────────────────────────────
 
@@ -151,9 +116,7 @@ public sealed class PasswordProtectedCompressionTests
 
     [TestCase(ArchiveFormat.SevenZip)]
     [TestCase(ArchiveFormat.Zip)]
-    public async Task CompressAsync_WithPassword_ExtractWithWrongPassword_FailsAcrossFormats(
-        ArchiveFormat format
-    )
+    public async Task CompressAsync_WithPassword_ExtractWithWrongPassword_FailsAcrossFormats(ArchiveFormat format)
     {
         var archiveBytes = await CompressWithPasswordAsync(format, Password);
 
@@ -170,9 +133,7 @@ public sealed class PasswordProtectedCompressionTests
 
     [TestCase(ArchiveFormat.SevenZip)]
     [TestCase(ArchiveFormat.Zip)]
-    public async Task CompressAsync_WithPassword_ResultingEntriesReportIsEncrypted(
-        ArchiveFormat format
-    )
+    public async Task CompressAsync_WithPassword_ResultingEntriesReportIsEncrypted(ArchiveFormat format)
     {
         var archiveBytes = await CompressWithPasswordAsync(format, Password);
 
@@ -181,31 +142,21 @@ public sealed class PasswordProtectedCompressionTests
         var entries = (await extractor.ListEntriesAsync()).Value;
 
         entries.Should().NotBeEmpty();
-        entries
-            .All(e => e.IsEncrypted)
-            .Should()
-            .BeTrue("every compressed entry must report IsEncrypted");
+        entries.All(e => e.IsEncrypted).Should().BeTrue("every compressed entry must report IsEncrypted");
     }
 
     [TestCase(ArchiveFormat.SevenZip)]
     [TestCase(ArchiveFormat.Zip)]
     public async Task CompressAsync_WithoutPassword_ProducesUnencryptedArchive(ArchiveFormat format)
     {
-        var archiveBytes = await IntegrationTestHelpers.BuildArchiveAsync(
-            format,
-            CompressionParameters.Default,
-            ("content.txt", Content)
-        );
+        var archiveBytes = await IntegrationTestHelpers.BuildArchiveAsync(format, CompressionParameters.Default, ("content.txt", Content));
 
         using var extractor = OpenExtractor(archiveBytes, format);
         await extractor.OpenAsync();
         var entries = (await extractor.ListEntriesAsync()).Value;
 
         entries.Should().NotBeEmpty();
-        entries
-            .All(e => !e.IsEncrypted)
-            .Should()
-            .BeTrue("entries must not be encrypted without a password");
+        entries.All(e => !e.IsEncrypted).Should().BeTrue("entries must not be encrypted without a password");
     }
 
     [TestCase(ArchiveFormat.SevenZip)]
@@ -219,28 +170,14 @@ public sealed class PasswordProtectedCompressionTests
             var basePath = Path.GetDirectoryName(tempPath)!;
 
             using var archive = new MemoryStream();
-            using (
-                var compressor = new SevenZipCompressor(
-                    format,
-                    WithPassword(Password),
-                    NullLogger<SevenZipCompressor>.Instance
-                )
-            )
+            using (var compressor = new SevenZipCompressor(format, WithPassword(Password), NullLogger<SevenZipCompressor>.Instance))
             {
-                var result = await compressor.CompressFilesAsync(
-                    new[] { tempPath },
-                    basePath,
-                    archive
-                );
+                var result = await compressor.CompressFilesAsync(new[] { tempPath }, basePath, archive);
                 result.IsSuccess.Should().BeTrue();
             }
 
             archive.Position = 0;
-            using var extractor = new SevenZipExtractor(
-                archive,
-                format,
-                NullLogger<SevenZipExtractor>.Instance
-            );
+            using var extractor = new SevenZipExtractor(archive, format, NullLogger<SevenZipExtractor>.Instance);
             (await extractor.OpenAsync(password: Password)).IsSuccess.Should().BeTrue();
             var entries = (await extractor.ListEntriesAsync()).Value;
             using var output = new MemoryStream();
@@ -267,29 +204,15 @@ public sealed class PasswordProtectedCompressionTests
             return ms;
         }
 
-        using (
-            var compressor = new SevenZipCompressor(
-                format,
-                WithPassword(Password),
-                NullLogger<SevenZipCompressor>.Instance
-            )
-        )
+        using (var compressor = new SevenZipCompressor(format, WithPassword(Password), NullLogger<SevenZipCompressor>.Instance))
         {
-            var result = await compressor.CompressMultiVolumeAsync(
-                entries,
-                VolumeFactory,
-                maxVolumeBytes: 10 * 1024 * 1024
-            );
+            var result = await compressor.CompressMultiVolumeAsync(entries, VolumeFactory, maxVolumeBytes: 10 * 1024 * 1024);
             result.IsSuccess.Should().BeTrue();
         }
 
         var archiveStream = volumeStreams[0];
         archiveStream.Position = 0;
-        using var extractor = new SevenZipExtractor(
-            archiveStream,
-            format,
-            NullLogger<SevenZipExtractor>.Instance
-        );
+        using var extractor = new SevenZipExtractor(archiveStream, format, NullLogger<SevenZipExtractor>.Instance);
         (await extractor.OpenAsync(password: Password)).IsSuccess.Should().BeTrue();
         var extracted = (await extractor.ListEntriesAsync()).Value;
         using var output = new MemoryStream();
@@ -302,20 +225,14 @@ public sealed class PasswordProtectedCompressionTests
     [Test]
     public async Task CompressAsync_SevenZip_WithEncryptHeaders_ListEntriesWithoutPassword_Fails()
     {
-        var archiveBytes = await CompressWithPasswordAsync(
-            ArchiveFormat.SevenZip,
-            Password,
-            encryptHeaders: true
-        );
+        var archiveBytes = await CompressWithPasswordAsync(ArchiveFormat.SevenZip, Password, encryptHeaders: true);
 
         using var extractor = OpenExtractor(archiveBytes, ArchiveFormat.SevenZip);
         var openResult = await extractor.OpenAsync();
         if (openResult.IsSuccess)
         {
             var listResult = await extractor.ListEntriesAsync();
-            listResult
-                .IsFailed.Should()
-                .BeTrue("header-encrypted archive must not be listable without a password");
+            listResult.IsFailed.Should().BeTrue("header-encrypted archive must not be listable without a password");
         }
         // else: Open itself failed — also an acceptable outcome for header encryption
     }
@@ -323,11 +240,7 @@ public sealed class PasswordProtectedCompressionTests
     [Test]
     public async Task CompressAsync_SevenZip_WithEncryptHeaders_ListEntriesWithPassword_Succeeds()
     {
-        var archiveBytes = await CompressWithPasswordAsync(
-            ArchiveFormat.SevenZip,
-            Password,
-            encryptHeaders: true
-        );
+        var archiveBytes = await CompressWithPasswordAsync(ArchiveFormat.SevenZip, Password, encryptHeaders: true);
 
         using var extractor = OpenExtractor(archiveBytes, ArchiveFormat.SevenZip);
         (await extractor.OpenAsync(password: Password)).IsSuccess.Should().BeTrue();
@@ -343,21 +256,12 @@ public sealed class PasswordProtectedCompressionTests
     [TestCase(ArchiveFormat.GZip)]
     [TestCase(ArchiveFormat.BZip2)]
     [TestCase(ArchiveFormat.Tar)]
-    public async Task CompressAsync_WithPassword_OnUnsupportedFormat_ReturnsFailure(
-        ArchiveFormat format
-    )
+    public async Task CompressAsync_WithPassword_OnUnsupportedFormat_ReturnsFailure(ArchiveFormat format)
     {
         var parameters = CompressionParameters.Default with { EncryptionPassword = Password };
-        using var compressor = new SevenZipCompressor(
-            format,
-            parameters,
-            NullLogger<SevenZipCompressor>.Instance
-        );
+        using var compressor = new SevenZipCompressor(format, parameters, NullLogger<SevenZipCompressor>.Instance);
 
-        var result = await compressor.CompressAsync(
-            new[] { ("content.txt", (Stream)new MemoryStream(Content)) },
-            new MemoryStream()
-        );
+        var result = await compressor.CompressAsync(new[] { ("content.txt", (Stream)new MemoryStream(Content)) }, new MemoryStream());
 
         result.IsFailed.Should().BeTrue();
         result.Errors.Should().Contain(e => e.Message.Contains("Encryption"));
@@ -367,25 +271,12 @@ public sealed class PasswordProtectedCompressionTests
     [TestCase(ArchiveFormat.GZip)]
     [TestCase(ArchiveFormat.BZip2)]
     [TestCase(ArchiveFormat.Tar)]
-    public async Task CompressAsync_WithEncryptHeaders_OnNonSevenZipFormat_ReturnsFailure(
-        ArchiveFormat format
-    )
+    public async Task CompressAsync_WithEncryptHeaders_OnNonSevenZipFormat_ReturnsFailure(ArchiveFormat format)
     {
-        var parameters = CompressionParameters.Default with
-        {
-            EncryptionPassword = Password,
-            EncryptHeaders = true,
-        };
-        using var compressor = new SevenZipCompressor(
-            format,
-            parameters,
-            NullLogger<SevenZipCompressor>.Instance
-        );
+        var parameters = CompressionParameters.Default with { EncryptionPassword = Password, EncryptHeaders = true };
+        using var compressor = new SevenZipCompressor(format, parameters, NullLogger<SevenZipCompressor>.Instance);
 
-        var result = await compressor.CompressAsync(
-            new[] { ("content.txt", (Stream)new MemoryStream(Content)) },
-            new MemoryStream()
-        );
+        var result = await compressor.CompressAsync(new[] { ("content.txt", (Stream)new MemoryStream(Content)) }, new MemoryStream());
 
         result.IsFailed.Should().BeTrue();
         result.Errors.Should().Contain(e => e.Message.Contains("EncryptHeaders"));
@@ -396,11 +287,7 @@ public sealed class PasswordProtectedCompressionTests
     [Test]
     public async Task AppendAsync_ToEncryptedHeadersArchive_WithMatchingPassword_Succeeds()
     {
-        var archiveBytes = await CompressWithPasswordAsync(
-            ArchiveFormat.SevenZip,
-            Password,
-            encryptHeaders: true
-        );
+        var archiveBytes = await CompressWithPasswordAsync(ArchiveFormat.SevenZip, Password, encryptHeaders: true);
         var output = new MemoryStream();
 
         using var compressor = new SevenZipCompressor(
@@ -408,80 +295,42 @@ public sealed class PasswordProtectedCompressionTests
             WithPassword(Password, encryptHeaders: true),
             NullLogger<SevenZipCompressor>.Instance
         );
-        var result = await compressor.AppendAsync(
-            new MemoryStream(archiveBytes),
-            new[] { ("appended.txt", (Stream)new MemoryStream(Content)) },
-            output
-        );
+        var result = await compressor.AppendAsync(new MemoryStream(archiveBytes), new[] { ("appended.txt", (Stream)new MemoryStream(Content)) }, output);
 
-        result
-            .IsSuccess.Should()
-            .BeTrue(
-                "appending with the matching password to a header-encrypted archive must succeed"
-            );
+        result.IsSuccess.Should().BeTrue("appending with the matching password to a header-encrypted archive must succeed");
     }
 
     [Test]
     public async Task AppendAsync_ToEncryptedHeadersArchive_WithoutPassword_Fails()
     {
-        var archiveBytes = await CompressWithPasswordAsync(
-            ArchiveFormat.SevenZip,
-            Password,
-            encryptHeaders: true
-        );
+        var archiveBytes = await CompressWithPasswordAsync(ArchiveFormat.SevenZip, Password, encryptHeaders: true);
 
-        using var compressor = new SevenZipCompressor(
-            ArchiveFormat.SevenZip,
-            CompressionParameters.Default,
-            NullLogger<SevenZipCompressor>.Instance
-        );
+        using var compressor = new SevenZipCompressor(ArchiveFormat.SevenZip, CompressionParameters.Default, NullLogger<SevenZipCompressor>.Instance);
         var result = await compressor.AppendAsync(
             new MemoryStream(archiveBytes),
             new[] { ("appended.txt", (Stream)new MemoryStream(Content)) },
             new MemoryStream()
         );
 
-        result
-            .IsFailed.Should()
-            .BeTrue("opening a header-encrypted archive without the password must fail");
+        result.IsFailed.Should().BeTrue("opening a header-encrypted archive without the password must fail");
     }
 
     [Test]
     public async Task AppendAsync_NewEntriesToContentEncryptedArchive_WithMatchingPassword_RoundTrips()
     {
         var existingContent = new byte[] { 1, 2, 3, 4, 5 };
-        var archiveBytes = await IntegrationTestHelpers.BuildArchiveAsync(
-            ArchiveFormat.SevenZip,
-            WithPassword(Password),
-            ("existing.bin", existingContent)
-        );
+        var archiveBytes = await IntegrationTestHelpers.BuildArchiveAsync(ArchiveFormat.SevenZip, WithPassword(Password), ("existing.bin", existingContent));
         var output = new MemoryStream();
 
-        using (
-            var compressor = new SevenZipCompressor(
-                ArchiveFormat.SevenZip,
-                WithPassword(Password),
-                NullLogger<SevenZipCompressor>.Instance
-            )
-        )
+        using (var compressor = new SevenZipCompressor(ArchiveFormat.SevenZip, WithPassword(Password), NullLogger<SevenZipCompressor>.Instance))
         {
-            (
-                await compressor.AppendAsync(
-                    new MemoryStream(archiveBytes),
-                    new[] { ("appended.bin", (Stream)new MemoryStream(Content)) },
-                    output
-                )
-            )
+            (await compressor.AppendAsync(new MemoryStream(archiveBytes), new[] { ("appended.bin", (Stream)new MemoryStream(Content)) }, output))
                 .IsSuccess.Should()
                 .BeTrue();
         }
 
         output.Position = 0;
-        using var extractor = new SevenZipExtractor(
-            output,
-            ArchiveFormat.SevenZip,
-            NullLogger<SevenZipExtractor>.Instance
-        );
+        using var extractor = new SevenZipExtractor(output, ArchiveFormat.SevenZip, NullLogger<SevenZipExtractor>.Instance);
         (await extractor.OpenAsync(password: Password)).IsSuccess.Should().BeTrue();
         var entries = (await extractor.ListEntriesAsync()).Value;
         entries.Should().HaveCount(2);
@@ -497,9 +346,7 @@ public sealed class PasswordProtectedCompressionTests
         var archiveBytes = await CompressWithPasswordAsync(ArchiveFormat.Zip, Password);
 
         // WinZip AES extra field header ID 0x9901, little-endian bytes [0x01, 0x99]
-        ContainsAes256ExtraField(archiveBytes)
-            .Should()
-            .BeTrue("Zip encryption must use AES-256 (extra field 0x9901), not weak ZipCrypto");
+        ContainsAes256ExtraField(archiveBytes).Should().BeTrue("Zip encryption must use AES-256 (extra field 0x9901), not weak ZipCrypto");
     }
 
     // Parses the local file header extra field of the first Zip entry and looks for the
@@ -513,12 +360,7 @@ public sealed class PasswordProtectedCompressionTests
             return false;
 
         // Verify local file header signature (PK\x03\x04).
-        if (
-            zipBytes[0] != 0x50
-            || zipBytes[1] != 0x4B
-            || zipBytes[2] != 0x03
-            || zipBytes[3] != 0x04
-        )
+        if (zipBytes[0] != 0x50 || zipBytes[1] != 0x4B || zipBytes[2] != 0x03 || zipBytes[3] != 0x04)
         {
             return false;
         }

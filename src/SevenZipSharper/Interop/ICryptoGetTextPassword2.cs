@@ -8,8 +8,5 @@ namespace SevenZipSharper.Interop;
 internal partial interface ICryptoGetTextPassword2
 {
     [PreserveSig]
-    int CryptoGetTextPassword2(
-        out int passwordIsDefined,
-        [MarshalUsing(typeof(SevenZipBStrMarshaller))] out string password
-    );
+    int CryptoGetTextPassword2(out int passwordIsDefined, [MarshalUsing(typeof(SevenZipBStrMarshaller))] out string password);
 }

@@ -9,10 +9,7 @@ internal static class PropVariantMarshaller
     // platform's native stride, plus a freer to release any unmanaged allocation.
     internal static (nint Ptr, Action Free) AllocValuesBuffer(PropVariant[] values)
     {
-        var stride = PropVariantLayout.GetPropVariantStride(
-            OperatingSystem.IsWindows(),
-            IntPtr.Size
-        );
+        var stride = PropVariantLayout.GetPropVariantStride(OperatingSystem.IsWindows(), IntPtr.Size);
         return PackAtStride(values, stride);
     }
 

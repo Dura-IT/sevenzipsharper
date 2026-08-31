@@ -18,11 +18,7 @@ internal static class NativeLibraryLoader
             NativeLibrary.SetDllImportResolver(typeof(NativeLibraryLoader).Assembly, Resolve);
     }
 
-    private static IntPtr Resolve(
-        string libraryName,
-        Assembly assembly,
-        DllImportSearchPath? searchPath
-    )
+    private static IntPtr Resolve(string libraryName, Assembly assembly, DllImportSearchPath? searchPath)
     {
         if (libraryName != LibraryName)
             return IntPtr.Zero;
@@ -43,8 +39,7 @@ internal static class NativeLibraryLoader
         if (!File.Exists(path))
         {
             throw new DllNotFoundException(
-                $"7-Zip native library not found at '{path}'. "
-                    + $"Ensure the SevenZipSharper NuGet package includes native assets for RID '{rid}'."
+                $"7-Zip native library not found at '{path}'. " + $"Ensure the SevenZipSharper NuGet package includes native assets for RID '{rid}'."
             );
         }
 

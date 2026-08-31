@@ -150,16 +150,12 @@ public record CompressionParameters
 
             if (!IsPowerOfTwo(dict))
             {
-                return Result.Fail(
-                    $"DictionarySize {dict} is not a power of 2. LZMA and LZMA2 require a power-of-2 dictionary size."
-                );
+                return Result.Fail($"DictionarySize {dict} is not a power of 2. LZMA and LZMA2 require a power-of-2 dictionary size.");
             }
 
             if (dict < minLzma || dict > maxLzma)
             {
-                return Result.Fail(
-                    $"DictionarySize {dict} is out of range for LZMA/LZMA2. Valid range: 1 KB – 1536 MB."
-                );
+                return Result.Fail($"DictionarySize {dict} is out of range for LZMA/LZMA2. Valid range: 1 KB – 1536 MB.");
             }
         }
 
@@ -171,9 +167,7 @@ public record CompressionParameters
 
             if (dict < minBzip2 || dict > maxBzip2 || dict % stepBzip2 != 0)
             {
-                return Result.Fail(
-                    $"DictionarySize {dict} is invalid for BZip2. Valid values: multiples of 100 KB between 100 KB and 900 KB."
-                );
+                return Result.Fail($"DictionarySize {dict} is invalid for BZip2. Valid values: multiples of 100 KB between 100 KB and 900 KB.");
             }
         }
 
@@ -187,9 +181,7 @@ public record CompressionParameters
 
         if (wordSize < minWordSize || wordSize > maxWordSize)
         {
-            return Result.Fail(
-                $"WordSize {wordSize} is out of range for LZMA/LZMA2. Valid range: 5–273."
-            );
+            return Result.Fail($"WordSize {wordSize} is out of range for LZMA/LZMA2. Valid range: 5–273.");
         }
 
         return Result.Ok();

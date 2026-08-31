@@ -76,11 +76,7 @@ internal sealed partial class ExtractionHandler : IArchiveExtractCallback, IPass
         return HResult.Ok;
     }
 
-    int IArchiveExtractCallback.GetStream(
-        uint index,
-        out ISequentialOutStream? outStream,
-        AskMode askExtractMode
-    )
+    int IArchiveExtractCallback.GetStream(uint index, out ISequentialOutStream? outStream, AskMode askExtractMode)
     {
         _activeEntryOwner?.Dispose();
         _activeEntryOwner = null;

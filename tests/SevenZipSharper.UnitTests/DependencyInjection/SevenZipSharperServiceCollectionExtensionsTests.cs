@@ -21,8 +21,7 @@ public sealed class SevenZipSharperServiceCollectionExtensionsTests
         services.Verify(s =>
             s.Add(
                 It.Is<ServiceDescriptor>(d =>
-                    d.ServiceType == typeof(Func<Stream, ArchiveFormat, SevenZipExtractor>)
-                    && d.Lifetime == ServiceLifetime.Singleton
+                    d.ServiceType == typeof(Func<Stream, ArchiveFormat, SevenZipExtractor>) && d.Lifetime == ServiceLifetime.Singleton
                 )
             )
         );
@@ -38,9 +37,7 @@ public sealed class SevenZipSharperServiceCollectionExtensionsTests
         services.Verify(s =>
             s.Add(
                 It.Is<ServiceDescriptor>(d =>
-                    d.ServiceType
-                        == typeof(Func<ArchiveFormat, CompressionParameters, SevenZipCompressor>)
-                    && d.Lifetime == ServiceLifetime.Singleton
+                    d.ServiceType == typeof(Func<ArchiveFormat, CompressionParameters, SevenZipCompressor>) && d.Lifetime == ServiceLifetime.Singleton
                 )
             )
         );
@@ -90,10 +87,7 @@ public sealed class SevenZipSharperServiceCollectionExtensionsTests
             .Setup(s => s.Add(It.IsAny<ServiceDescriptor>()))
             .Callback<ServiceDescriptor>(d =>
             {
-                if (
-                    d.ServiceType
-                    == typeof(Func<ArchiveFormat, CompressionParameters, SevenZipCompressor>)
-                )
+                if (d.ServiceType == typeof(Func<ArchiveFormat, CompressionParameters, SevenZipCompressor>))
                 {
                     captured = d;
                 }
@@ -102,9 +96,6 @@ public sealed class SevenZipSharperServiceCollectionExtensionsTests
 
         var factory = captured!.ImplementationFactory!(new Mock<IServiceProvider>().Object);
 
-        factory
-            .Should()
-            .NotBeNull()
-            .And.BeOfType<Func<ArchiveFormat, CompressionParameters, SevenZipCompressor>>();
+        factory.Should().NotBeNull().And.BeOfType<Func<ArchiveFormat, CompressionParameters, SevenZipCompressor>>();
     }
 }

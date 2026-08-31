@@ -37,8 +37,7 @@ internal sealed partial class OutStreamAdapter : SeekableStreamAdapterBase, IOut
         }
     }
 
-    int IOutStream.Seek(long offset, uint seekOrigin, nint newPosition) =>
-        SeekStream(offset, seekOrigin, newPosition);
+    int IOutStream.Seek(long offset, uint seekOrigin, nint newPosition) => SeekStream(offset, seekOrigin, newPosition);
 
     [SuppressMessage(
         "Design",

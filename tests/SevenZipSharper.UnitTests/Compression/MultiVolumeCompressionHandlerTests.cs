@@ -15,16 +15,10 @@ namespace SevenZipSharper.UnitTests.Compression;
 [TestOf(typeof(MultiVolumeCompressionHandler))]
 public sealed class MultiVolumeCompressionHandlerTests
 {
-    private static MultiVolumeCompressionHandler CreateHandler(
-        Func<int, Stream>? factory = null,
-        ulong maxVolumeBytes = 1024 * 1024
-    )
+    private static MultiVolumeCompressionHandler CreateHandler(Func<int, Stream>? factory = null, ulong maxVolumeBytes = 1024 * 1024)
     {
         factory ??= _ => new MemoryStream();
-        IReadOnlyList<(string, Stream)> entries = new[]
-        {
-            ("a.txt", (Stream)new MemoryStream(new byte[] { 1 })),
-        };
+        IReadOnlyList<(string, Stream)> entries = new[] { ("a.txt", (Stream)new MemoryStream(new byte[] { 1 })) };
         return new MultiVolumeCompressionHandler(
             entries,
             progress: null,
@@ -124,18 +118,8 @@ public sealed class MultiVolumeCompressionHandlerTests
     [Test]
     public void CryptoGetTextPassword2_WithPasswordSet_ReturnsPasswordWithIsDefinedOne()
     {
-        IReadOnlyList<(string, Stream)> entries = new[]
-        {
-            ("a.txt", (Stream)new MemoryStream(new byte[] { 1 })),
-        };
-        var handler = new MultiVolumeCompressionHandler(
-            entries,
-            null,
-            _ => new MemoryStream(),
-            1024,
-            CancellationToken.None,
-            password: "hunter2"
-        );
+        IReadOnlyList<(string, Stream)> entries = new[] { ("a.txt", (Stream)new MemoryStream(new byte[] { 1 })) };
+        var handler = new MultiVolumeCompressionHandler(entries, null, _ => new MemoryStream(), 1024, CancellationToken.None, password: "hunter2");
         ICryptoGetTextPassword2 crypto = handler;
 
         var hr = crypto.CryptoGetTextPassword2(out var isDefined, out var password);
@@ -164,13 +148,7 @@ public sealed class MultiVolumeCompressionHandlerTests
         using var cts = new CancellationTokenSource();
         cts.Cancel();
         IReadOnlyList<(string, Stream)> entries = new[] { ("a.txt", (Stream)new MemoryStream()) };
-        var handler = new MultiVolumeCompressionHandler(
-            entries,
-            null,
-            _ => new MemoryStream(),
-            1024,
-            cts.Token
-        );
+        var handler = new MultiVolumeCompressionHandler(entries, null, _ => new MemoryStream(), 1024, cts.Token);
         IArchiveUpdateCallback cb = handler;
 
         cb.SetCompleted(nint.Zero).Should().Be(HResult.Abort);

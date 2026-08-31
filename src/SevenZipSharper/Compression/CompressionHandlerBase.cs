@@ -11,9 +11,7 @@ using SevenZipSharper.Interop.Streams;
 namespace SevenZipSharper.Compression;
 
 [GeneratedComClass]
-internal abstract partial class CompressionHandlerBase
-    : IArchiveUpdateCallback,
-        ICryptoGetTextPassword2
+internal abstract partial class CompressionHandlerBase : IArchiveUpdateCallback, ICryptoGetTextPassword2
 {
     private readonly IReadOnlyList<(string EntryPath, Stream Data)> _entries;
     private readonly IProgress<CompressionProgress>? _progress;
@@ -43,18 +41,9 @@ internal abstract partial class CompressionHandlerBase
         _password = password;
     }
 
-    protected virtual int OnGetExistingUpdateItemInfo(
-        uint index,
-        nint newData,
-        nint newProperties,
-        nint indexInArchive
-    ) => HResult.Ok;
+    protected virtual int OnGetExistingUpdateItemInfo(uint index, nint newData, nint newProperties, nint indexInArchive) => HResult.Ok;
 
-    protected virtual int OnGetExistingProperty(
-        uint index,
-        ItemPropId propId,
-        ref PropVariant value
-    ) => HResult.Ok;
+    protected virtual int OnGetExistingProperty(uint index, ItemPropId propId, ref PropVariant value) => HResult.Ok;
 
     protected virtual int OnGetExistingStream(uint index, out ISequentialInStream? inStream)
     {
@@ -78,10 +67,7 @@ internal abstract partial class CompressionHandlerBase
 
         var bytesProcessed = (ulong)Marshal.ReadInt64(completeValue);
         var newIndex = _completedEntries - (int)_existingCount;
-        var entryPath =
-            newIndex >= 0 && newIndex < _entries.Count
-                ? _entries[newIndex].EntryPath
-                : string.Empty;
+        var entryPath = newIndex >= 0 && newIndex < _entries.Count ? _entries[newIndex].EntryPath : string.Empty;
 
         _progress?.Report(
             new CompressionProgress
@@ -95,12 +81,7 @@ internal abstract partial class CompressionHandlerBase
         return HResult.Ok;
     }
 
-    int IArchiveUpdateCallback.GetUpdateItemInfo(
-        uint index,
-        nint newData,
-        nint newProperties,
-        nint indexInArchive
-    )
+    int IArchiveUpdateCallback.GetUpdateItemInfo(uint index, nint newData, nint newProperties, nint indexInArchive)
     {
         if (index < _existingCount)
             return OnGetExistingUpdateItemInfo(index, newData, newProperties, indexInArchive);
@@ -130,9 +111,7 @@ internal abstract partial class CompressionHandlerBase
         value = propId switch
         {
             ItemPropId.Path => PropVariant.FromString(entryPath),
-            ItemPropId.Size => data.CanSeek
-                ? PropVariant.FromUInt64((ulong)data.Length)
-                : new PropVariant(),
+            ItemPropId.Size => data.CanSeek ? PropVariant.FromUInt64((ulong)data.Length) : new PropVariant(),
             ItemPropId.IsDirectory => PropVariant.FromBoolean(false),
             ItemPropId.IsAnti => PropVariant.FromBoolean(false),
             _ => new PropVariant(),
@@ -171,10 +150,7 @@ internal abstract partial class CompressionHandlerBase
         return HResult.Ok;
     }
 
-    int ICryptoGetTextPassword2.CryptoGetTextPassword2(
-        out int passwordIsDefined,
-        out string password
-    )
+    int ICryptoGetTextPassword2.CryptoGetTextPassword2(out int passwordIsDefined, out string password)
     {
         if (_password is null)
         {

@@ -11,9 +11,7 @@ namespace SevenZipSharper.IntegrationTests;
 [TestOf(typeof(SevenZipCompressor))]
 public sealed class FormatCoverageTests
 {
-    private static readonly byte[] Content = System.Text.Encoding.UTF8.GetBytes(
-        "Format coverage test content"
-    );
+    private static readonly byte[] Content = System.Text.Encoding.UTF8.GetBytes("Format coverage test content");
 
     [TestCase(ArchiveFormat.SevenZip)]
     [TestCase(ArchiveFormat.Zip)]
@@ -22,13 +20,7 @@ public sealed class FormatCoverageTests
         var entries = new (string, Stream)[] { ("file.txt", new MemoryStream(Content)) };
 
         using var archive = new MemoryStream();
-        using (
-            var compressor = new SevenZipCompressor(
-                format,
-                CompressionParameters.Default,
-                NullLogger<SevenZipCompressor>.Instance
-            )
-        )
+        using (var compressor = new SevenZipCompressor(format, CompressionParameters.Default, NullLogger<SevenZipCompressor>.Instance))
         {
             var compressResult = await compressor.CompressAsync(entries, archive);
             compressResult.IsSuccess.Should().BeTrue($"compression to {format} should succeed");
@@ -37,11 +29,7 @@ public sealed class FormatCoverageTests
         archive.Position = 0;
         archive.Length.Should().BeGreaterThan(0, $"{format} archive should not be empty");
 
-        using var extractor = new SevenZipExtractor(
-            archive,
-            format,
-            NullLogger<SevenZipExtractor>.Instance
-        );
+        using var extractor = new SevenZipExtractor(archive, format, NullLogger<SevenZipExtractor>.Instance);
         var openResult = await extractor.OpenAsync();
         openResult.IsSuccess.Should().BeTrue($"opening {format} archive should succeed");
 
@@ -57,9 +45,7 @@ public sealed class FormatCoverageTests
 
     [TestCase(ArchiveFormat.SevenZip)]
     [TestCase(ArchiveFormat.Zip)]
-    public async Task ListEntriesAsync_ArchiveWithMultipleEntries_ReturnsCorrectMetadata(
-        ArchiveFormat format
-    )
+    public async Task ListEntriesAsync_ArchiveWithMultipleEntries_ReturnsCorrectMetadata(ArchiveFormat format)
     {
         var entries = new (string, Stream)[]
         {
@@ -68,23 +54,13 @@ public sealed class FormatCoverageTests
         };
 
         using var archive = new MemoryStream();
-        using (
-            var compressor = new SevenZipCompressor(
-                format,
-                CompressionParameters.Default,
-                NullLogger<SevenZipCompressor>.Instance
-            )
-        )
+        using (var compressor = new SevenZipCompressor(format, CompressionParameters.Default, NullLogger<SevenZipCompressor>.Instance))
         {
             await compressor.CompressAsync(entries, archive);
         }
 
         archive.Position = 0;
-        using var extractor = new SevenZipExtractor(
-            archive,
-            format,
-            NullLogger<SevenZipExtractor>.Instance
-        );
+        using var extractor = new SevenZipExtractor(archive, format, NullLogger<SevenZipExtractor>.Instance);
         await extractor.OpenAsync();
 
         var result = await extractor.ListEntriesAsync();

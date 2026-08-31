@@ -12,11 +12,7 @@ public sealed class PropVariantMarshallerTests
     [Test]
     public void PackAtStride_ManagedStride_PreservesEachValuesBytes()
     {
-        var values = new[]
-        {
-            PropVariant.FromUInt32(0x11223344u),
-            PropVariant.FromUInt32(0x55667788u),
-        };
+        var values = new[] { PropVariant.FromUInt32(0x11223344u), PropVariant.FromUInt32(0x55667788u) };
         var expected = ExpectedBytes(values);
 
         var (ptr, free) = PropVariantMarshaller.PackAtStride(values, PropVariantLayout.ManagedSize);
@@ -26,10 +22,7 @@ public sealed class PropVariantMarshallerTests
             {
                 for (var b = 0; b < PropVariantLayout.ManagedSize; b++)
                 {
-                    Marshal
-                        .ReadByte(ptr + (i * PropVariantLayout.ManagedSize) + b)
-                        .Should()
-                        .Be(expected[i][b]);
+                    Marshal.ReadByte(ptr + (i * PropVariantLayout.ManagedSize) + b).Should().Be(expected[i][b]);
                 }
             }
         }
@@ -46,11 +39,7 @@ public sealed class PropVariantMarshallerTests
         // PropVariant and whose trailing bytes must be zero. This path never runs on the Linux
         // coverage host at runtime, so packing it at an explicit stride is the only way to cover it.
         const int stride = 24;
-        var values = new[]
-        {
-            PropVariant.FromUInt32(0x11223344u),
-            PropVariant.FromUInt32(0x55667788u),
-        };
+        var values = new[] { PropVariant.FromUInt32(0x11223344u), PropVariant.FromUInt32(0x55667788u) };
         var expected = ExpectedBytes(values);
 
         var (ptr, free) = PropVariantMarshaller.PackAtStride(values, stride);

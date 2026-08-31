@@ -29,10 +29,7 @@ public sealed class ArchiveFormatRegistryTests
     [Test]
     public void GetClassId_KnownFormat_ReturnsMatchingClassId()
     {
-        ArchiveFormatRegistry
-            .GetClassId(ArchiveFormat.SevenZip)
-            .Should()
-            .Be(ArchiveClassIds.SevenZip);
+        ArchiveFormatRegistry.GetClassId(ArchiveFormat.SevenZip).Should().Be(ArchiveClassIds.SevenZip);
         ArchiveFormatRegistry.GetClassId(ArchiveFormat.Zip).Should().Be(ArchiveClassIds.Zip);
         ArchiveFormatRegistry.GetClassId(ArchiveFormat.GZip).Should().Be(ArchiveClassIds.GZip);
     }

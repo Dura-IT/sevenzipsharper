@@ -12,11 +12,7 @@ internal static partial class SevenZipLib
 {
     [LibraryImport(NativeLibraryLoader.LibraryName, EntryPoint = "CreateObject")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-    private static partial int CreateObject(
-        in Guid classId,
-        in Guid interfaceId,
-        out nint outObject
-    );
+    private static partial int CreateObject(in Guid classId, in Guid interfaceId, out nint outObject);
 
     [SuppressMessage(
         "Security",
@@ -32,12 +28,9 @@ internal static partial class SevenZipLib
 
         if (hr != HResult.Ok || ptr == 0)
         {
-            throw new InvalidOperationException(
-                $"Failed to create 7-Zip archive object (HRESULT: 0x{hr:X8})."
-            );
+            throw new InvalidOperationException($"Failed to create 7-Zip archive object (HRESULT: 0x{hr:X8}).");
         }
 
-        return ComInterfaceMarshaller<T>.ConvertToManaged((void*)ptr)
-            ?? throw new InvalidOperationException("CreateObject returned null.");
+        return ComInterfaceMarshaller<T>.ConvertToManaged((void*)ptr) ?? throw new InvalidOperationException("CreateObject returned null.");
     }
 }

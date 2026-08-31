@@ -46,13 +46,7 @@ public sealed class ExtractionHandlerTests
         IProgress<ExtractionProgress>? progress = null,
         int totalEntries = 1,
         CancellationToken cancellationToken = default
-    ) =>
-        new ExtractionHandler(
-            streamProvider ?? (_ => (null, string.Empty)),
-            progress,
-            totalEntries,
-            cancellationToken
-        );
+    ) => new ExtractionHandler(streamProvider ?? (_ => (null, string.Empty)), progress, totalEntries, cancellationToken);
 
     [Test]
     public void SetTotal_WithAnyValue_ReturnsOk()
@@ -153,10 +147,7 @@ public sealed class ExtractionHandlerTests
     {
         var reported = new List<ExtractionProgress>();
         var progress = new SynchronousProgress<ExtractionProgress>(p => reported.Add(p));
-        var handler = CreateHandler(
-            streamProvider: _ => (null, "some/file.txt"),
-            progress: progress
-        );
+        var handler = CreateHandler(streamProvider: _ => (null, "some/file.txt"), progress: progress);
         IArchiveExtractCallback cb = handler;
         cb.SetTotal(100);
 

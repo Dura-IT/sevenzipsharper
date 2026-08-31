@@ -12,28 +12,18 @@ namespace SevenZipSharper.IntegrationTests;
 [TestOf(typeof(SevenZipExtractor))]
 public sealed class ExtractionIntegrationTests
 {
-    private static readonly byte[] EntryContent = System.Text.Encoding.UTF8.GetBytes(
-        "Hello from SevenZipSharper integration tests"
-    );
+    private static readonly byte[] EntryContent = System.Text.Encoding.UTF8.GetBytes("Hello from SevenZipSharper integration tests");
 
     private static readonly Lazy<Task<byte[]>> _archiveBytes = new(BuildArchiveAsync);
 
     private static Task<byte[]> BuildArchiveAsync() =>
-        IntegrationTestHelpers.BuildArchiveAsync(
-            ArchiveFormat.SevenZip,
-            CompressionParameters.Default,
-            ("test/hello.txt", EntryContent)
-        );
+        IntegrationTestHelpers.BuildArchiveAsync(ArchiveFormat.SevenZip, CompressionParameters.Default, ("test/hello.txt", EntryContent));
 
     [Test]
     public async Task OpenAsync_ValidArchive_ReturnsSuccessWithArchiveInfo()
     {
         var archive = await _archiveBytes.Value;
-        using var extractor = new SevenZipExtractor(
-            new MemoryStream(archive),
-            ArchiveFormat.SevenZip,
-            NullLogger<SevenZipExtractor>.Instance
-        );
+        using var extractor = new SevenZipExtractor(new MemoryStream(archive), ArchiveFormat.SevenZip, NullLogger<SevenZipExtractor>.Instance);
 
         var result = await extractor.OpenAsync();
 
@@ -45,11 +35,7 @@ public sealed class ExtractionIntegrationTests
     public async Task ListEntriesAsync_AfterOpen_ReturnsEntries()
     {
         var archive = await _archiveBytes.Value;
-        using var extractor = new SevenZipExtractor(
-            new MemoryStream(archive),
-            ArchiveFormat.SevenZip,
-            NullLogger<SevenZipExtractor>.Instance
-        );
+        using var extractor = new SevenZipExtractor(new MemoryStream(archive), ArchiveFormat.SevenZip, NullLogger<SevenZipExtractor>.Instance);
         await extractor.OpenAsync();
 
         var result = await extractor.ListEntriesAsync();
@@ -64,11 +50,7 @@ public sealed class ExtractionIntegrationTests
     public async Task ExtractAllAsync_AfterOpen_WritesFilesWithCorrectContent()
     {
         var archive = await _archiveBytes.Value;
-        using var extractor = new SevenZipExtractor(
-            new MemoryStream(archive),
-            ArchiveFormat.SevenZip,
-            NullLogger<SevenZipExtractor>.Instance
-        );
+        using var extractor = new SevenZipExtractor(new MemoryStream(archive), ArchiveFormat.SevenZip, NullLogger<SevenZipExtractor>.Instance);
         await extractor.OpenAsync();
 
         var outDir = IntegrationTestHelpers.UniqueTempDir("extractAll");
@@ -92,11 +74,7 @@ public sealed class ExtractionIntegrationTests
     public async Task ExtractEntryAsync_AfterOpen_WritesCorrectContent()
     {
         var archive = await _archiveBytes.Value;
-        using var extractor = new SevenZipExtractor(
-            new MemoryStream(archive),
-            ArchiveFormat.SevenZip,
-            NullLogger<SevenZipExtractor>.Instance
-        );
+        using var extractor = new SevenZipExtractor(new MemoryStream(archive), ArchiveFormat.SevenZip, NullLogger<SevenZipExtractor>.Instance);
         await extractor.OpenAsync();
         var entries = (await extractor.ListEntriesAsync()).Value;
         using var output = new MemoryStream();
@@ -116,16 +94,8 @@ public sealed class ExtractionIntegrationTests
         var payload = new byte[256 * 1024];
         for (var i = 0; i < payload.Length; i++)
             payload[i] = (byte)(i % 251);
-        var archive = await IntegrationTestHelpers.BuildArchiveAsync(
-            ArchiveFormat.SevenZip,
-            CompressionParameters.Default,
-            ("big/payload.bin", payload)
-        );
-        using var extractor = new SevenZipExtractor(
-            new MemoryStream(archive),
-            ArchiveFormat.SevenZip,
-            NullLogger<SevenZipExtractor>.Instance
-        );
+        var archive = await IntegrationTestHelpers.BuildArchiveAsync(ArchiveFormat.SevenZip, CompressionParameters.Default, ("big/payload.bin", payload));
+        using var extractor = new SevenZipExtractor(new MemoryStream(archive), ArchiveFormat.SevenZip, NullLogger<SevenZipExtractor>.Instance);
         await extractor.OpenAsync();
 
         var outDir = IntegrationTestHelpers.UniqueTempDir("extractFlush");
@@ -162,16 +132,8 @@ public sealed class ExtractionIntegrationTests
                 payload[i] = (byte)((i + f) % 251);
             entries[f] = ($"small/file-{f:D2}.bin", payload);
         }
-        var archive = await IntegrationTestHelpers.BuildArchiveAsync(
-            ArchiveFormat.SevenZip,
-            CompressionParameters.Default,
-            entries
-        );
-        using var extractor = new SevenZipExtractor(
-            new MemoryStream(archive),
-            ArchiveFormat.SevenZip,
-            NullLogger<SevenZipExtractor>.Instance
-        );
+        var archive = await IntegrationTestHelpers.BuildArchiveAsync(ArchiveFormat.SevenZip, CompressionParameters.Default, entries);
+        using var extractor = new SevenZipExtractor(new MemoryStream(archive), ArchiveFormat.SevenZip, NullLogger<SevenZipExtractor>.Instance);
         await extractor.OpenAsync();
 
         var outDir = IntegrationTestHelpers.UniqueTempDir("extractManySmall");
@@ -184,10 +146,7 @@ public sealed class ExtractionIntegrationTests
             result.IsSuccess.Should().BeTrue();
             foreach (var (path, content) in entries)
             {
-                var extracted = Path.Combine(
-                    outDir,
-                    path.Replace('/', Path.DirectorySeparatorChar)
-                );
+                var extracted = Path.Combine(outDir, path.Replace('/', Path.DirectorySeparatorChar));
                 File.Exists(extracted).Should().BeTrue();
                 (await File.ReadAllBytesAsync(extracted)).Should().Equal(content);
             }

@@ -8,9 +8,5 @@ namespace SevenZipSharper.Interop.Streams;
 internal partial interface ISequentialInStream
 {
     [PreserveSig]
-    int Read(
-        [Out, MarshalUsing(CountElementName = "size")] byte[] data,
-        uint size,
-        out uint processedSize
-    );
+    int Read([Out, MarshalUsing(CountElementName = "size")] byte[] data, uint size, out uint processedSize);
 }

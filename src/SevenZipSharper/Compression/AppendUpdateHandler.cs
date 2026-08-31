@@ -24,23 +24,12 @@ internal sealed partial class AppendUpdateHandler : CompressionHandlerBase, IArc
         CancellationToken cancellationToken,
         string? password = null
     )
-        : base(
-            newEntries,
-            progress,
-            cancellationToken,
-            existingCount: existingCount,
-            password: password
-        )
+        : base(newEntries, progress, cancellationToken, existingCount: existingCount, password: password)
     {
         _existingArchive = existingArchive;
     }
 
-    protected override int OnGetExistingUpdateItemInfo(
-        uint index,
-        nint newData,
-        nint newProperties,
-        nint indexInArchive
-    )
+    protected override int OnGetExistingUpdateItemInfo(uint index, nint newData, nint newProperties, nint indexInArchive)
     {
         if (newData != nint.Zero)
             Marshal.WriteInt32(newData, 0);
@@ -59,16 +48,8 @@ internal sealed partial class AppendUpdateHandler : CompressionHandlerBase, IArc
         "S6640:Make sure that using \"unsafe\" is safe here.",
         Justification = "Required to convert the managed ref-to-PROPVARIANT (which is itself a pointer into the native-provided platform-sized buffer) into a raw nint for the IInArchive.GetProperty(nint) signature. The buffer is owned by outer-native and survives the call. See [[project-interop-gotchas]] round 3."
     )]
-    protected override unsafe int OnGetExistingProperty(
-        uint index,
-        ItemPropId propId,
-        ref PropVariant value
-    ) =>
-        _existingArchive.GetProperty(
-            index,
-            propId,
-            (nint)System.Runtime.CompilerServices.Unsafe.AsPointer(ref value)
-        );
+    protected override unsafe int OnGetExistingProperty(uint index, ItemPropId propId, ref PropVariant value) =>
+        _existingArchive.GetProperty(index, propId, (nint)System.Runtime.CompilerServices.Unsafe.AsPointer(ref value));
 
     protected override int OnGetExistingStream(uint index, out ISequentialInStream? inStream)
     {

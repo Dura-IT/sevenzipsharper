@@ -18,19 +18,13 @@ public sealed class PropVariantLayoutTests
     [Test]
     public void GetPropVariantStride_Windows32Bit_Returns16()
     {
-        PropVariantLayout
-            .GetPropVariantStride(isWindows: true, pointerSize: 4)
-            .Should()
-            .Be(PropVariantLayout.ManagedSize);
+        PropVariantLayout.GetPropVariantStride(isWindows: true, pointerSize: 4).Should().Be(PropVariantLayout.ManagedSize);
     }
 
     [TestCase(8)]
     [TestCase(4)]
     public void GetPropVariantStride_NonWindows_ReturnsManagedSize(int pointerSize)
     {
-        PropVariantLayout
-            .GetPropVariantStride(isWindows: false, pointerSize: pointerSize)
-            .Should()
-            .Be(PropVariantLayout.ManagedSize);
+        PropVariantLayout.GetPropVariantStride(isWindows: false, pointerSize: pointerSize).Should().Be(PropVariantLayout.ManagedSize);
     }
 }

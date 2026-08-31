@@ -23,14 +23,12 @@ internal static unsafe class SevenZipWideStringMarshaller
     /// <summary>
     /// Converts a managed string to an unmanaged wchar_t pointer.
     /// </summary>
-    public static char* ConvertToUnmanaged(string? managed) =>
-        managed is null ? null : (char*)SevenZipWideString.Alloc(managed);
+    public static char* ConvertToUnmanaged(string? managed) => managed is null ? null : (char*)SevenZipWideString.Alloc(managed);
 
     /// <summary>
     /// Converts an unmanaged wchar_t pointer to a managed string.
     /// </summary>
-    public static string? ConvertToManaged(char* unmanaged) =>
-        SevenZipWideString.Read((nint)unmanaged);
+    public static string? ConvertToManaged(char* unmanaged) => SevenZipWideString.Read((nint)unmanaged);
 
     /// <summary>
     /// Frees an unmanaged wchar_t pointer.

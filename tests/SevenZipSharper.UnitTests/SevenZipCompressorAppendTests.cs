@@ -15,10 +15,7 @@ namespace SevenZipSharper.UnitTests;
 [TestOf(typeof(SevenZipCompressor))]
 public sealed class SevenZipCompressorAppendTests
 {
-    private static SevenZipCompressor CreateCompressor(
-        IOutArchive? archive = null,
-        CompressionParameters? parameters = null
-    ) =>
+    private static SevenZipCompressor CreateCompressor(IOutArchive? archive = null, CompressionParameters? parameters = null) =>
         new SevenZipCompressor(
             ArchiveFormat.SevenZip,
             parameters ?? CompressionParameters.Default,
@@ -26,8 +23,7 @@ public sealed class SevenZipCompressorAppendTests
             NullLogger<SevenZipCompressor>.Instance
         );
 
-    private static (string EntryPath, Stream Data)[] OneNewEntry() =>
-        new[] { ("new.txt", (Stream)new MemoryStream(new byte[] { 1, 2, 3 })) };
+    private static (string EntryPath, Stream Data)[] OneNewEntry() => new[] { ("new.txt", (Stream)new MemoryStream(new byte[] { 1, 2, 3 })) };
 
     [Test]
     public async Task AppendAsync_CallsUpdateItems_WithExistingPlusNewCount()
@@ -49,13 +45,7 @@ public sealed class SevenZipCompressorAppendTests
         using var compressor = CreateCompressor(parameters: invalidParams);
         var output = new MemoryStream();
 
-        var result = await compressor.AppendAsync(
-            new FakeInArchiveForAppend(),
-            new FakeOutArchive(),
-            1u,
-            OneNewEntry(),
-            output
-        );
+        var result = await compressor.AppendAsync(new FakeInArchiveForAppend(), new FakeOutArchive(), 1u, OneNewEntry(), output);
 
         result.IsFailed.Should().BeTrue();
     }
@@ -67,13 +57,7 @@ public sealed class SevenZipCompressorAppendTests
         using var compressor = CreateCompressor(outArchive);
         var output = new MemoryStream();
 
-        var result = await compressor.AppendAsync(
-            new FakeInArchiveForAppend(),
-            outArchive,
-            1u,
-            OneNewEntry(),
-            output
-        );
+        var result = await compressor.AppendAsync(new FakeInArchiveForAppend(), outArchive, 1u, OneNewEntry(), output);
 
         result.IsFailed.Should().BeTrue();
     }
@@ -88,16 +72,7 @@ public sealed class SevenZipCompressorAppendTests
         var output = new MemoryStream();
 
         await FluentActions
-            .Awaiting(() =>
-                compressor.AppendAsync(
-                    new FakeInArchiveForAppend(),
-                    new FakeOutArchive(),
-                    1u,
-                    OneNewEntry(),
-                    output,
-                    cancellationToken: cts.Token
-                )
-            )
+            .Awaiting(() => compressor.AppendAsync(new FakeInArchiveForAppend(), new FakeOutArchive(), 1u, OneNewEntry(), output, cancellationToken: cts.Token))
             .Should()
             .ThrowAsync<OperationCanceledException>();
     }
@@ -112,11 +87,7 @@ public sealed class SevenZipCompressorAppendTests
         var outArchive = new FakeOutArchive();
         using var compressor = CreateCompressor(outArchive);
 
-        await compressor.CompressMultiVolumeAsync(
-            OneNewEntry(),
-            _ => new MemoryStream(),
-            1024 * 1024
-        );
+        await compressor.CompressMultiVolumeAsync(OneNewEntry(), _ => new MemoryStream(), 1024 * 1024);
 
         outArchive.LastCount.Should().Be(1u);
     }
@@ -127,11 +98,7 @@ public sealed class SevenZipCompressorAppendTests
         var invalidParams = CompressionParameters.Default with { ThreadCount = 0 };
         using var compressor = CreateCompressor(parameters: invalidParams);
 
-        var result = await compressor.CompressMultiVolumeAsync(
-            OneNewEntry(),
-            _ => new MemoryStream(),
-            1024 * 1024
-        );
+        var result = await compressor.CompressMultiVolumeAsync(OneNewEntry(), _ => new MemoryStream(), 1024 * 1024);
 
         result.IsFailed.Should().BeTrue();
     }
@@ -142,11 +109,7 @@ public sealed class SevenZipCompressorAppendTests
         var outArchive = new FakeOutArchive(HResult.NotImplemented);
         using var compressor = CreateCompressor(outArchive);
 
-        var result = await compressor.CompressMultiVolumeAsync(
-            OneNewEntry(),
-            _ => new MemoryStream(),
-            1024 * 1024
-        );
+        var result = await compressor.CompressMultiVolumeAsync(OneNewEntry(), _ => new MemoryStream(), 1024 * 1024);
 
         result.IsFailed.Should().BeTrue();
     }
@@ -160,14 +123,7 @@ public sealed class SevenZipCompressorAppendTests
         using var compressor = CreateCompressor();
 
         await FluentActions
-            .Awaiting(() =>
-                compressor.CompressMultiVolumeAsync(
-                    OneNewEntry(),
-                    _ => new MemoryStream(),
-                    1024 * 1024,
-                    cancellationToken: cts.Token
-                )
-            )
+            .Awaiting(() => compressor.CompressMultiVolumeAsync(OneNewEntry(), _ => new MemoryStream(), 1024 * 1024, cancellationToken: cts.Token))
             .Should()
             .ThrowAsync<OperationCanceledException>();
     }
@@ -182,13 +138,7 @@ public sealed class SevenZipCompressorAppendTests
         using var compressor = CreateCompressor(outArchive);
         var output = new MemoryStream();
 
-        var result = await compressor.AppendAsync(
-            new FakeInArchiveForAppend(),
-            outArchive,
-            1u,
-            OneNewEntry(),
-            output
-        );
+        var result = await compressor.AppendAsync(new FakeInArchiveForAppend(), outArchive, 1u, OneNewEntry(), output);
 
         result.IsSuccess.Should().BeTrue();
     }
@@ -199,11 +149,7 @@ public sealed class SevenZipCompressorAppendTests
         var outArchive = new FakeOutArchive();
         using var compressor = CreateCompressor(outArchive);
 
-        var result = await compressor.CompressMultiVolumeAsync(
-            OneNewEntry(),
-            _ => new MemoryStream(),
-            1024 * 1024
-        );
+        var result = await compressor.CompressMultiVolumeAsync(OneNewEntry(), _ => new MemoryStream(), 1024 * 1024);
 
         result.IsSuccess.Should().BeTrue();
     }

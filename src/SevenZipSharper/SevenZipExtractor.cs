@@ -49,18 +49,11 @@ public sealed class SevenZipExtractor : IDisposable
         _format = format;
         _logger = logger;
         _streamAdapter = new InStreamAdapter(stream);
-        _archive = SevenZipLib.CreateArchiveObject<IInArchive>(
-            ArchiveFormatRegistry.GetClassId(format)
-        );
+        _archive = SevenZipLib.CreateArchiveObject<IInArchive>(ArchiveFormatRegistry.GetClassId(format));
     }
 
     // For unit testing — bypasses native library creation.
-    internal SevenZipExtractor(
-        Stream stream,
-        ArchiveFormat format,
-        IInArchive archive,
-        ILogger<SevenZipExtractor> logger
-    )
+    internal SevenZipExtractor(Stream stream, ArchiveFormat format, IInArchive archive, ILogger<SevenZipExtractor> logger)
     {
         _format = format;
         _logger = logger;
@@ -88,11 +81,7 @@ public sealed class SevenZipExtractor : IDisposable
         "CA2000:Dispose objects before losing scope",
         Justification = "Ownership of the extractor transfers to the caller via Result<T>; disposing here would return a dead object."
     )]
-    public static Result<SevenZipExtractor> Create(
-        Stream stream,
-        ArchiveFormat format,
-        ILogger<SevenZipExtractor> logger
-    )
+    public static Result<SevenZipExtractor> Create(Stream stream, ArchiveFormat format, ILogger<SevenZipExtractor> logger)
     {
         try
         {
@@ -121,10 +110,7 @@ public sealed class SevenZipExtractor : IDisposable
     /// </code>
     /// </example>
     /// <exception cref="ObjectDisposedException">Thrown if the extractor has been disposed.</exception>
-    public async Task<Result<ArchiveInfo>> OpenAsync(
-        string? password = null,
-        CancellationToken cancellationToken = default
-    )
+    public async Task<Result<ArchiveInfo>> OpenAsync(string? password = null, CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed != 0, this);
         return await Task.Run(
@@ -136,9 +122,7 @@ public sealed class SevenZipExtractor : IDisposable
                     if (hr != HResult.Ok)
                     {
                         ArchiveOpenFailed(_logger, _format, hr);
-                        return Result.Fail<ArchiveInfo>(
-                            $"Failed to open archive (HRESULT: 0x{hr:X8})."
-                        );
+                        return Result.Fail<ArchiveInfo>($"Failed to open archive (HRESULT: 0x{hr:X8}).");
                     }
 
                     var info = ReadArchiveInfo();
@@ -157,9 +141,7 @@ public sealed class SevenZipExtractor : IDisposable
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>A successful result containing the entry list, or a failed result if listing fails.</returns>
     /// <exception cref="ObjectDisposedException">Thrown if the extractor has been disposed.</exception>
-    public async Task<Result<IReadOnlyList<ArchiveEntry>>> ListEntriesAsync(
-        CancellationToken cancellationToken = default
-    )
+    public async Task<Result<IReadOnlyList<ArchiveEntry>>> ListEntriesAsync(CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed != 0, this);
         if (!_opened)
@@ -171,16 +153,12 @@ public sealed class SevenZipExtractor : IDisposable
                     if (hr != HResult.Ok)
                     {
                         ListEntriesFailed(_logger, _format, hr);
-                        return Result.Fail<IReadOnlyList<ArchiveEntry>>(
-                            $"Failed to list archive entries (HRESULT: 0x{hr:X8})."
-                        );
+                        return Result.Fail<IReadOnlyList<ArchiveEntry>>($"Failed to list archive entries (HRESULT: 0x{hr:X8}).");
                     }
 
                     if (count > (uint)Array.MaxLength)
                     {
-                        return Result.Fail<IReadOnlyList<ArchiveEntry>>(
-                            $"Archive reports {count} entries, which exceeds the supported maximum."
-                        );
+                        return Result.Fail<IReadOnlyList<ArchiveEntry>>($"Archive reports {count} entries, which exceeds the supported maximum.");
                     }
 
                     var entries = new List<ArchiveEntry>((int)count);
@@ -225,8 +203,7 @@ public sealed class SevenZipExtractor : IDisposable
         ObjectDisposedException.ThrowIf(_disposed != 0, this);
         if (!_opened)
             return Result.Fail(NotOpenedMessage);
-        var flushIntervalBytes =
-            options?.FlushIntervalBytes ?? ExtractionOptions.DefaultFlushIntervalBytes;
+        var flushIntervalBytes = options?.FlushIntervalBytes ?? ExtractionOptions.DefaultFlushIntervalBytes;
         return await Task.Run(
                 () =>
                 {
@@ -248,9 +225,7 @@ public sealed class SevenZipExtractor : IDisposable
                     if (hr == HResult.Ok && handler.LastEntryError != OperationResult.Ok)
                     {
                         ExtractionHadEntryErrors(_logger, _format, handler.LastEntryError);
-                        return Result.Fail(
-                            $"Extraction had entry errors: {handler.LastEntryError}."
-                        );
+                        return Result.Fail($"Extraction had entry errors: {handler.LastEntryError}.");
                     }
 
                     if (hr == HResult.Ok)
@@ -284,11 +259,7 @@ public sealed class SevenZipExtractor : IDisposable
     /// </code>
     /// </example>
     /// <exception cref="ObjectDisposedException">Thrown if the extractor has been disposed.</exception>
-    public async Task<Result> ExtractEntryAsync(
-        ArchiveEntry entry,
-        Stream outputStream,
-        CancellationToken cancellationToken = default
-    )
+    public async Task<Result> ExtractEntryAsync(ArchiveEntry entry, Stream outputStream, CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(_disposed != 0, this);
         if (!_opened)
@@ -297,13 +268,7 @@ public sealed class SevenZipExtractor : IDisposable
                 () =>
                 {
                     var indices = new uint[] { (uint)entry.Index };
-                    var handler = new ExtractionHandler(
-                        CreateSingleEntryProvider(entry, outputStream),
-                        null,
-                        1,
-                        cancellationToken,
-                        _password
-                    );
+                    var handler = new ExtractionHandler(CreateSingleEntryProvider(entry, outputStream), null, 1, cancellationToken, _password);
 
                     var hr = _archive.Extract(indices, 1, 0, handler);
                     cancellationToken.ThrowIfCancellationRequested();
@@ -311,9 +276,7 @@ public sealed class SevenZipExtractor : IDisposable
                     if (hr == HResult.Ok && handler.LastEntryError != OperationResult.Ok)
                     {
                         ExtractionHadEntryErrors(_logger, _format, handler.LastEntryError);
-                        return Result.Fail(
-                            $"Entry extraction had errors: {handler.LastEntryError}."
-                        );
+                        return Result.Fail($"Entry extraction had errors: {handler.LastEntryError}.");
                     }
 
                     if (hr == HResult.Ok)
@@ -363,15 +326,7 @@ public sealed class SevenZipExtractor : IDisposable
         var entriesResult = await ListEntriesAsync(cancellationToken).ConfigureAwait(false);
         if (entriesResult.IsFailed)
             return entriesResult.ToResult();
-        return await ExtractAsync(
-                entriesResult.Value,
-                filter,
-                outputPath,
-                progress,
-                options,
-                cancellationToken
-            )
-            .ConfigureAwait(false);
+        return await ExtractAsync(entriesResult.Value, filter, outputPath, progress, options, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -397,8 +352,7 @@ public sealed class SevenZipExtractor : IDisposable
         ObjectDisposedException.ThrowIf(_disposed != 0, this);
         if (!_opened)
             return Result.Fail(NotOpenedMessage);
-        var flushIntervalBytes =
-            options?.FlushIntervalBytes ?? ExtractionOptions.DefaultFlushIntervalBytes;
+        var flushIntervalBytes = options?.FlushIntervalBytes ?? ExtractionOptions.DefaultFlushIntervalBytes;
         return await Task.Run(
                 () =>
                 {
@@ -421,9 +375,7 @@ public sealed class SevenZipExtractor : IDisposable
                     if (hr == HResult.Ok && handler.LastEntryError != OperationResult.Ok)
                     {
                         ExtractionHadEntryErrors(_logger, _format, handler.LastEntryError);
-                        return Result.Fail(
-                            $"Filtered extraction had entry errors: {handler.LastEntryError}."
-                        );
+                        return Result.Fail($"Filtered extraction had entry errors: {handler.LastEntryError}.");
                     }
 
                     if (hr == HResult.Ok)
@@ -483,9 +435,7 @@ public sealed class SevenZipExtractor : IDisposable
     // Calls native GetProperty into a 24-byte stack buffer (worst-case PROPVARIANT size:
     // Windows propidlbase.h is 24 on x64; POSIX 7-Zip MyWindows.h is 16 on x64). The first
     // 16 bytes are copied into a PropVariant, which is all our managed struct holds.
-    [ExcludeFromCodeCoverage(
-        Justification = "Unsafe stackalloc + Marshal pointer bridge; exercised by every property read in the integration test matrix."
-    )]
+    [ExcludeFromCodeCoverage(Justification = "Unsafe stackalloc + Marshal pointer bridge; exercised by every property read in the integration test matrix.")]
     [SuppressMessage(
         "Security",
         "S6640:Make sure that using \"unsafe\" is safe here.",
@@ -603,15 +553,9 @@ public sealed class SevenZipExtractor : IDisposable
         return value;
     }
 
-    private Func<uint, (ISequentialOutStream? Stream, string EntryPath)> CreateFileEntryProvider(
-        string outputPath,
-        long flushIntervalBytes
-    )
+    private Func<uint, (ISequentialOutStream? Stream, string EntryPath)> CreateFileEntryProvider(string outputPath, long flushIntervalBytes)
     {
-        var canonicalOutput =
-            Path.GetFullPath(outputPath)
-                .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
-            + Path.DirectorySeparatorChar;
+        var canonicalOutput = Path.GetFullPath(outputPath).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
 
         // One pacer shared by every entry in this extraction so the flush cadence bounds the
         // aggregate write backlog, not just the backlog within a single large file. No locking
@@ -642,13 +586,9 @@ public sealed class SevenZipExtractor : IDisposable
         };
     }
 
-    private static Func<
-        uint,
-        (ISequentialOutStream? Stream, string EntryPath)
-    > CreateSingleEntryProvider(ArchiveEntry entry, Stream outputStream)
+    private static Func<uint, (ISequentialOutStream? Stream, string EntryPath)> CreateSingleEntryProvider(ArchiveEntry entry, Stream outputStream)
     {
         var adapter = new OutStreamAdapter(outputStream);
-        return index =>
-            (index == (uint)entry.Index ? (ISequentialOutStream?)adapter : null, entry.Path);
+        return index => (index == (uint)entry.Index ? (ISequentialOutStream?)adapter : null, entry.Path);
     }
 }

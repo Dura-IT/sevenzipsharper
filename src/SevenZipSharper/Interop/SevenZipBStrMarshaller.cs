@@ -26,8 +26,7 @@ internal static unsafe class SevenZipBStrMarshaller
     /// <summary>
     /// Converts a managed string to an unmanaged BSTR pointer.
     /// </summary>
-    public static ushort* ConvertToUnmanaged(string? managed) =>
-        managed is null ? null : (ushort*)SevenZipBStr.Alloc(managed);
+    public static ushort* ConvertToUnmanaged(string? managed) => managed is null ? null : (ushort*)SevenZipBStr.Alloc(managed);
 
     /// <summary>
     /// Converts an unmanaged BSTR pointer to a managed string.

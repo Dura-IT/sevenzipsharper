@@ -5,10 +5,7 @@ namespace SevenZipSharper.Interop;
 
 internal static class ArchiveFormatRegistry
 {
-    private static readonly Dictionary<ArchiveFormat, Guid> ClassIds = new Dictionary<
-        ArchiveFormat,
-        Guid
-    >
+    private static readonly Dictionary<ArchiveFormat, Guid> ClassIds = new Dictionary<ArchiveFormat, Guid>
     {
         [ArchiveFormat.SevenZip] = ArchiveClassIds.SevenZip,
         [ArchiveFormat.Zip] = ArchiveClassIds.Zip,

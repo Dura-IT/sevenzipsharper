@@ -57,11 +57,7 @@ public sealed class ParameterValidationTests
     [Test]
     public void Validate_EncryptHeadersWithPassword_Succeeds()
     {
-        var parameters = new CompressionParameters
-        {
-            EncryptHeaders = true,
-            EncryptionPassword = "secret",
-        };
+        var parameters = new CompressionParameters { EncryptHeaders = true, EncryptionPassword = "secret" };
 
         parameters.Validate().IsSuccess.Should().BeTrue();
     }
@@ -72,11 +68,7 @@ public sealed class ParameterValidationTests
     [TestCase(1024u * 1024u * 1024u * 2u)] // Above 1536 MB
     public void Validate_LzmaInvalidDictionarySize_Fails(uint size)
     {
-        var parameters = new CompressionParameters
-        {
-            Method = CompressionMethod.Lzma2,
-            DictionarySize = size,
-        };
+        var parameters = new CompressionParameters { Method = CompressionMethod.Lzma2, DictionarySize = size };
 
         parameters.Validate().IsFailed.Should().BeTrue();
     }
@@ -86,11 +78,7 @@ public sealed class ParameterValidationTests
     [TestCase(16u * 1024u * 1024u)] // 16 MB — typical default
     public void Validate_LzmaValidDictionarySize_Succeeds(uint size)
     {
-        var parameters = new CompressionParameters
-        {
-            Method = CompressionMethod.Lzma2,
-            DictionarySize = size,
-        };
+        var parameters = new CompressionParameters { Method = CompressionMethod.Lzma2, DictionarySize = size };
 
         parameters.Validate().IsSuccess.Should().BeTrue();
     }
@@ -100,11 +88,7 @@ public sealed class ParameterValidationTests
     [TestCase(150u * 1024u)] // Not a multiple of 100 KB
     public void Validate_BZip2InvalidDictionarySize_Fails(uint size)
     {
-        var parameters = new CompressionParameters
-        {
-            Method = CompressionMethod.BZip2,
-            DictionarySize = size,
-        };
+        var parameters = new CompressionParameters { Method = CompressionMethod.BZip2, DictionarySize = size };
 
         parameters.Validate().IsFailed.Should().BeTrue();
     }
@@ -114,11 +98,7 @@ public sealed class ParameterValidationTests
     [TestCase(900u * 1024u)] // Maximum
     public void Validate_BZip2ValidDictionarySize_Succeeds(uint size)
     {
-        var parameters = new CompressionParameters
-        {
-            Method = CompressionMethod.BZip2,
-            DictionarySize = size,
-        };
+        var parameters = new CompressionParameters { Method = CompressionMethod.BZip2, DictionarySize = size };
 
         parameters.Validate().IsSuccess.Should().BeTrue();
     }
@@ -128,11 +108,7 @@ public sealed class ParameterValidationTests
     [TestCase(1000u)] // Far above 273
     public void Validate_LzmaInvalidWordSize_Fails(uint wordSize)
     {
-        var parameters = new CompressionParameters
-        {
-            Method = CompressionMethod.Lzma,
-            WordSize = wordSize,
-        };
+        var parameters = new CompressionParameters { Method = CompressionMethod.Lzma, WordSize = wordSize };
 
         parameters.Validate().IsFailed.Should().BeTrue();
     }
@@ -142,11 +118,7 @@ public sealed class ParameterValidationTests
     [TestCase(273u)] // Maximum
     public void Validate_LzmaValidWordSize_Succeeds(uint wordSize)
     {
-        var parameters = new CompressionParameters
-        {
-            Method = CompressionMethod.Lzma,
-            WordSize = wordSize,
-        };
+        var parameters = new CompressionParameters { Method = CompressionMethod.Lzma, WordSize = wordSize };
 
         parameters.Validate().IsSuccess.Should().BeTrue();
     }
@@ -169,25 +141,15 @@ public sealed class ParameterValidationTests
     [Test]
     public async Task CompressAsync_InvalidThreadCount_FailsBeforeNativeCall()
     {
-        var parameters = new CompressionParameters
-        {
-            Method = CompressionMethod.Lzma2,
-            ThreadCount = 0,
-        };
+        var parameters = new CompressionParameters { Method = CompressionMethod.Lzma2, ThreadCount = 0 };
 
         using var output = new MemoryStream();
-        using var compressor = new SevenZipCompressor(
-            ArchiveFormat.SevenZip,
-            parameters,
-            NullLogger<SevenZipCompressor>.Instance
-        );
+        using var compressor = new SevenZipCompressor(ArchiveFormat.SevenZip, parameters, NullLogger<SevenZipCompressor>.Instance);
         var entries = new[] { ("a.bin", (Stream)new MemoryStream(Payload)) };
 
         var result = await compressor.CompressAsync(entries, output);
 
-        result
-            .IsFailed.Should()
-            .BeTrue("invalid parameters should be caught before reaching the native layer");
+        result.IsFailed.Should().BeTrue("invalid parameters should be caught before reaching the native layer");
         result.Errors[0].Message.Should().Contain("ThreadCount");
     }
 
@@ -201,11 +163,7 @@ public sealed class ParameterValidationTests
         };
 
         using var output = new MemoryStream();
-        using var compressor = new SevenZipCompressor(
-            ArchiveFormat.SevenZip,
-            parameters,
-            NullLogger<SevenZipCompressor>.Instance
-        );
+        using var compressor = new SevenZipCompressor(ArchiveFormat.SevenZip, parameters, NullLogger<SevenZipCompressor>.Instance);
         var entries = new[] { ("a.bin", (Stream)new MemoryStream(Payload)) };
 
         var result = await compressor.CompressAsync(entries, output);

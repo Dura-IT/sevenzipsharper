@@ -33,10 +33,7 @@ public sealed class SevenZipCompressorFilesTests
             Directory.Delete(_tempDir, recursive: true);
     }
 
-    private static SevenZipCompressor CreateCompressor(
-        IOutArchive? archive = null,
-        CompressionParameters? parameters = null
-    ) =>
+    private static SevenZipCompressor CreateCompressor(IOutArchive? archive = null, CompressionParameters? parameters = null) =>
         new SevenZipCompressor(
             ArchiveFormat.SevenZip,
             parameters ?? CompressionParameters.Default,
@@ -76,11 +73,7 @@ public sealed class SevenZipCompressorFilesTests
 
         await compressor.CompressFilesAsync(new[] { file }, _tempDir, output);
 
-        archive
-            .CapturedPaths.Should()
-            .ContainSingle()
-            .Which.Should()
-            .Be(Path.Combine("sub", "file.txt"));
+        archive.CapturedPaths.Should().ContainSingle().Which.Should().Be(Path.Combine("sub", "file.txt"));
     }
 
     [Test]
@@ -115,8 +108,7 @@ public sealed class SevenZipCompressorFilesTests
         using var compressor = CreateCompressor();
         var output = new MemoryStream();
 
-        Func<Task> act = () =>
-            compressor.CompressFilesAsync(new[] { missingPath }, _tempDir, output);
+        Func<Task> act = () => compressor.CompressFilesAsync(new[] { missingPath }, _tempDir, output);
 
         act.Should().ThrowAsync<FileNotFoundException>();
     }
@@ -132,14 +124,7 @@ public sealed class SevenZipCompressorFilesTests
         var output = new MemoryStream();
 
         await FluentActions
-            .Awaiting(() =>
-                compressor.CompressFilesAsync(
-                    new[] { file },
-                    _tempDir,
-                    output,
-                    cancellationToken: cts.Token
-                )
-            )
+            .Awaiting(() => compressor.CompressFilesAsync(new[] { file }, _tempDir, output, cancellationToken: cts.Token))
             .Should()
             .ThrowAsync<OperationCanceledException>();
     }
@@ -151,11 +136,7 @@ internal sealed partial class FakeOutArchiveCapturingPaths : IOutArchive
     internal uint LastCount { get; private set; }
     internal List<string> CapturedPaths { get; } = [];
 
-    public int UpdateItems(
-        IOutStream outStream,
-        uint numItems,
-        IArchiveUpdateCallback updateCallback
-    )
+    public int UpdateItems(IOutStream outStream, uint numItems, IArchiveUpdateCallback updateCallback)
     {
         LastCount = numItems;
         for (uint i = 0; i < numItems; i++)

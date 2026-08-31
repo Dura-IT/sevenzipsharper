@@ -13,10 +13,7 @@ public sealed class PlatformInfoTests
     [TestCase(Architecture.X64, "win-x64")]
     [TestCase(Architecture.Arm64, "win-arm64")]
     [TestCase(Architecture.X86, "win-x86")]
-    public void BuildRuntimeIdentifier_Windows_ReturnsExpectedRid(
-        Architecture arch,
-        string expected
-    )
+    public void BuildRuntimeIdentifier_Windows_ReturnsExpectedRid(Architecture arch, string expected)
     {
         PlatformInfo.BuildRuntimeIdentifier(OSPlatform.Windows, arch).Should().Be(expected);
     }
@@ -41,9 +38,7 @@ public sealed class PlatformInfoTests
     {
         var act = () => PlatformInfo.BuildRuntimeIdentifier(OSPlatform.Linux, arch);
 
-        act.Should()
-            .Throw<PlatformNotSupportedException>()
-            .WithMessage("*Unsupported processor architecture*");
+        act.Should().Throw<PlatformNotSupportedException>().WithMessage("*Unsupported processor architecture*");
     }
 
     [Test]
@@ -51,9 +46,7 @@ public sealed class PlatformInfoTests
     {
         var act = () => PlatformInfo.BuildRuntimeIdentifier(OSPlatform.FreeBSD, Architecture.X64);
 
-        act.Should()
-            .Throw<PlatformNotSupportedException>()
-            .WithMessage("*Unsupported operating system*");
+        act.Should().Throw<PlatformNotSupportedException>().WithMessage("*Unsupported operating system*");
     }
 
     [Test]
@@ -79,18 +72,13 @@ public sealed class PlatformInfoTests
     {
         var act = () => PlatformInfo.BuildLibraryFileName(OSPlatform.FreeBSD);
 
-        act.Should()
-            .Throw<PlatformNotSupportedException>()
-            .WithMessage("*Unsupported operating system*");
+        act.Should().Throw<PlatformNotSupportedException>().WithMessage("*Unsupported operating system*");
     }
 
     [Test]
     public void GetRuntimeIdentifier_OnHost_ReturnsValidRid()
     {
-        PlatformInfo
-            .GetRuntimeIdentifier()
-            .Should()
-            .MatchRegex("^(win|osx|linux)-(x64|arm64|x86)$");
+        PlatformInfo.GetRuntimeIdentifier().Should().MatchRegex("^(win|osx|linux)-(x64|arm64|x86)$");
     }
 
     [Test]

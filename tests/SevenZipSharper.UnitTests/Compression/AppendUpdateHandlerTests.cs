@@ -26,13 +26,7 @@ public sealed class AppendUpdateHandlerTests
     {
         existingArchive ??= new FakeInArchiveForAppend(existingCount);
         newEntries ??= new[] { ("new.txt", (Stream)new MemoryStream(new byte[] { 1, 2, 3 })) };
-        return new AppendUpdateHandler(
-            existingArchive,
-            existingCount,
-            newEntries,
-            progress,
-            cancellationToken
-        );
+        return new AppendUpdateHandler(existingArchive, existingCount, newEntries, progress, cancellationToken);
     }
 
     [Test]
@@ -231,11 +225,7 @@ internal sealed partial class FakeInArchiveForAppend : IInArchive
         _path = path;
     }
 
-    public int Open(
-        IInStream stream,
-        IntPtr maxCheckStartPosition,
-        IArchiveOpenCallback? openArchiveCallback
-    ) => HResult.Ok;
+    public int Open(IInStream stream, IntPtr maxCheckStartPosition, IArchiveOpenCallback? openArchiveCallback) => HResult.Ok;
 
     public int Close() => HResult.Ok;
 
@@ -259,12 +249,7 @@ internal sealed partial class FakeInArchiveForAppend : IInArchive
         return HResult.Ok;
     }
 
-    public int Extract(
-        uint[]? indices,
-        uint numItems,
-        int testMode,
-        IArchiveExtractCallback extractCallback
-    ) => HResult.Ok;
+    public int Extract(uint[]? indices, uint numItems, int testMode, IArchiveExtractCallback extractCallback) => HResult.Ok;
 
     public int GetArchiveProperty(ItemPropId propId, nint value) => HResult.Ok;
 
@@ -282,13 +267,8 @@ internal sealed partial class FakeInArchiveForAppend : IInArchive
         return HResult.Ok;
     }
 
-    public int GetNumberOfArchiveProperties(out uint numProps) =>
-        GetNumberOfProperties(out numProps);
+    public int GetNumberOfArchiveProperties(out uint numProps) => GetNumberOfProperties(out numProps);
 
-    public int GetArchivePropertyInfo(
-        uint index,
-        out string? name,
-        out uint propId,
-        out ushort varType
-    ) => GetPropertyInfo(index, out name, out propId, out varType);
+    public int GetArchivePropertyInfo(uint index, out string? name, out uint propId, out ushort varType) =>
+        GetPropertyInfo(index, out name, out propId, out varType);
 }

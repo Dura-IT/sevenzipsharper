@@ -22,21 +22,11 @@ public static class SevenZipSharperServiceCollectionExtensions
         NativeLibraryLoader.Register();
 
         services.AddSingleton<Func<Stream, ArchiveFormat, SevenZipExtractor>>(sp =>
-            (stream, format) =>
-                new SevenZipExtractor(
-                    stream,
-                    format,
-                    sp.GetRequiredService<ILogger<SevenZipExtractor>>()
-                )
+            (stream, format) => new SevenZipExtractor(stream, format, sp.GetRequiredService<ILogger<SevenZipExtractor>>())
         );
 
         services.AddSingleton<Func<ArchiveFormat, CompressionParameters, SevenZipCompressor>>(sp =>
-            (format, parameters) =>
-                new SevenZipCompressor(
-                    format,
-                    parameters,
-                    sp.GetRequiredService<ILogger<SevenZipCompressor>>()
-                )
+            (format, parameters) => new SevenZipCompressor(format, parameters, sp.GetRequiredService<ILogger<SevenZipCompressor>>())
         );
 
         return services;

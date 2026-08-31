@@ -36,12 +36,7 @@ public sealed class CompressionHandlerTests
         IReadOnlyList<(string EntryPath, Stream Data)>? entries = null,
         IProgress<CompressionProgress>? progress = null,
         CancellationToken cancellationToken = default
-    ) =>
-        new CompressionHandler(
-            entries ?? new[] { MakeEntry("file.txt") },
-            progress,
-            cancellationToken
-        );
+    ) => new CompressionHandler(entries ?? new[] { MakeEntry("file.txt") }, progress, cancellationToken);
 
     [Test]
     public void SetTotal_WithAnyValue_ReturnsOk()
@@ -234,12 +229,7 @@ public sealed class CompressionHandlerTests
     [Test]
     public void CryptoGetTextPassword2_WithPasswordSet_ReturnsPasswordWithIsDefinedOne()
     {
-        var handler = new CompressionHandler(
-            new[] { MakeEntry("file.txt") },
-            null,
-            CancellationToken.None,
-            password: "hunter2"
-        );
+        var handler = new CompressionHandler(new[] { MakeEntry("file.txt") }, null, CancellationToken.None, password: "hunter2");
         ICryptoGetTextPassword2 crypto = handler;
 
         var hr = crypto.CryptoGetTextPassword2(out var isDefined, out var password);
@@ -268,12 +258,7 @@ public sealed class CompressionHandlerTests
         var first = new TrackingStream(new byte[] { 1, 2, 3 });
         var second = new TrackingStream(new byte[] { 4, 5, 6 });
         var entries = new (string EntryPath, Stream Data)[] { ("a.bin", first), ("b.bin", second) };
-        var handler = new CompressionHandler(
-            entries,
-            null,
-            CancellationToken.None,
-            ownsEntryStreams: true
-        );
+        var handler = new CompressionHandler(entries, null, CancellationToken.None, ownsEntryStreams: true);
         IArchiveUpdateCallback cb = handler;
 
         cb.GetStream(0, out _);
@@ -319,6 +304,5 @@ file sealed class NonSeekableStream : Stream
 
     public override void SetLength(long value) => throw new NotSupportedException();
 
-    public override void Write(byte[] buffer, int offset, int count) =>
-        throw new NotSupportedException();
+    public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
 }

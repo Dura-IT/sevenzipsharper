@@ -11,9 +11,7 @@ using SevenZipSharper.Interop.Streams;
 namespace SevenZipSharper.Compression;
 
 [GeneratedComClass]
-internal sealed partial class MultiVolumeCompressionHandler
-    : CompressionHandlerBase,
-        IArchiveUpdateCallback2
+internal sealed partial class MultiVolumeCompressionHandler : CompressionHandlerBase, IArchiveUpdateCallback2
 {
     private readonly Func<int, Stream> _volumeStreamFactory;
     private readonly ulong _maxVolumeBytes;
