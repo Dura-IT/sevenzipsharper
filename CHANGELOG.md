@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Package icon, README logo and social preview now use the framed Dura IT mark: the
+  isometric box inverted onto a navy tile. The mark carries its own background, so it
+  stays legible on dark backgrounds where the previous transparent version lost contrast
+  against the surrounding canvas.
+
 ## [2.0.0] - 2026-07-28
 
 ### Added
