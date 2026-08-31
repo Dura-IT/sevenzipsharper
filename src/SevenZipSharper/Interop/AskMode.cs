@@ -1,8 +1,9 @@
-namespace SevenZipSharper.Interop;
-
-internal enum AskMode
+namespace SevenZipSharper.Interop
 {
-    Extract = 0,
-    Test = 1,
-    Skip = 2,
+    internal enum AskMode
+    {
+        Extract = 0,
+        Test = 1,
+        Skip = 2,
+    }
 }

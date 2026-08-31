@@ -7,71 +7,57 @@ using Microsoft.Extensions.Logging.Abstractions;
 using NUnit.Framework;
 using SevenZipSharper.Compression;
 
-namespace SevenZipSharper.IntegrationTests;
-
-[TestFixture]
-[TestOf(typeof(SevenZipExtractor))]
-public sealed class CancellationTests
+namespace SevenZipSharper.IntegrationTests
 {
-    private static readonly Lazy<Task<byte[]>> _archiveBytes = new(BuildArchiveAsync);
-
-    private static async Task<byte[]> BuildArchiveAsync()
+    [TestFixture]
+    [TestOf(typeof(SevenZipExtractor))]
+    public sealed class CancellationTests
     {
-        var content = new byte[128 * 1024];
-        new Random(0).NextBytes(content);
-        return await IntegrationTestHelpers.BuildArchiveAsync(
-            ArchiveFormat.SevenZip,
-            CompressionParameters.Default,
-            ("large.bin", content)
-        );
-    }
+        private static readonly Lazy<Task<byte[]>> _archiveBytes = new(BuildArchiveAsync);
 
-    [Test]
-    public async Task ExtractAllAsync_PreCancelledToken_ThrowsOperationCanceledException()
-    {
-        var archive = await _archiveBytes.Value;
-        using var cts = new CancellationTokenSource();
-        await cts.CancelAsync();
-
-        using var extractor = new SevenZipExtractor(
-            new MemoryStream(archive),
-            ArchiveFormat.SevenZip,
-            NullLogger<SevenZipExtractor>.Instance
-        );
-        await extractor.OpenAsync();
-
-        var outDir = IntegrationTestHelpers.UniqueTempDir("cancel_extractAll");
-        try
+        private static async Task<byte[]> BuildArchiveAsync()
         {
-            await FluentActions
-                .Awaiting(() => extractor.ExtractAllAsync(outDir, cancellationToken: cts.Token))
-                .Should()
-                .ThrowAsync<OperationCanceledException>();
+            var content = new byte[128 * 1024];
+            new Random(0).NextBytes(content);
+            return await IntegrationTestHelpers.BuildArchiveAsync(ArchiveFormat.SevenZip, CompressionParameters.Default, ("large.bin", content));
         }
-        finally
+
+        [Test]
+        public async Task ExtractAllAsync_PreCancelledToken_ThrowsOperationCanceledException()
         {
-            if (Directory.Exists(outDir))
-                Directory.Delete(outDir, recursive: true);
+            var archive = await _archiveBytes.Value;
+            using var cts = new CancellationTokenSource();
+            await cts.CancelAsync();
+
+            using var extractor = new SevenZipExtractor(new MemoryStream(archive), ArchiveFormat.SevenZip, NullLogger<SevenZipExtractor>.Instance);
+            await extractor.OpenAsync();
+
+            var outDir = IntegrationTestHelpers.UniqueTempDir("cancel_extractAll");
+            try
+            {
+                await FluentActions
+                    .Awaiting(() => extractor.ExtractAllAsync(outDir, cancellationToken: cts.Token))
+                    .Should()
+                    .ThrowAsync<OperationCanceledException>();
+            }
+            finally
+            {
+                if (Directory.Exists(outDir))
+                    Directory.Delete(outDir, recursive: true);
+            }
         }
-    }
 
-    [Test]
-    public async Task ListEntriesAsync_PreCancelledToken_ThrowsOperationCanceledException()
-    {
-        var archive = await _archiveBytes.Value;
-        using var cts = new CancellationTokenSource();
-        await cts.CancelAsync();
+        [Test]
+        public async Task ListEntriesAsync_PreCancelledToken_ThrowsOperationCanceledException()
+        {
+            var archive = await _archiveBytes.Value;
+            using var cts = new CancellationTokenSource();
+            await cts.CancelAsync();
 
-        using var extractor = new SevenZipExtractor(
-            new MemoryStream(archive),
-            ArchiveFormat.SevenZip,
-            NullLogger<SevenZipExtractor>.Instance
-        );
-        await extractor.OpenAsync();
+            using var extractor = new SevenZipExtractor(new MemoryStream(archive), ArchiveFormat.SevenZip, NullLogger<SevenZipExtractor>.Instance);
+            await extractor.OpenAsync();
 
-        await FluentActions
-            .Awaiting(() => extractor.ListEntriesAsync(cts.Token))
-            .Should()
-            .ThrowAsync<OperationCanceledException>();
+            await FluentActions.Awaiting(() => extractor.ListEntriesAsync(cts.Token)).Should().ThrowAsync<OperationCanceledException>();
+        }
     }
 }

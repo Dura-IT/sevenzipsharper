@@ -6,114 +6,89 @@ using Microsoft.Extensions.Logging.Abstractions;
 using NUnit.Framework;
 using SevenZipSharper.Compression;
 
-namespace SevenZipSharper.IntegrationTests;
-
-[TestFixture]
-[TestOf(typeof(SevenZipCompressor))]
-public sealed class CompressionRoundTripTests
+namespace SevenZipSharper.IntegrationTests
 {
-    [Test]
-    public async Task CompressAsync_ThenExtract_ContentMatchesOriginal()
+    [TestFixture]
+    [TestOf(typeof(SevenZipCompressor))]
+    public sealed class CompressionRoundTripTests
     {
-        var original = System.Text.Encoding.UTF8.GetBytes(
-            "Round-trip test content — SevenZipSharper"
-        );
-        var entries = new (string, Stream)[] { ("roundtrip.txt", new MemoryStream(original)) };
-
-        using var archive = new MemoryStream();
-        using (
-            var compressor = new SevenZipCompressor(
-                ArchiveFormat.SevenZip,
-                CompressionParameters.Default,
-                NullLogger<SevenZipCompressor>.Instance
-            )
-        )
+        [Test]
+        public async Task CompressAsync_ThenExtract_ContentMatchesOriginal()
         {
-            var compressResult = await compressor.CompressAsync(entries, archive);
-            compressResult.IsSuccess.Should().BeTrue();
+            var original = System.Text.Encoding.UTF8.GetBytes("Round-trip test content — SevenZipSharper");
+            var entries = new (string, Stream)[] { ("roundtrip.txt", new MemoryStream(original)) };
+
+            using var archive = new MemoryStream();
+            using (var compressor = new SevenZipCompressor(ArchiveFormat.SevenZip, CompressionParameters.Default, NullLogger<SevenZipCompressor>.Instance))
+            {
+                var compressResult = await compressor.CompressAsync(entries, archive);
+                compressResult.IsSuccess.Should().BeTrue();
+            }
+
+            archive.Position = 0;
+            using var extractor = new SevenZipExtractor(archive, ArchiveFormat.SevenZip, NullLogger<SevenZipExtractor>.Instance);
+            await extractor.OpenAsync();
+            var entryList = (await extractor.ListEntriesAsync()).Value;
+            using var output = new MemoryStream();
+            await extractor.ExtractEntryAsync(entryList[0], output);
+
+            output.ToArray().Should().BeEquivalentTo(original);
         }
 
-        archive.Position = 0;
-        using var extractor = new SevenZipExtractor(
-            archive,
-            ArchiveFormat.SevenZip,
-            NullLogger<SevenZipExtractor>.Instance
-        );
-        await extractor.OpenAsync();
-        var entryList = (await extractor.ListEntriesAsync()).Value;
-        using var output = new MemoryStream();
-        await extractor.ExtractEntryAsync(entryList[0], output);
-
-        output.ToArray().Should().BeEquivalentTo(original);
-    }
-
-    [Test]
-    public async Task CompressAsync_MultipleEntries_AllRoundTripCorrectly()
-    {
-        var entries = new (string, Stream)[]
+        [Test]
+        public async Task CompressAsync_MultipleEntries_AllRoundTripCorrectly()
         {
-            ("alpha.txt", new MemoryStream(new byte[] { 1, 2, 3 })),
-            ("beta.txt", new MemoryStream(new byte[] { 4, 5, 6, 7, 8 })),
-            ("gamma.txt", new MemoryStream(new byte[] { 9 })),
-        };
+            var entries = new (string, Stream)[]
+            {
+                ("alpha.txt", new MemoryStream(new byte[] { 1, 2, 3 })),
+                ("beta.txt", new MemoryStream(new byte[] { 4, 5, 6, 7, 8 })),
+                ("gamma.txt", new MemoryStream(new byte[] { 9 })),
+            };
 
-        using var archive = new MemoryStream();
-        using (
-            var compressor = new SevenZipCompressor(
-                ArchiveFormat.SevenZip,
-                CompressionParameters.Default,
-                NullLogger<SevenZipCompressor>.Instance
-            )
-        )
-        {
-            (await compressor.CompressAsync(entries, archive)).IsSuccess.Should().BeTrue();
+            using var archive = new MemoryStream();
+            using (var compressor = new SevenZipCompressor(ArchiveFormat.SevenZip, CompressionParameters.Default, NullLogger<SevenZipCompressor>.Instance))
+            {
+                (await compressor.CompressAsync(entries, archive)).IsSuccess.Should().BeTrue();
+            }
+
+            archive.Position = 0;
+            using var extractor = new SevenZipExtractor(archive, ArchiveFormat.SevenZip, NullLogger<SevenZipExtractor>.Instance);
+            await extractor.OpenAsync();
+            var entryList = (await extractor.ListEntriesAsync()).Value;
+
+            entryList.Should().HaveCount(3);
+
+            foreach (var entry in entryList)
+            {
+                using var buf = new MemoryStream();
+                (await extractor.ExtractEntryAsync(entry, buf)).IsSuccess.Should().BeTrue();
+                buf.Length.Should().BeGreaterThan(0);
+            }
         }
 
-        archive.Position = 0;
-        using var extractor = new SevenZipExtractor(
-            archive,
-            ArchiveFormat.SevenZip,
-            NullLogger<SevenZipExtractor>.Instance
-        );
-        await extractor.OpenAsync();
-        var entryList = (await extractor.ListEntriesAsync()).Value;
-
-        entryList.Should().HaveCount(3);
-
-        foreach (var entry in entryList)
+        [Test]
+        public async Task CompressAsync_WithProgress_ReportsProgressEvents()
         {
-            using var buf = new MemoryStream();
-            (await extractor.ExtractEntryAsync(entry, buf)).IsSuccess.Should().BeTrue();
-            buf.Length.Should().BeGreaterThan(0);
+            var progressReports = new System.Collections.Generic.List<CompressionProgress>();
+            var progress = new SynchronousProgress<CompressionProgress>(p => progressReports.Add(p));
+            var content = new byte[64 * 1024];
+            new Random(42).NextBytes(content);
+            var entries = new (string, Stream)[] { ("big.bin", new MemoryStream(content)) };
+
+            using var archive = new MemoryStream();
+            using var compressor = new SevenZipCompressor(ArchiveFormat.SevenZip, CompressionParameters.Default, NullLogger<SevenZipCompressor>.Instance);
+            await compressor.CompressAsync(entries, archive, progress);
+
+            progressReports.Should().NotBeEmpty();
         }
     }
 
-    [Test]
-    public async Task CompressAsync_WithProgress_ReportsProgressEvents()
+    file sealed class SynchronousProgress<T> : IProgress<T>
     {
-        var progressReports = new System.Collections.Generic.List<CompressionProgress>();
-        var progress = new SynchronousProgress<CompressionProgress>(p => progressReports.Add(p));
-        var content = new byte[64 * 1024];
-        new Random(42).NextBytes(content);
-        var entries = new (string, Stream)[] { ("big.bin", new MemoryStream(content)) };
+        private readonly Action<T> _callback;
 
-        using var archive = new MemoryStream();
-        using var compressor = new SevenZipCompressor(
-            ArchiveFormat.SevenZip,
-            CompressionParameters.Default,
-            NullLogger<SevenZipCompressor>.Instance
-        );
-        await compressor.CompressAsync(entries, archive, progress);
+        internal SynchronousProgress(Action<T> callback) => _callback = callback;
 
-        progressReports.Should().NotBeEmpty();
+        public void Report(T value) => _callback(value);
     }
-}
-
-file sealed class SynchronousProgress<T> : IProgress<T>
-{
-    private readonly Action<T> _callback;
-
-    internal SynchronousProgress(Action<T> callback) => _callback = callback;
-
-    public void Report(T value) => _callback(value);
 }

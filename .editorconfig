@@ -9,6 +9,12 @@ insert_final_newline = true
 [*.cs]
 indent_style = space
 indent_size = 4
+max_line_length = 160
+
+# Block-scoped namespaces, never file-scoped. EnforceCodeStyleInBuild turns this into a
+# build error (IDE0160), so the convention holds for new files without anyone having to
+# remember it.
+csharp_style_namespace_declarations = block_scoped:warning
 
 [*.{csproj,props,targets}]
 indent_style = space

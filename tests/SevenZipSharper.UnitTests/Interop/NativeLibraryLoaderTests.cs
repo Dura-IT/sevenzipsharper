@@ -4,42 +4,43 @@ using AwesomeAssertions;
 using NUnit.Framework;
 using SevenZipSharper.Interop;
 
-namespace SevenZipSharper.UnitTests.Interop;
-
-[TestOf(typeof(NativeLibraryLoader))]
-public sealed class NativeLibraryLoaderTests
+namespace SevenZipSharper.UnitTests.Interop
 {
-    [Test]
-    public void ResolveLibraryPath_WhenFileExists_ReturnsCorrectPath()
+    [TestOf(typeof(NativeLibraryLoader))]
+    public sealed class NativeLibraryLoaderTests
     {
-        var rid = PlatformInfo.GetRuntimeIdentifier();
-        var fileName = PlatformInfo.GetLibraryFileName();
-        var tempDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-        var nativeDir = Path.Combine(tempDir, "runtimes", rid, "native");
-        var expectedPath = Path.Combine(nativeDir, fileName);
-
-        Directory.CreateDirectory(nativeDir);
-        File.WriteAllBytes(expectedPath, []);
-
-        try
+        [Test]
+        public void ResolveLibraryPath_WhenFileExists_ReturnsCorrectPath()
         {
-            var result = NativeLibraryLoader.ResolveLibraryPath(tempDir);
+            var rid = PlatformInfo.GetRuntimeIdentifier();
+            var fileName = PlatformInfo.GetLibraryFileName();
+            var tempDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            var nativeDir = Path.Combine(tempDir, "runtimes", rid, "native");
+            var expectedPath = Path.Combine(nativeDir, fileName);
 
-            result.Should().Be(expectedPath);
+            Directory.CreateDirectory(nativeDir);
+            File.WriteAllBytes(expectedPath, []);
+
+            try
+            {
+                var result = NativeLibraryLoader.ResolveLibraryPath(tempDir);
+
+                result.Should().Be(expectedPath);
+            }
+            finally
+            {
+                Directory.Delete(tempDir, recursive: true);
+            }
         }
-        finally
+
+        [Test]
+        public void ResolveLibraryPath_WhenFileNotFound_ThrowsDllNotFoundException()
         {
-            Directory.Delete(tempDir, recursive: true);
+            var tempDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+
+            var act = () => NativeLibraryLoader.ResolveLibraryPath(tempDir);
+
+            act.Should().Throw<DllNotFoundException>().WithMessage("*native library not found*");
         }
-    }
-
-    [Test]
-    public void ResolveLibraryPath_WhenFileNotFound_ThrowsDllNotFoundException()
-    {
-        var tempDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-
-        var act = () => NativeLibraryLoader.ResolveLibraryPath(tempDir);
-
-        act.Should().Throw<DllNotFoundException>().WithMessage("*native library not found*");
     }
 }
