@@ -1,0 +1,26 @@
+# Commits to skip when running git blame — pure formatting, no behaviour change.
+#
+# GitHub's blame view reads this file automatically. Plain `git blame` does not:
+# each clone needs it turned on once, which is not something this file can do for you.
+#
+#     git config blame.ignoreRevsFile .git-blame-ignore-revs
+#
+# Only add a commit here if it changed formatting and nothing else. A commit that
+# reformatted files *while* changing code does not belong in this list — skipping it
+# would hide the real change along with the whitespace. That is why the InspectCode
+# commit (d03df6f) is absent: it reformatted 25 files while fixing real findings.
+#
+# Worth knowing what this can and cannot do. It re-attributes lines the ignored commit
+# *modified*, by looking them up in the parent commit. It cannot re-attribute a line the
+# commit *created* — and a reflow that collapses a four-line call onto one line creates
+# lines rather than modifying them. For the commit below that is most of the residual
+# blame, so this file changes almost nothing for it in practice. `git blame -w` is what
+# actually suppresses reflow noise; on SevenZipExtractor.cs it takes the reformat from 59
+# attributed lines down to 2, where this file takes it from 59 to 59.
+#
+# It is here for the next pure re-indent, where it does work, and to record the policy.
+
+# Apply documented formatting conventions (#22)
+# Set CSharpier's print width to 160 via .editorconfig, and converted all 99
+# file-scoped namespaces to block-scoped. Touched every .cs file in the repo.
+a411b366683b0dce4eb9bdb90d6bb511b8e8822d
