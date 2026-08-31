@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices.Marshalling;
 using System.Threading;
-using SevenZipSharper.Interop;
 using SevenZipSharper.Interop.Archive;
 
 namespace SevenZipSharper.Compression;

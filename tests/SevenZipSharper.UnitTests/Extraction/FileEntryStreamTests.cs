@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using AwesomeAssertions;
 using Moq;
@@ -97,7 +96,7 @@ public sealed class FileEntryStreamTests
 
         stream.Write(data, (uint)data.Length, out _).Should().Be(HResult.Ok);
 
-        pacer.Verify(p => p.ShouldFlush((long)data.Length), Times.Once);
+        pacer.Verify(p => p.ShouldFlush(data.Length), Times.Once);
         stream.Dispose();
         File.ReadAllBytes(path).Should().Equal(data);
     }
@@ -114,7 +113,7 @@ public sealed class FileEntryStreamTests
             b.Write(chunk, (uint)chunk.Length, out _).Should().Be(HResult.Ok);
 
         // Both streams routed their write through the one shared pacer instance.
-        pacer.Verify(p => p.ShouldFlush((long)chunk.Length), Times.Exactly(2));
+        pacer.Verify(p => p.ShouldFlush(chunk.Length), Times.Exactly(2));
     }
 
     [Test]

@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 using Microsoft.Extensions.Logging.Abstractions;
-using SevenZipSharper;
 using SevenZipSharper.Compression;
 
 namespace SevenZipSharper.Benchmarks;
@@ -18,7 +17,7 @@ namespace SevenZipSharper.Benchmarks;
 /// <remarks>
 /// Both extractors are created and opened in <see cref="IterationSetupAttribute"/> so the timed
 /// window covers only decompression: <see cref="SevenZipExtractor.ExtractEntryAsync"/> for
-/// SevenZipSharper and <see cref="global::SharpSevenZip.SharpSevenZipExtractor.ExtractFile"/>
+/// SevenZipSharper and <see cref="SharpSevenZip.SharpSevenZipExtractor.ExtractFile(int,System.IO.Stream)"/>
 /// for SharpSevenZip. Both call the same underlying native <c>IInArchive::Extract</c> on a
 /// pre-opened archive.
 /// </remarks>
@@ -36,7 +35,7 @@ public class ExtractionBenchmarks
     private MemoryStream _sharpStream = null!;
     private SevenZipExtractor _oursExtractor = null!;
     private IReadOnlyList<ArchiveEntry> _oursEntries = null!;
-    private global::SharpSevenZip.SharpSevenZipExtractor _sharpExtractor = null!;
+    private SharpSevenZip.SharpSevenZipExtractor _sharpExtractor = null!;
 
     [GlobalSetup]
     public async Task GlobalSetupAsync()
@@ -57,7 +56,7 @@ public class ExtractionBenchmarks
         _archive = ms.ToArray();
         _outputBuffer = new MemoryStream(capacity: 2 * 1024 * 1024);
 
-        global::SharpSevenZip.SharpSevenZipExtractor.SetLibraryPath(NativeLibPath);
+        SharpSevenZip.SharpSevenZipExtractor.SetLibraryPath(NativeLibPath);
     }
 
     [IterationSetup]
@@ -75,7 +74,7 @@ public class ExtractionBenchmarks
         _oursEntries = _oursExtractor.ListEntriesAsync().GetAwaiter().GetResult().Value;
 
         _sharpStream = new MemoryStream(_archive, writable: false);
-        _sharpExtractor = new global::SharpSevenZip.SharpSevenZipExtractor(_sharpStream);
+        _sharpExtractor = new SharpSevenZip.SharpSevenZipExtractor(_sharpStream);
     }
 
     [IterationCleanup]

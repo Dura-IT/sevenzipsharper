@@ -1,0 +1,13 @@
+<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+
+	<!--
+	Project-scoped so this stays enforced in src/ and tests/.
+
+	AccessToStaticMemberViaDerivedType: the SharpSevenZip comparison baseline exposes
+	SetLibraryPath on a base type. Naming the concrete type we are benchmarking against
+	(SharpSevenZipCompressor / SharpSevenZipExtractor) reads better here than naming a
+	third-party base class the benchmark never otherwise mentions.
+	-->
+	<s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=AccessToStaticMemberViaDerivedType/@EntryIndexedValue">DO_NOT_SHOW</s:String>
+
+</wpf:ResourceDictionary>

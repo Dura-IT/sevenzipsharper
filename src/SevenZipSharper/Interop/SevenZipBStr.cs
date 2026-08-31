@@ -41,7 +41,7 @@ internal static class SevenZipBStr
         nint dataPtr = ptr + 4;
         for (int i = 0; i < numChars; i++)
             Marshal.WriteInt32(dataPtr + ((nint)i * 4), value[i]);
-        Marshal.WriteInt32(dataPtr + (nint)byteLen, 0);
+        Marshal.WriteInt32(dataPtr + byteLen, 0);
         return dataPtr;
     }
 

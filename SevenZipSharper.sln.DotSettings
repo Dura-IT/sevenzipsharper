@@ -1,0 +1,68 @@
+<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+
+	<!--
+	Solution-shared ReSharper settings. Read by both Rider's live inspections and
+	`jb inspectcode` in CI, so what you see while editing matches what the build enforces.
+
+	Every entry below is a deliberate divergence from a ReSharper default, justified in
+	place. Do not add blanket suppressions here to silence a real finding.
+	-->
+
+	<!--
+	Naming is not a CI gate — Rider still surfaces it live, it just does not fail the build.
+
+	ReSharper's defaults disagree with this codebase in both directions, and the codebase is
+	deliberately not uniform: `private static readonly` fields are PascalCase when they are
+	constants in all but the keyword (MethodNameLzma, PropKeyDictionarySize) and _camelCase
+	when they are LoggerMessage delegates (_appendCompleted). ReSharper wants PascalCase for
+	all of them; a dotnet_naming_rule in .editorconfig cannot express the split either, since
+	symbol groups cannot match "private, not static". It also wants GetCurrentOs for
+	GetCurrentOS, and Stream for the protected `_stream` field — which would collide with the
+	type name.
+
+	Note for anyone tempted to fix this in .editorconfig: ReSharper does read
+	dotnet_naming_rule, and .editorconfig severity wins over this file, so a rule added there
+	re-enables the inspection regardless of the setting below.
+	-->
+	<s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=InconsistentNaming/@EntryIndexedValue">DO_NOT_SHOW</s:String>
+
+	<!--
+	This is a library: public surface exists for consumers, so "never used" measured
+	across this solution alone is meaningless. ArchiveEntry.Crc, ArchiveInfo.Comment and
+	friends are read by callers, not by us.
+	-->
+	<s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=UnusedAutoPropertyAccessor_002EGlobal/@EntryIndexedValue">DO_NOT_SHOW</s:String>
+	<s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=UnusedMember_002EGlobal/@EntryIndexedValue">DO_NOT_SHOW</s:String>
+
+	<!--
+	Namespace-per-folder is deliberately not our rule. The DI extensions live in
+	`Microsoft.Extensions.DependencyInjection` so consumers get AddSevenZipSharper()
+	without an extra using — the standard .NET library idiom — and test projects use a
+	single flat namespace per assembly rather than mirroring their folder tree.
+	-->
+	<s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=CheckNamespace/@EntryIndexedValue">DO_NOT_SHOW</s:String>
+
+	<!--
+	COM interop: casts between [GeneratedComInterface] types are resolved by the runtime
+	through QueryInterface against the native 7-Zip vtable. No managed type implements
+	both interfaces, so ReSharper's solution-wide type-hierarchy check cannot see the
+	relationship and reports every such cast as suspicious.
+	-->
+	<s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=SuspiciousTypeConversion_002EGlobal/@EntryIndexedValue">DO_NOT_SHOW</s:String>
+
+	<!--
+	COM classes list every interface they expose, even when a base class already declares
+	it. With [GeneratedComClass] the interface list is the contract the source generator and
+	the reader both go by; trimming it to what the compiler strictly requires hides which
+	vtable a class actually publishes.
+	-->
+	<s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=RedundantExtendsListEntry/@EntryIndexedValue">DO_NOT_SHOW</s:String>
+
+	<!--
+	Array element types stay written out: `new uint[] { ... }`, not `new[] { ... }`. Same
+	reasoning as the no-target-typed-new rule in /Development/CLAUDE.md -> C# -> Style — the
+	type is stated at the creation site, not inferred from the initializer.
+	-->
+	<s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=RedundantExplicitArrayCreation/@EntryIndexedValue">DO_NOT_SHOW</s:String>
+
+</wpf:ResourceDictionary>

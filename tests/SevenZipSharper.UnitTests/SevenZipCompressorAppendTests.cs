@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -100,7 +99,7 @@ public sealed class SevenZipCompressorAppendTests
                 )
             )
             .Should()
-            .ThrowAsync<System.OperationCanceledException>();
+            .ThrowAsync<OperationCanceledException>();
     }
 
     // CompressMultiVolumeAsync — public overload via internal constructor.
@@ -170,7 +169,7 @@ public sealed class SevenZipCompressorAppendTests
                 )
             )
             .Should()
-            .ThrowAsync<System.OperationCanceledException>();
+            .ThrowAsync<OperationCanceledException>();
     }
 
     // AppendAsync — public overload early-exit paths (param validation and dispose guard

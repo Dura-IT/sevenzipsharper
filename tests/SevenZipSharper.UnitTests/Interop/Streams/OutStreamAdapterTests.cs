@@ -32,6 +32,8 @@ public sealed class OutStreamAdapterTests
         ISequentialOutStream adapter = new OutStreamAdapter(stream);
         var data = new byte[1];
 
+        // ReSharper disable once RedundantCast — the cast documents uint arithmetic, not int overflow.
+
         var hr = adapter.Write(data, (uint)int.MaxValue + 1u, out var processed);
 
         hr.Should().Be(HResult.InvalidArg);

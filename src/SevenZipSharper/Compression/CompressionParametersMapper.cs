@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using System.Globalization;
-using SevenZipSharper;
-using SevenZipSharper.Compression;
 using SevenZipSharper.Interop;
 
 namespace SevenZipSharper.Compression;

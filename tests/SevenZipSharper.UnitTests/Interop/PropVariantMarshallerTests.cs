@@ -61,7 +61,7 @@ public sealed class PropVariantMarshallerTests
                 for (var b = 0; b < PropVariantLayout.ManagedSize; b++)
                     Marshal.ReadByte(ptr + (i * stride) + b).Should().Be(expected[i][b]);
                 for (var b = PropVariantLayout.ManagedSize; b < stride; b++)
-                    Marshal.ReadByte(ptr + (i * stride) + b).Should().Be((byte)0);
+                    Marshal.ReadByte(ptr + (i * stride) + b).Should().Be(0);
             }
         }
         finally

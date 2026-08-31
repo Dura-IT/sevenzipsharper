@@ -58,11 +58,7 @@ public sealed class FormatFallbackBehaviorTests
 
         // Verify the written method code is Deflate (8), not any LZMA variant.
         archive.Position = 0;
-        using var reader = new System.IO.BinaryReader(
-            archive,
-            System.Text.Encoding.UTF8,
-            leaveOpen: true
-        );
+        using var reader = new BinaryReader(archive, System.Text.Encoding.UTF8, leaveOpen: true);
         reader.ReadInt32(); // local file header signature
         reader.ReadUInt16(); // version needed
         reader.ReadUInt16(); // general purpose bit flag
@@ -125,11 +121,7 @@ public sealed class FormatFallbackBehaviorTests
 
         // Verify the local file header contains the expected ZIP method code.
         archive.Position = 0;
-        using var reader = new System.IO.BinaryReader(
-            archive,
-            System.Text.Encoding.UTF8,
-            leaveOpen: true
-        );
+        using var reader = new BinaryReader(archive, System.Text.Encoding.UTF8, leaveOpen: true);
         reader.ReadInt32(); // local file header signature
         reader.ReadUInt16(); // version needed
         reader.ReadUInt16(); // general purpose bit flag
