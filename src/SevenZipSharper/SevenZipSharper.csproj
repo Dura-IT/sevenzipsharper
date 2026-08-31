@@ -22,9 +22,40 @@
 
   <ItemGroup>
     <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
-    <!-- Export assets/logo.svg to PNG at 128×128 and save as assets/icon.png before packing. -->
     <None Include="..\..\assets\icon.png" Pack="true" PackagePath="\" Condition="Exists('..\..\assets\icon.png')"/>
   </ItemGroup>
+
+  <!-- Regenerates the icon PNGs from assets/logo.svg before packing, so the packed icon can
+       never drift from the SVG master. Both PNGs are committed, so this is a consistency
+       check rather than a build dependency: when rsvg-convert is missing the target logs and
+       skips, and pack uses the checked-in files. That is the normal case on CI — GitHub
+       runners do not ship librsvg — and the reason this must never be a hard requirement.
+       Inputs/Outputs make it a no-op unless logo.svg is newer than what it produces. -->
+  <Target Name="GenerateIconsFromLogo"
+          BeforeTargets="Pack"
+          Inputs="$(MSBuildThisFileDirectory)../../assets/logo.svg"
+          Outputs="$(MSBuildThisFileDirectory)../../assets/icon.png;$(MSBuildThisFileDirectory)../../assets/icon@2x.png">
+    <PropertyGroup>
+      <_AssetsDir>$(MSBuildThisFileDirectory)../../assets</_AssetsDir>
+    </PropertyGroup>
+
+    <!-- IgnoreExitCode so a missing binary is a skip, not an MSB3073 warning. -->
+    <Exec Command="rsvg-convert --version"
+          IgnoreExitCode="true"
+          StandardOutputImportance="low"
+          StandardErrorImportance="low">
+      <Output TaskParameter="ExitCode" PropertyName="_RsvgExitCode"/>
+    </Exec>
+
+    <Message Condition="'$(_RsvgExitCode)' != '0'"
+             Importance="high"
+             Text="rsvg-convert not found - packing the committed assets/icon.png unchanged. Install librsvg to regenerate it from logo.svg." />
+
+    <Exec Condition="'$(_RsvgExitCode)' == '0'"
+          Command="rsvg-convert -w 128 -h 128 &quot;$(_AssetsDir)/logo.svg&quot; -o &quot;$(_AssetsDir)/icon.png&quot;" />
+    <Exec Condition="'$(_RsvgExitCode)' == '0'"
+          Command="rsvg-convert -w 256 -h 256 &quot;$(_AssetsDir)/logo.svg&quot; -o &quot;$(_AssetsDir)/icon@2x.png&quot;" />
+  </Target>
 
   <ItemGroup>
     <PackageReference Include="FluentResults" Version="4.0.0"/>
