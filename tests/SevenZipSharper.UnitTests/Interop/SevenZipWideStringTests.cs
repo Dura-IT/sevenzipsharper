@@ -2,110 +2,111 @@ using AwesomeAssertions;
 using NUnit.Framework;
 using SevenZipSharper.Interop;
 
-namespace SevenZipSharper.UnitTests.Interop;
-
-[TestOf(typeof(SevenZipWideString))]
-public sealed class SevenZipWideStringTests
+namespace SevenZipSharper.UnitTests.Interop
 {
-    [Test]
-    public void Alloc_EmptyString_RoundTrips()
+    [TestOf(typeof(SevenZipWideString))]
+    public sealed class SevenZipWideStringTests
     {
-        var ptr = SevenZipWideString.Alloc(string.Empty);
-        try
+        [Test]
+        public void Alloc_EmptyString_RoundTrips()
         {
-            SevenZipWideString.Read(ptr).Should().Be(string.Empty);
+            var ptr = SevenZipWideString.Alloc(string.Empty);
+            try
+            {
+                SevenZipWideString.Read(ptr).Should().Be(string.Empty);
+            }
+            finally
+            {
+                SevenZipWideString.Free(ptr);
+            }
         }
-        finally
-        {
-            SevenZipWideString.Free(ptr);
-        }
-    }
 
-    [Test]
-    public void Alloc_SingleAsciiChar_RoundTrips()
-    {
-        var ptr = SevenZipWideString.Alloc("x");
-        try
+        [Test]
+        public void Alloc_SingleAsciiChar_RoundTrips()
         {
-            SevenZipWideString.Read(ptr).Should().Be("x");
+            var ptr = SevenZipWideString.Alloc("x");
+            try
+            {
+                SevenZipWideString.Read(ptr).Should().Be("x");
+            }
+            finally
+            {
+                SevenZipWideString.Free(ptr);
+            }
         }
-        finally
-        {
-            SevenZipWideString.Free(ptr);
-        }
-    }
 
-    [Test]
-    public void Alloc_MultiCharAscii_RoundTrips()
-    {
-        var ptr = SevenZipWideString.Alloc("LZMA");
-        try
+        [Test]
+        public void Alloc_MultiCharAscii_RoundTrips()
         {
-            SevenZipWideString.Read(ptr).Should().Be("LZMA");
+            var ptr = SevenZipWideString.Alloc("LZMA");
+            try
+            {
+                SevenZipWideString.Read(ptr).Should().Be("LZMA");
+            }
+            finally
+            {
+                SevenZipWideString.Free(ptr);
+            }
         }
-        finally
-        {
-            SevenZipWideString.Free(ptr);
-        }
-    }
 
-    [Test]
-    public void Alloc_MixedCaseKeyword_RoundTrips()
-    {
-        var ptr = SevenZipWideString.Alloc("LZMA2");
-        try
+        [Test]
+        public void Alloc_MixedCaseKeyword_RoundTrips()
         {
-            SevenZipWideString.Read(ptr).Should().Be("LZMA2");
+            var ptr = SevenZipWideString.Alloc("LZMA2");
+            try
+            {
+                SevenZipWideString.Read(ptr).Should().Be("LZMA2");
+            }
+            finally
+            {
+                SevenZipWideString.Free(ptr);
+            }
         }
-        finally
-        {
-            SevenZipWideString.Free(ptr);
-        }
-    }
 
-    [Test]
-    public void Alloc_BmpUnicode_RoundTrips()
-    {
-        // U+00E9 (é), U+4E2D (中), U+00FC (ü) — all in BMP, safely representable as wchar_t
-        const string value = "é中ü";
-        var ptr = SevenZipWideString.Alloc(value);
-        try
+        [Test]
+        public void Alloc_BmpUnicode_RoundTrips()
         {
-            SevenZipWideString.Read(ptr).Should().Be(value);
+            // U+00E9 (é), U+4E2D (中), U+00FC (ü) — all in BMP, safely representable as wchar_t
+            const string value = "é中ü";
+            var ptr = SevenZipWideString.Alloc(value);
+            try
+            {
+                SevenZipWideString.Read(ptr).Should().Be(value);
+            }
+            finally
+            {
+                SevenZipWideString.Free(ptr);
+            }
         }
-        finally
+
+        [Test]
+        public void Read_NullPointer_ReturnsNull()
         {
-            SevenZipWideString.Free(ptr);
+            SevenZipWideString.Read(nint.Zero).Should().BeNull();
         }
-    }
 
-    [Test]
-    public void Read_NullPointer_ReturnsNull()
-    {
-        SevenZipWideString.Read(nint.Zero).Should().BeNull();
-    }
-
-    [Test]
-    public void Free_NullPointer_DoesNotThrow()
-    {
-        var act = () => SevenZipWideString.Free(nint.Zero);
-        act.Should().NotThrow();
-    }
-
-    [TestCase("on")]
-    [TestCase("off")]
-    [TestCase("e")]
-    [TestCase("0")]
-    public void Alloc_CommonPropertyValues_RoundTrips(string value)
-    {
-        var ptr = SevenZipWideString.Alloc(value);
-        try
+        [Test]
+        public void Free_NullPointer_DoesNotThrow()
         {
-            SevenZipWideString.Read(ptr).Should().Be(value);
+            var act = () => SevenZipWideString.Free(nint.Zero);
+            act.Should().NotThrow();
         }
-        finally
+
+        [TestCase("on")]
+        [TestCase("off")]
+        [TestCase("e")]
+        [TestCase("0")]
+        public void Alloc_CommonPropertyValues_RoundTrips(string value)
         {
-            SevenZipWideString.Free(ptr);
+            var ptr = SevenZipWideString.Alloc(value);
+            try
+            {
+                SevenZipWideString.Read(ptr).Should().Be(value);
+            }
+            finally
+            {
+                SevenZipWideString.Free(ptr);
+            }
         }
     }
 }
