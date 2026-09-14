@@ -307,6 +307,11 @@ Results on x64 hardware and Linux/Windows may differ — the relative ordering s
 
 ## License
 
-SevenZipSharper is licensed under the **GNU Lesser General Public License v3.0 or later** (LGPL-3.0-or-later).
+Copyright © 2026 Durable IT Solutions.
 
-See [LICENSE](https://github.com/Dura-IT/sevenzipsharper/blob/main/LICENSE) for details.
+SevenZipSharper is licensed under the **GNU Lesser General Public License v3.0 or later** (LGPL-3.0-or-later). It bundles `7z` native libraries built from official 7-Zip source, which is why the licence is LGPL rather than MIT.
+
+This library is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. It is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+- [LICENSE](https://github.com/Dura-IT/sevenzipsharper/blob/main/LICENSE) — the GNU Lesser General Public License v3.0
+- [COPYING](https://github.com/Dura-IT/sevenzipsharper/blob/main/COPYING) — the GNU General Public License v3.0, whose terms LGPL-3.0 incorporates by reference
