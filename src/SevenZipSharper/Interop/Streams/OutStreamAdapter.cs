@@ -26,7 +26,7 @@ namespace SevenZipSharper.Interop.Streams
 
             try
             {
-                _stream.Write(data, 0, (int)size);
+                BaseStream.Write(data, 0, (int)size);
                 processedSize = size;
                 return HResult.Ok;
             }
@@ -48,7 +48,7 @@ namespace SevenZipSharper.Interop.Streams
         {
             try
             {
-                _stream.SetLength((long)newSize);
+                BaseStream.SetLength((long)newSize);
                 return HResult.Ok;
             }
             catch (Exception)

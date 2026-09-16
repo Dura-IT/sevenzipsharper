@@ -13,7 +13,7 @@ namespace SevenZipSharper.IntegrationTests
     [TestOf(typeof(SevenZipExtractor))]
     public sealed class CancellationTests
     {
-        private static readonly Lazy<Task<byte[]>> _archiveBytes = new(BuildArchiveAsync);
+        private static readonly Lazy<Task<byte[]>> ArchiveBytes = new(BuildArchiveAsync);
 
         private static async Task<byte[]> BuildArchiveAsync()
         {
@@ -25,7 +25,7 @@ namespace SevenZipSharper.IntegrationTests
         [Test]
         public async Task ExtractAllAsync_PreCancelledToken_ThrowsOperationCanceledException()
         {
-            var archive = await _archiveBytes.Value;
+            var archive = await ArchiveBytes.Value;
             using var cts = new CancellationTokenSource();
             await cts.CancelAsync();
 
@@ -50,7 +50,7 @@ namespace SevenZipSharper.IntegrationTests
         [Test]
         public async Task ListEntriesAsync_PreCancelledToken_ThrowsOperationCanceledException()
         {
-            var archive = await _archiveBytes.Value;
+            var archive = await ArchiveBytes.Value;
             using var cts = new CancellationTokenSource();
             await cts.CancelAsync();
 

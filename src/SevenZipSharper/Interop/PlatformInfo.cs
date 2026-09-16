@@ -5,9 +5,9 @@ namespace SevenZipSharper.Interop
 {
     internal static class PlatformInfo
     {
-        internal static string GetRuntimeIdentifier() => BuildRuntimeIdentifier(GetCurrentOS(), RuntimeInformation.ProcessArchitecture);
+        internal static string GetRuntimeIdentifier() => BuildRuntimeIdentifier(GetCurrentOs(), RuntimeInformation.ProcessArchitecture);
 
-        internal static string GetLibraryFileName() => BuildLibraryFileName(GetCurrentOS());
+        internal static string GetLibraryFileName() => BuildLibraryFileName(GetCurrentOs());
 
         internal static string BuildRuntimeIdentifier(OSPlatform os, Architecture architecture)
         {
@@ -43,7 +43,7 @@ namespace SevenZipSharper.Interop
             throw new PlatformNotSupportedException($"Unsupported operating system: {os}.");
         }
 
-        private static OSPlatform GetCurrentOS()
+        private static OSPlatform GetCurrentOs()
         {
             if (OperatingSystem.IsWindows())
                 return OSPlatform.Windows;

@@ -26,7 +26,7 @@ namespace SevenZipSharper.Interop.Streams
 
             try
             {
-                processedSize = (uint)_stream.Read(data, 0, (int)size);
+                processedSize = (uint)BaseStream.Read(data, 0, (int)size);
                 return HResult.Ok;
             }
             catch (Exception)
