@@ -7,11 +7,11 @@ namespace SevenZipSharper.Interop.Streams
 {
     internal abstract class SeekableStreamAdapterBase
     {
-        protected readonly Stream _stream;
+        protected readonly Stream BaseStream;
 
         protected SeekableStreamAdapterBase(Stream stream)
         {
-            _stream = stream;
+            BaseStream = stream;
         }
 
         [SuppressMessage(
@@ -30,7 +30,7 @@ namespace SevenZipSharper.Interop.Streams
 
             try
             {
-                var pos = _stream.Seek(offset, (SeekOrigin)seekOrigin);
+                var pos = BaseStream.Seek(offset, (SeekOrigin)seekOrigin);
                 if (newPosition != nint.Zero)
                     Marshal.WriteInt64(newPosition, pos);
                 return HResult.Ok;

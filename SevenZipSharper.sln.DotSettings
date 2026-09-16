@@ -9,24 +9,6 @@
 	-->
 
 	<!--
-	Naming is not a CI gate — Rider still surfaces it live, it just does not fail the build.
-
-	ReSharper's defaults disagree with this codebase in both directions, and the codebase is
-	deliberately not uniform: `private static readonly` fields are PascalCase when they are
-	constants in all but the keyword (MethodNameLzma, PropKeyDictionarySize) and _camelCase
-	when they are LoggerMessage delegates (_appendCompleted). ReSharper wants PascalCase for
-	all of them; a dotnet_naming_rule in .editorconfig cannot express the split either, since
-	symbol groups cannot match "private, not static". It also wants GetCurrentOs for
-	GetCurrentOS, and Stream for the protected `_stream` field — which would collide with the
-	type name.
-
-	Note for anyone tempted to fix this in .editorconfig: ReSharper does read
-	dotnet_naming_rule, and .editorconfig severity wins over this file, so a rule added there
-	re-enables the inspection regardless of the setting below.
-	-->
-	<s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=InconsistentNaming/@EntryIndexedValue">DO_NOT_SHOW</s:String>
-
-	<!--
 	This is a library: public surface exists for consumers, so "never used" measured
 	across this solution alone is meaningless. ArchiveEntry.Crc, ArchiveInfo.Comment and
 	friends are read by callers, not by us.

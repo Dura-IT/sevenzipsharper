@@ -14,7 +14,7 @@ namespace SevenZipSharper.IntegrationTests
     {
         private static readonly byte[] EntryContent = System.Text.Encoding.UTF8.GetBytes("Hello from SevenZipSharper integration tests");
 
-        private static readonly Lazy<Task<byte[]>> _archiveBytes = new(BuildArchiveAsync);
+        private static readonly Lazy<Task<byte[]>> ArchiveBytes = new(BuildArchiveAsync);
 
         private static Task<byte[]> BuildArchiveAsync() =>
             IntegrationTestHelpers.BuildArchiveAsync(ArchiveFormat.SevenZip, CompressionParameters.Default, ("test/hello.txt", EntryContent));
@@ -22,7 +22,7 @@ namespace SevenZipSharper.IntegrationTests
         [Test]
         public async Task OpenAsync_ValidArchive_ReturnsSuccessWithArchiveInfo()
         {
-            var archive = await _archiveBytes.Value;
+            var archive = await ArchiveBytes.Value;
             using var extractor = new SevenZipExtractor(new MemoryStream(archive), ArchiveFormat.SevenZip, NullLogger<SevenZipExtractor>.Instance);
 
             var result = await extractor.OpenAsync();
@@ -34,7 +34,7 @@ namespace SevenZipSharper.IntegrationTests
         [Test]
         public async Task ListEntriesAsync_AfterOpen_ReturnsEntries()
         {
-            var archive = await _archiveBytes.Value;
+            var archive = await ArchiveBytes.Value;
             using var extractor = new SevenZipExtractor(new MemoryStream(archive), ArchiveFormat.SevenZip, NullLogger<SevenZipExtractor>.Instance);
             await extractor.OpenAsync();
 
@@ -49,7 +49,7 @@ namespace SevenZipSharper.IntegrationTests
         [Test]
         public async Task ExtractAllAsync_AfterOpen_WritesFilesWithCorrectContent()
         {
-            var archive = await _archiveBytes.Value;
+            var archive = await ArchiveBytes.Value;
             using var extractor = new SevenZipExtractor(new MemoryStream(archive), ArchiveFormat.SevenZip, NullLogger<SevenZipExtractor>.Instance);
             await extractor.OpenAsync();
 
@@ -73,7 +73,7 @@ namespace SevenZipSharper.IntegrationTests
         [Test]
         public async Task ExtractEntryAsync_AfterOpen_WritesCorrectContent()
         {
-            var archive = await _archiveBytes.Value;
+            var archive = await ArchiveBytes.Value;
             using var extractor = new SevenZipExtractor(new MemoryStream(archive), ArchiveFormat.SevenZip, NullLogger<SevenZipExtractor>.Instance);
             await extractor.OpenAsync();
             var entries = (await extractor.ListEntriesAsync()).Value;

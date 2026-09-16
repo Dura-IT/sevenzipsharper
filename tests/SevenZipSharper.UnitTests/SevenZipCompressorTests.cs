@@ -25,10 +25,10 @@ namespace SevenZipSharper.UnitTests
             return new SevenZipCompressor(format, parameters ?? CompressionParameters.Default, archive, NullLogger<SevenZipCompressor>.Instance);
         }
 
-        private static readonly byte[] _sampleContent = { 1, 2, 3 };
-        private static readonly string[] _singleFilePath = { "anything" };
+        private static readonly byte[] SampleContent = { 1, 2, 3 };
+        private static readonly string[] SingleFilePath = { "anything" };
 
-        private static (string EntryPath, Stream Data)[] OneEntry() => new[] { ("file.txt", (Stream)new MemoryStream(_sampleContent)) };
+        private static (string EntryPath, Stream Data)[] OneEntry() => new[] { ("file.txt", (Stream)new MemoryStream(SampleContent)) };
 
         [Test]
         public async Task CompressAsync_CallsUpdateItems_WithCorrectCount()
@@ -207,7 +207,7 @@ namespace SevenZipSharper.UnitTests
             compressor.Dispose();
 
             await FluentActions
-                .Awaiting(() => compressor.CompressFilesAsync(_singleFilePath, Path.GetTempPath(), new MemoryStream()))
+                .Awaiting(() => compressor.CompressFilesAsync(SingleFilePath, Path.GetTempPath(), new MemoryStream()))
                 .Should()
                 .ThrowAsync<System.ObjectDisposedException>();
         }

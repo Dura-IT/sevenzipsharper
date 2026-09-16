@@ -20,7 +20,7 @@ namespace SevenZipSharper.IntegrationTests
     [TestOf(typeof(SevenZipExtractor))]
     public sealed class PasswordProtectionTests
     {
-        private static readonly Lazy<byte[]> _archiveBytes = new(LoadFixture);
+        private static readonly Lazy<byte[]> ArchiveBytes = new(LoadFixture);
 
         private static byte[] LoadFixture()
         {
@@ -36,7 +36,7 @@ namespace SevenZipSharper.IntegrationTests
         [Test]
         public async Task OpenAsync_WithCorrectPassword_Succeeds()
         {
-            using var extractor = new SevenZipExtractor(new MemoryStream(_archiveBytes.Value), ArchiveFormat.SevenZip, NullLogger<SevenZipExtractor>.Instance);
+            using var extractor = new SevenZipExtractor(new MemoryStream(ArchiveBytes.Value), ArchiveFormat.SevenZip, NullLogger<SevenZipExtractor>.Instance);
 
             var result = await extractor.OpenAsync(password: "TestPassword123");
 
@@ -46,7 +46,7 @@ namespace SevenZipSharper.IntegrationTests
         [Test]
         public async Task OpenAsync_WithWrongPassword_FailsOrExtractFails()
         {
-            using var extractor = new SevenZipExtractor(new MemoryStream(_archiveBytes.Value), ArchiveFormat.SevenZip, NullLogger<SevenZipExtractor>.Instance);
+            using var extractor = new SevenZipExtractor(new MemoryStream(ArchiveBytes.Value), ArchiveFormat.SevenZip, NullLogger<SevenZipExtractor>.Instance);
 
             // 7-Zip may succeed at Open with a wrong password (metadata is not encrypted by default)
             // but extraction will fail with DataError / CrcError.
@@ -64,7 +64,7 @@ namespace SevenZipSharper.IntegrationTests
         [Test]
         public async Task ExtractAsync_WithCorrectPassword_ContentIsReadable()
         {
-            using var extractor = new SevenZipExtractor(new MemoryStream(_archiveBytes.Value), ArchiveFormat.SevenZip, NullLogger<SevenZipExtractor>.Instance);
+            using var extractor = new SevenZipExtractor(new MemoryStream(ArchiveBytes.Value), ArchiveFormat.SevenZip, NullLogger<SevenZipExtractor>.Instance);
             await extractor.OpenAsync(password: "TestPassword123");
             var entries = (await extractor.ListEntriesAsync()).Value;
             using var output = new MemoryStream();
