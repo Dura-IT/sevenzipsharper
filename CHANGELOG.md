@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.2] - 2026-10-08
+
+### Changed
+
+- Bundled 7-Zip native libraries updated from 26.02 to 26.04. Upstream 26.03 and 26.04
+  carry bug and security fixes, including CVE-2026-58052 (Mark-of-the-Web not preserved
+  when extracting a crafted archive, Windows only). 26.04 reworks the NTFS, WIM and VHD
+  parsers, so consumers opening untrusted images in those formats benefit most.
+
 ## [2.0.1] - 2026-08-31
 
 ### Changed
@@ -184,7 +193,8 @@ published as pre-release pending native library compilation for all supported pl
   `osx-x64`, `linux-x64`, `linux-arm64` via `NativeLibrary.SetDllImportResolver`
 - GitHub Actions CI: build + test on Ubuntu, Windows, macOS; pack job
 
-[Unreleased]: https://github.com/Dura-IT/SevenZipSharper/compare/v2.0.1...HEAD
+[Unreleased]: https://github.com/Dura-IT/SevenZipSharper/compare/v2.0.2...HEAD
+[2.0.2]: https://github.com/Dura-IT/SevenZipSharper/compare/v2.0.1...v2.0.2
 [2.0.1]: https://github.com/Dura-IT/SevenZipSharper/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/Dura-IT/SevenZipSharper/compare/v1.0.2...v2.0.0
 [1.0.2]: https://github.com/Dura-IT/SevenZipSharper/compare/v1.0.1...v1.0.2
