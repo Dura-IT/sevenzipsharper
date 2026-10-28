@@ -1,11 +1,11 @@
 name: Build native libraries
 
+# Dispatch-only. CI downloads natives-v<7zip-version>, so this has to run on the 7-Zip bump
+# branch before that PR can pass: gh workflow run build-natives.yml --ref <branch>
+# A push trigger on main can only fail: by merge time the asset already exists, and the
+# publish step refuses to overwrite it.
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - scripts/7zip-version
-    branches: [main]
 
 concurrency:
   group: build-natives-${{ github.ref }}
