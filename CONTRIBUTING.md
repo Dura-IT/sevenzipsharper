@@ -2,7 +2,8 @@
 
 ## Prerequisites
 
-- [.NET 10 SDK](https://dotnet.microsoft.com/download)
+- [.NET 11 SDK](https://dotnet.microsoft.com/download)
+- .NET 8 and .NET 10 runtimes (the tests run on both target frameworks)
 - CSharpier (installed as a local tool — see below)
 
 ## Getting started

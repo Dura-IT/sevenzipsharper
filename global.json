@@ -1,9 +1,9 @@
 {
   "sdk": {
     "rollForward": "latestMinor",
-    "version": "10.0.300"
+    "version": "11.0.100"
   },
   "msbuild-sdks": {
-    "Microsoft.Build.NoTargets": "3.7.56"
+    "Microsoft.Build.NoTargets": "3.7.134"
   }
 }

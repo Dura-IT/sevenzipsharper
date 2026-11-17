@@ -24,6 +24,7 @@ jobs:
           dotnet-version: |
             8.x
             10.x
+            11.x
           cache: true
           cache-dependency-path: '**/*.csproj'
 
@@ -101,6 +102,7 @@ jobs:
           dotnet-version: |
             8.x
             10.x
+            11.x
           architecture: ${{ matrix.dotnet_arch }}
           cache: true
           cache-dependency-path: '**/*.csproj'
@@ -145,13 +147,14 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
       # The action installs only one SDK; the solution multi-targets net8.0 and net10.0,
-      # and InspectCode builds it before analysing.
+      # global.json pins SDK 11, and InspectCode builds it before analysing.
       - name: Setup .NET
         uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68  # v6.0.0
         with:
           dotnet-version: |
             8.x
             10.x
+            11.x
           cache: true
           cache-dependency-path: '**/*.csproj'
 
@@ -191,7 +194,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68  # v6.0.0
         with:
-          dotnet-version: 10.x
+          dotnet-version: 11.x
           cache: true
           cache-dependency-path: '**/*.csproj'
 
