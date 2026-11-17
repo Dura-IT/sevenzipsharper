@@ -1,35 +1,46 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>net10.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <!-- On macOS: copy lib7z.dylib from Homebrew into the repo runtimes folder (once) -->
-  <Target Name="ProvisionNativeLibrary" BeforeTargets="Build"
-          Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+  <Target
+    Name="ProvisionNativeLibrary"
+    BeforeTargets="Build"
+    Condition="$([MSBuild]::IsOSPlatform('OSX'))"
+  >
     <PropertyGroup>
       <_HomebrewLib>/opt/homebrew/lib/lib7z.dylib</_HomebrewLib>
       <_RuntimeNativeDir>$(MSBuildThisFileDirectory)..\..\runtimes\osx-arm64\native\</_RuntimeNativeDir>
     </PropertyGroup>
-    <MakeDir Directories="$(_RuntimeNativeDir)"
-             Condition="Exists('$(_HomebrewLib)') And !Exists('$(_RuntimeNativeDir)')" />
-    <Copy SourceFiles="$(_HomebrewLib)"
-          DestinationFiles="$(_RuntimeNativeDir)7z.dylib"
-          Condition="Exists('$(_HomebrewLib)') And !Exists('$(_RuntimeNativeDir)7z.dylib')" />
+    <MakeDir
+      Directories="$(_RuntimeNativeDir)"
+      Condition="Exists('$(_HomebrewLib)') And !Exists('$(_RuntimeNativeDir)')"
+    />
+    <Copy
+      SourceFiles="$(_HomebrewLib)"
+      DestinationFiles="$(_RuntimeNativeDir)7z.dylib"
+      Condition="Exists('$(_HomebrewLib)') And !Exists('$(_RuntimeNativeDir)7z.dylib')"
+    />
   </Target>
 
   <!-- Copy whatever is in runtimes/ to the test output directory -->
-  <Target Name="CopyNativeLibsToOutput" DependsOnTargets="ProvisionNativeLibrary"
-          AfterTargets="Build">
+  <Target
+    Name="CopyNativeLibsToOutput"
+    DependsOnTargets="ProvisionNativeLibrary"
+    AfterTargets="Build"
+  >
     <ItemGroup>
       <!-- Use runtimes\**\* (no fixed 'native' suffix) so RecursiveDir captures the full
            RID+native sub-path (e.g. osx-arm64\native\) without any double-match. -->
       <_NativeLibs Include="$(MSBuildThisFileDirectory)..\..\runtimes\**\*" />
     </ItemGroup>
-    <Copy SourceFiles="@(_NativeLibs)"
-          DestinationFiles="@(_NativeLibs->'$(OutDir)runtimes\%(RecursiveDir)%(Filename)%(Extension)')"
-          SkipUnchangedFiles="true" />
+    <Copy
+      SourceFiles="@(_NativeLibs)"
+      DestinationFiles="@(_NativeLibs->'$(OutDir)runtimes\%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="true"
+    />
   </Target>
 
   <ItemGroup>
@@ -37,11 +48,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.15"/>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.12.0"/>
-    <PackageReference Include="NUnit" Version="5.0.0"/>
-    <PackageReference Include="NUnit3TestAdapter" Version="6.3.1"/>
-    <PackageReference Include="AwesomeAssertions" Version="9.6.0"/>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.15" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.12.0" />
+    <PackageReference Include="NUnit" Version="5.0.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="6.3.1" />
+    <PackageReference Include="AwesomeAssertions" Version="9.6.0" />
     <PackageReference Include="coverlet.collector" Version="10.1.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -49,7 +60,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\SevenZipSharper\SevenZipSharper.csproj"/>
+    <ProjectReference Include="..\..\src\SevenZipSharper\SevenZipSharper.csproj" />
   </ItemGroup>
-
 </Project>

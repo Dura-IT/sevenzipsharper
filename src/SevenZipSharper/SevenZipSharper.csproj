@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -21,8 +20,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
-    <None Include="..\..\assets\icon.png" Pack="true" PackagePath="\" Condition="Exists('..\..\assets\icon.png')"/>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None
+      Include="..\..\assets\icon.png"
+      Pack="true"
+      PackagePath="\"
+      Condition="Exists('..\..\assets\icon.png')"
+    />
   </ItemGroup>
 
   <!-- Regenerates the icon PNGs from assets/logo.svg before packing, so the packed icon can
@@ -31,36 +35,49 @@
        skips, and pack uses the checked-in files. That is the normal case on CI — GitHub
        runners do not ship librsvg — and the reason this must never be a hard requirement.
        Inputs/Outputs make it a no-op unless logo.svg is newer than what it produces. -->
-  <Target Name="GenerateIconsFromLogo"
-          BeforeTargets="Pack"
-          Inputs="$(MSBuildThisFileDirectory)../../assets/logo.svg"
-          Outputs="$(MSBuildThisFileDirectory)../../assets/icon.png;$(MSBuildThisFileDirectory)../../assets/icon@2x.png">
+  <Target
+    Name="GenerateIconsFromLogo"
+    BeforeTargets="Pack"
+    Inputs="$(MSBuildThisFileDirectory)../../assets/logo.svg"
+    Outputs="$(MSBuildThisFileDirectory)../../assets/icon.png;$(MSBuildThisFileDirectory)../../assets/icon@2x.png"
+  >
     <PropertyGroup>
       <_AssetsDir>$(MSBuildThisFileDirectory)../../assets</_AssetsDir>
     </PropertyGroup>
 
     <!-- IgnoreExitCode so a missing binary is a skip, not an MSB3073 warning. -->
-    <Exec Command="rsvg-convert --version"
-          IgnoreExitCode="true"
-          StandardOutputImportance="low"
-          StandardErrorImportance="low">
-      <Output TaskParameter="ExitCode" PropertyName="_RsvgExitCode"/>
+    <Exec
+      Command="rsvg-convert --version"
+      IgnoreExitCode="true"
+      StandardOutputImportance="low"
+      StandardErrorImportance="low"
+    >
+      <Output TaskParameter="ExitCode" PropertyName="_RsvgExitCode" />
     </Exec>
 
-    <Message Condition="'$(_RsvgExitCode)' != '0'"
-             Importance="high"
-             Text="rsvg-convert not found - packing the committed assets/icon.png unchanged. Install librsvg to regenerate it from logo.svg." />
+    <Message
+      Condition="'$(_RsvgExitCode)' != '0'"
+      Importance="high"
+      Text="rsvg-convert not found - packing the committed assets/icon.png unchanged. Install librsvg to regenerate it from logo.svg."
+    />
 
-    <Exec Condition="'$(_RsvgExitCode)' == '0'"
-          Command="rsvg-convert -w 128 -h 128 &quot;$(_AssetsDir)/logo.svg&quot; -o &quot;$(_AssetsDir)/icon.png&quot;" />
-    <Exec Condition="'$(_RsvgExitCode)' == '0'"
-          Command="rsvg-convert -w 256 -h 256 &quot;$(_AssetsDir)/logo.svg&quot; -o &quot;$(_AssetsDir)/icon@2x.png&quot;" />
+    <Exec
+      Condition="'$(_RsvgExitCode)' == '0'"
+      Command="rsvg-convert -w 128 -h 128 &quot;$(_AssetsDir)/logo.svg&quot; -o &quot;$(_AssetsDir)/icon.png&quot;"
+    />
+    <Exec
+      Condition="'$(_RsvgExitCode)' == '0'"
+      Command="rsvg-convert -w 256 -h 256 &quot;$(_AssetsDir)/logo.svg&quot; -o &quot;$(_AssetsDir)/icon@2x.png&quot;"
+    />
   </Target>
 
   <ItemGroup>
-    <PackageReference Include="FluentResults" Version="4.0.0"/>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.15"/>
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.15"/>
+    <PackageReference Include="FluentResults" Version="4.0.0" />
+    <PackageReference
+      Include="Microsoft.Extensions.DependencyInjection.Abstractions"
+      Version="10.0.15"
+    />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.15" />
   </ItemGroup>
 
   <ItemGroup>
@@ -69,16 +86,17 @@
          automatically when they add DuraIT.SevenZipSharper.
          SetTargetFramework: Native is net8.0-only; tell MSBuild which TFM to use when this
          multi-targeting project resolves the dependency, avoiding a TFM negotiation error. -->
-    <ProjectReference Include="../SevenZipSharper.Native/SevenZipSharper.Native.csproj"
-                      ReferenceOutputAssembly="false"
-                      SkipGetTargetFrameworkProperties="true"
-                      SetTargetFramework="TargetFramework=net8.0"/>
+    <ProjectReference
+      Include="../SevenZipSharper.Native/SevenZipSharper.Native.csproj"
+      ReferenceOutputAssembly="false"
+      SkipGetTargetFrameworkProperties="true"
+      SetTargetFramework="TargetFramework=net8.0"
+    />
   </ItemGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="SevenZipSharper.UnitTests"/>
+    <InternalsVisibleTo Include="SevenZipSharper.UnitTests" />
     <!-- Lets Moq (Castle DynamicProxy) mock internal interfaces such as IWriteFlushPacer. -->
-    <InternalsVisibleTo Include="DynamicProxyGenAssembly2"/>
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
   </ItemGroup>
-
 </Project>

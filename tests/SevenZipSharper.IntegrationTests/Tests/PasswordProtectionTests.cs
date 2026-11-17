@@ -26,8 +26,8 @@ namespace SevenZipSharper.IntegrationTests
         {
             var assembly = Assembly.GetExecutingAssembly();
             const string resourceName = "SevenZipSharper.IntegrationTests.Fixtures.password-protected.7z";
-            using var stream =
-                assembly.GetManifestResourceStream(resourceName) ?? throw new InvalidOperationException($"Embedded resource '{resourceName}' not found.");
+            using var stream = assembly.GetManifestResourceStream(resourceName)
+                ?? throw new InvalidOperationException($"Embedded resource '{resourceName}' not found.");
             using var ms = new MemoryStream();
             stream.CopyTo(ms);
             return ms.ToArray();

@@ -167,7 +167,7 @@ jobs:
           upload-sarif: true
           # Keep in sync with dotnet-tools.json. A drift between the version CI installs
           # and the one `dotnet jb` runs locally silently changes which inspections fire.
-          tool-version: 2026.2.1
+          tool-version: 2026.3.0
 
       # InspectCode exits 0 even when it reports findings — the gate has to be explicit.
       - name: Fail on findings

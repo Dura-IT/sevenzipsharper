@@ -89,16 +89,13 @@ namespace SevenZipSharper.UnitTests
             try
             {
                 var content = new byte[] { 1, 2, 3 };
-                var archive = new FakeArchiveForExtraction(
-                    entries: new[] { ("../escaped.txt", false) },
-                    extractCallback: (callback, i) =>
-                    {
-                        callback.GetStream(i, out var stream, AskMode.Extract);
-                        stream?.Write(content, (uint)content.Length, out _);
-                        callback.PrepareOperation(AskMode.Extract);
-                        callback.SetOperationResult(OperationResult.Ok);
-                    }
-                );
+                var archive = new FakeArchiveForExtraction(entries: new[] { ("../escaped.txt", false) }, extractCallback: (callback, i) =>
+                {
+                    callback.GetStream(i, out var stream, AskMode.Extract);
+                    stream?.Write(content, (uint)content.Length, out _);
+                    callback.PrepareOperation(AskMode.Extract);
+                    callback.SetOperationResult(OperationResult.Ok);
+                });
                 using var extractor = CreateExtractor(archive);
                 await extractor.OpenAsync();
 
@@ -121,16 +118,13 @@ namespace SevenZipSharper.UnitTests
             try
             {
                 var content = new byte[] { 7, 8, 9 };
-                var archive = new FakeArchiveForExtraction(
-                    entries: new[] { ("safe.txt", false) },
-                    extractCallback: (callback, i) =>
-                    {
-                        callback.GetStream(i, out var stream, AskMode.Extract);
-                        stream?.Write(content, (uint)content.Length, out _);
-                        callback.PrepareOperation(AskMode.Extract);
-                        callback.SetOperationResult(OperationResult.Ok);
-                    }
-                );
+                var archive = new FakeArchiveForExtraction(entries: new[] { ("safe.txt", false) }, extractCallback: (callback, i) =>
+                {
+                    callback.GetStream(i, out var stream, AskMode.Extract);
+                    stream?.Write(content, (uint)content.Length, out _);
+                    callback.PrepareOperation(AskMode.Extract);
+                    callback.SetOperationResult(OperationResult.Ok);
+                });
                 using var extractor = CreateExtractor(archive);
                 await extractor.OpenAsync();
 
@@ -156,15 +150,12 @@ namespace SevenZipSharper.UnitTests
             Directory.CreateDirectory(tempDir);
             try
             {
-                var archive = new FakeArchiveForExtraction(
-                    entries: new[] { ("corrupt.bin", false) },
-                    extractCallback: (callback, i) =>
-                    {
-                        callback.GetStream(i, out _, AskMode.Extract);
-                        callback.PrepareOperation(AskMode.Extract);
-                        callback.SetOperationResult(OperationResult.CrcError);
-                    }
-                );
+                var archive = new FakeArchiveForExtraction(entries: new[] { ("corrupt.bin", false) }, extractCallback: (callback, i) =>
+                {
+                    callback.GetStream(i, out _, AskMode.Extract);
+                    callback.PrepareOperation(AskMode.Extract);
+                    callback.SetOperationResult(OperationResult.CrcError);
+                });
                 using var extractor = CreateExtractor(archive);
                 await extractor.OpenAsync();
 
@@ -194,16 +185,13 @@ namespace SevenZipSharper.UnitTests
         public async Task ExtractEntryAsync_WritesEntryData_ToOutputStream()
         {
             var content = new byte[] { 7, 8, 9 };
-            var archive = new FakeArchiveForExtraction(
-                entries: new[] { ("entry.txt", false) },
-                extractCallback: (callback, i) =>
-                {
-                    callback.GetStream(i, out var stream, AskMode.Extract);
-                    stream?.Write(content, (uint)content.Length, out _);
-                    callback.PrepareOperation(AskMode.Extract);
-                    callback.SetOperationResult(OperationResult.Ok);
-                }
-            );
+            var archive = new FakeArchiveForExtraction(entries: new[] { ("entry.txt", false) }, extractCallback: (callback, i) =>
+            {
+                callback.GetStream(i, out var stream, AskMode.Extract);
+                stream?.Write(content, (uint)content.Length, out _);
+                callback.PrepareOperation(AskMode.Extract);
+                callback.SetOperationResult(OperationResult.Ok);
+            });
             using var extractor = CreateExtractor(archive);
             await extractor.OpenAsync();
             var output = new MemoryStream();
@@ -229,15 +217,12 @@ namespace SevenZipSharper.UnitTests
         [Test]
         public async Task ExtractEntryAsync_ReturnsFail_WhenEntryResultIsCrcError()
         {
-            var archive = new FakeArchiveForExtraction(
-                entries: new[] { ("entry.txt", false) },
-                extractCallback: (callback, i) =>
-                {
-                    callback.GetStream(i, out _, AskMode.Extract);
-                    callback.PrepareOperation(AskMode.Extract);
-                    callback.SetOperationResult(OperationResult.CrcError);
-                }
-            );
+            var archive = new FakeArchiveForExtraction(entries: new[] { ("entry.txt", false) }, extractCallback: (callback, i) =>
+            {
+                callback.GetStream(i, out _, AskMode.Extract);
+                callback.PrepareOperation(AskMode.Extract);
+                callback.SetOperationResult(OperationResult.CrcError);
+            });
             using var extractor = CreateExtractor(archive);
             await extractor.OpenAsync();
 
@@ -270,16 +255,13 @@ namespace SevenZipSharper.UnitTests
             try
             {
                 var content = new byte[] { 1, 2, 3 };
-                var archive = new FakeArchiveForExtraction(
-                    entries: new[] { ("match.txt", false), ("skip.txt", false) },
-                    extractCallback: (callback, i) =>
-                    {
-                        callback.GetStream(i, out var stream, AskMode.Extract);
-                        stream?.Write(content, (uint)content.Length, out _);
-                        callback.PrepareOperation(AskMode.Extract);
-                        callback.SetOperationResult(OperationResult.Ok);
-                    }
-                );
+                var archive = new FakeArchiveForExtraction(entries: new[] { ("match.txt", false), ("skip.txt", false) }, extractCallback: (callback, i) =>
+                {
+                    callback.GetStream(i, out var stream, AskMode.Extract);
+                    stream?.Write(content, (uint)content.Length, out _);
+                    callback.PrepareOperation(AskMode.Extract);
+                    callback.SetOperationResult(OperationResult.Ok);
+                });
                 using var extractor = CreateExtractor(archive);
                 await extractor.OpenAsync();
 
@@ -324,15 +306,12 @@ namespace SevenZipSharper.UnitTests
             Directory.CreateDirectory(tempDir);
             try
             {
-                var archive = new FakeArchiveForExtraction(
-                    entries: new[] { ("file.txt", false) },
-                    extractCallback: (callback, i) =>
-                    {
-                        callback.GetStream(i, out _, AskMode.Extract);
-                        callback.PrepareOperation(AskMode.Extract);
-                        callback.SetOperationResult(OperationResult.CrcError);
-                    }
-                );
+                var archive = new FakeArchiveForExtraction(entries: new[] { ("file.txt", false) }, extractCallback: (callback, i) =>
+                {
+                    callback.GetStream(i, out _, AskMode.Extract);
+                    callback.PrepareOperation(AskMode.Extract);
+                    callback.SetOperationResult(OperationResult.CrcError);
+                });
                 using var extractor = CreateExtractor(archive);
                 await extractor.OpenAsync();
 
@@ -356,16 +335,13 @@ namespace SevenZipSharper.UnitTests
             try
             {
                 var content = new byte[] { 5, 6, 7 };
-                var archive = new FakeArchiveForExtraction(
-                    entries: new[] { ("a.txt", false), ("b.txt", false) },
-                    extractCallback: (callback, i) =>
-                    {
-                        callback.GetStream(i, out var stream, AskMode.Extract);
-                        stream?.Write(content, (uint)content.Length, out _);
-                        callback.PrepareOperation(AskMode.Extract);
-                        callback.SetOperationResult(OperationResult.Ok);
-                    }
-                );
+                var archive = new FakeArchiveForExtraction(entries: new[] { ("a.txt", false), ("b.txt", false) }, extractCallback: (callback, i) =>
+                {
+                    callback.GetStream(i, out var stream, AskMode.Extract);
+                    stream?.Write(content, (uint)content.Length, out _);
+                    callback.PrepareOperation(AskMode.Extract);
+                    callback.SetOperationResult(OperationResult.Ok);
+                });
                 using var extractor = CreateExtractor(archive);
                 await extractor.OpenAsync();
                 var prebuiltEntries = new List<ArchiveEntry> { TestEntry(0, "a.txt"), TestEntry(1, "b.txt") };
