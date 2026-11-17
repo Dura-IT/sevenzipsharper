@@ -68,10 +68,7 @@ namespace SevenZipSharper.UnitTests.Compression
         {
             // #12: the dictionary size must be a byte-suffixed string ("<n>b"), not a number — 7-Zip
             // reads a numeric "d" as a log2 exponent and rejects any real byte count with E_INVALIDARG.
-            var p = CompressionParameters.Default with
-            {
-                DictionarySize = 64 * 1024 * 1024u,
-            };
+            var p = CompressionParameters.Default with { DictionarySize = 64 * 1024 * 1024u };
             var (names, values) = CompressionParametersMapper.ToSetProperties(p, ArchiveFormat.SevenZip);
 
             var dictIndex = Array.IndexOf(names, "d");
