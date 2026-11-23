@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <TargetFramework>net10.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
     <Version>2.0.4</Version>
@@ -14,7 +14,7 @@
     <PackageProjectUrl>https://github.com/Dura-IT/SevenZipSharper</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Dura-IT/SevenZipSharper</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <Description>Cross-platform .NET 8+ library for reading and writing 7-zip archives.</Description>
+    <Description>Cross-platform .NET 10+ library for reading and writing 7-zip archives.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
@@ -75,9 +75,9 @@
     <PackageReference Include="FluentResults" Version="4.0.0" />
     <PackageReference
       Include="Microsoft.Extensions.DependencyInjection.Abstractions"
-      Version="10.0.15"
+      Version="11.0.0"
     />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.15" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="11.0.0" />
   </ItemGroup>
 
   <ItemGroup>
