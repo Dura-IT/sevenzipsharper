@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **BREAKING:** `net8.0` is no longer a target framework (.NET 8 is out of support). The library and
   `DuraIT.SevenZipSharper.Native` now target `net10.0`. Consumers still on .NET 8 stay on 2.x, which
-  will not receive further 7-Zip updates.
+  gets no scheduled updates; a 2.x branch can be cut on request.
 
 ### Changed
 
