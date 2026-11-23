@@ -32,6 +32,8 @@ jobs:
         run: dotnet tool install --global dotnet-sonarscanner
 
       - name: Sonar begin
+        # Forks get no SONAR_TOKEN, so the scanner would fail the job before the tests run
+        if: github.event.pull_request.head.repo.fork != true
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: >
@@ -57,6 +59,7 @@ jobs:
           -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
 
       - name: Sonar end
+        if: github.event.pull_request.head.repo.fork != true
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN"
