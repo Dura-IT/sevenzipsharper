@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.5] - 2026-11-23
+
+### Changed
+
+- The native libraries added by `DuraIT.SevenZipSharper.Native` are hidden in the project
+  explorer of consuming projects. They are still copied to the output directory.
+
 ## [2.0.4] - 2026-11-09
 
 ### Changed
@@ -210,7 +217,8 @@ published as pre-release pending native library compilation for all supported pl
   `osx-x64`, `linux-x64`, `linux-arm64` via `NativeLibrary.SetDllImportResolver`
 - GitHub Actions CI: build + test on Ubuntu, Windows, macOS; pack job
 
-[Unreleased]: https://github.com/Dura-IT/SevenZipSharper/compare/v2.0.4...HEAD
+[Unreleased]: https://github.com/Dura-IT/SevenZipSharper/compare/v2.0.5...HEAD
+[2.0.5]: https://github.com/Dura-IT/SevenZipSharper/compare/v2.0.4...v2.0.5
 [2.0.4]: https://github.com/Dura-IT/SevenZipSharper/compare/v2.0.3...v2.0.4
 [2.0.3]: https://github.com/Dura-IT/SevenZipSharper/compare/v2.0.2...v2.0.3
 [2.0.2]: https://github.com/Dura-IT/SevenZipSharper/compare/v2.0.1...v2.0.2
