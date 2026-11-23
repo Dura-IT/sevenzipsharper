@@ -4,7 +4,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Jobs;
+using BenchmarkDotNet.Configs;
 using Microsoft.Extensions.Logging.Abstractions;
 using SevenZipSharper.Compression;
 
@@ -22,8 +22,7 @@ namespace SevenZipSharper.Benchmarks
     /// pre-opened archive.
     /// </remarks>
     [MemoryDiagnoser]
-    [SimpleJob(RuntimeMoniker.Net80)]
-    [SimpleJob(RuntimeMoniker.Net10_0)]
+    [Config(typeof(RuntimeComparisonConfig))]
     public class ExtractionBenchmarks
     {
         [Params(ArchiveFormat.SevenZip, ArchiveFormat.Zip)]

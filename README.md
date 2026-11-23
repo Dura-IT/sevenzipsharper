@@ -36,7 +36,7 @@ All three forks share the same COM interop foundation: `[ComImport]` interface d
 | | SevenZipSharp (squid-box) | SharpSevenZip (JeremyAnsel) | **SevenZipSharper** |
 |---|---|---|---|
 | **Status** | Archived (2024) | Active | Active |
-| **Target frameworks** | .NET Std 2.0 / FX 4.7.2 / Core 3.1 | .NET Std 2.0 / FX 4.8 / .NET 6–8 | .NET 8 + .NET 10 |
+| **Target frameworks** | .NET Std 2.0 / FX 4.7.2 / Core 3.1 | .NET Std 2.0 / FX 4.8 / .NET 6–8 | .NET 10 (runs on .NET 11) |
 | **COM interop** | `[ComImport]` (runtime marshalling) | `[ComImport]` (runtime marshalling) | `[GeneratedComInterface]` (compile-time) |
 | **Async model** | Events + callbacks | Events + callbacks | `Task` / `CancellationToken` |
 | **Progress reporting** | Events | Events | `IProgress<T>` |
@@ -60,8 +60,9 @@ Both [squid-box's SevenZipSharp](https://github.com/squid-box/SevenZipSharp) and
 | .NET Standard 2.0 | Yes | Yes | — |
 | .NET Core 3.1 | Yes | — | — |
 | .NET 6 | — | Yes | — |
-| .NET 8 | — | Yes | **Yes** |
+| .NET 8 | — | Yes | — (use 2.x) |
 | .NET 10 | — | — | **Yes** |
+| .NET 11 | — | — | **Yes** (the `net10.0` build) |
 
 **.NET Framework and .NET Standard are not supported.** The COM interop layer requires `[GeneratedComInterface]`/`[GeneratedComClass]` (.NET 7+) and native library resolution requires `NativeLibrary.SetDllImportResolver` (.NET Core 3.0+). Neither API exists on .NET Framework or any version of .NET Standard.
 
@@ -272,34 +273,36 @@ To build the library for your own machine only, for local testing, run `bash scr
 dotnet run -c Release --project benchmarks/SevenZipSharper.Benchmarks --framework net10.0 -- --filter *
 ```
 
-Benchmarks compare extraction and compression performance against [SharpSevenZip](https://github.com/JeremyAnsel/SharpSevenZip) on a 1 MB compressible payload across formats and compression levels, run on both .NET 8 and .NET 10 to expose any TFM-dependent perf gap.
+Benchmarks compare extraction and compression performance against [SharpSevenZip](https://github.com/JeremyAnsel/SharpSevenZip) on a 1 MB compressible payload across formats and compression levels. Every benchmark runs on both .NET 10 and .NET 11 in the same invocation, to expose any runtime-dependent perf gap. Start the run with `--framework net10.0`: it hosts the process, and the .NET 11 job is built and run separately.
 
 **What is timed:** compression benchmarks time only the `CompressAsync`/`CompressStream` call on a pre-created, long-lived compressor. Extraction benchmarks time only `ExtractEntryAsync`/`ExtractFile` on a pre-opened archive — both resolve to the same underlying `IInArchive::Extract` native call, so this is a true apples-to-apples comparison of the two COM interop paths.
 
-### Results (Apple M5 Pro, macOS Tahoe Arm64, .NET 10.0.9 / .NET 8.0.28, BenchmarkDotNet 0.15.8)
+### Results (Apple M5 Pro, macOS Tahoe Arm64, .NET 10.0.15 / .NET 11.0.0, BenchmarkDotNet 0.16.0-preview.2)
 
 **Compression** — mean, 1 MB payload, lower is better:
 
-| Level   | SevenZipSharper / net10 | SevenZipSharper / net8 | SharpSevenZip / net10 | SharpSevenZip / net8 |
-|---------|------------------------:|-----------------------:|----------------------:|---------------------:|
-| Fastest |                2.05 ms |                1.86 ms |              1.90 ms |              1.73 ms |
-| Normal  |                3.28 ms |                3.17 ms |              3.13 ms |              3.11 ms |
-| Ultra   |                3.23 ms |                3.07 ms |              3.00 ms |              3.01 ms |
+| Level   | SevenZipSharper / net10 | SevenZipSharper / net11 | SharpSevenZip / net10 | SharpSevenZip / net11 |
+|---------|------------------------:|------------------------:|----------------------:|----------------------:|
+| Fastest |                1.91 ms |                 1.91 ms |               1.88 ms |               1.79 ms |
+| Normal  |                3.05 ms |                 3.03 ms |               3.10 ms |               3.00 ms |
+| Ultra   |                3.00 ms |                 3.04 ms |               2.95 ms |               3.01 ms |
 
 **Extraction** — mean, 1 MB payload, lower is better:
 
-| Format | SevenZipSharper / net10 | SevenZipSharper / net8 | SharpSevenZip / net10 | SharpSevenZip / net8 |
-|--------|------------------------:|-----------------------:|----------------------:|---------------------:|
-| 7z     |                  254 µs |                  250 µs |                239 µs |              308 µs |
-| Zip    |                  227 µs |                  215 µs |                215 µs |              246 µs |
+| Format | SevenZipSharper / net10 | SevenZipSharper / net11 | SharpSevenZip / net10 | SharpSevenZip / net11 |
+|--------|------------------------:|------------------------:|----------------------:|----------------------:|
+| 7z     |                  236 µs |                  238 µs |                219 µs |                221 µs |
+| Zip    |                  201 µs |                  204 µs |                187 µs |                184 µs |
 
 ### Reading the numbers
 
-- **Compression** is dominated by the LZMA codec running inside the native `7z` library. SevenZipSharper runs 2–8% slower than SharpSevenZip across all levels — not from COM overhead, but because `CompressAsync` goes through an internal `Task.Run` while SharpSevenZip's `CompressStream` is fully synchronous. Both TFMs are essentially flat for both libraries; the codec, not the runtime, drives this number.
-- **Extraction** is where the COM-interop story shows clearly. On **net8**, SevenZipSharper is faster than SharpSevenZip: 250 µs vs 308 µs for 7z (19% faster), 215 µs vs 246 µs for Zip (13% faster). Our compile-time-generated COM marshalling outperforms the net8 runtime marshaller. On **net10**, SharpSevenZip has improved enough to edge past us (239 µs vs 254 µs for 7z, 215 µs vs 227 µs for Zip) — the .NET team's optimisations to the runtime COM path in net9/net10 close the gap, and SharpSevenZip's synchronous `ExtractFile` avoids the `Task.Run` overhead that `ExtractEntryAsync` pays.
-- **Why SevenZipSharper is flat and SharpSevenZip is not:** our extraction times barely move between TFMs (249 µs net8 → 254 µs net10 for 7z). SharpSevenZip's jump is dramatic: 308 µs net8 → 239 µs net10 (23% faster). SevenZipSharper uses `[GeneratedComInterface]` / `[GeneratedComClass]`, where all marshalling is emitted at compile time and the runtime's COM machinery is never invoked. That code was already at the perf floor on net8 — the runtime improvements in net9/net10 don't apply to it. SharpSevenZip uses legacy `[ComImport]`, which routes every call through the CLR's runtime COM marshaller; that path benefited heavily from the net9/net10 work.
-- **Allocations:** SevenZipSharper allocates ~120–470× more than SharpSevenZip per compression call (~2 MB vs ~4–6 KB), and ~7–130× more per extraction call. The large compression figure is dominated by the 2 MB output buffer written through our managed wrappers; the remainder is the `Result<T>` + `Task` + `IProgress<T>` layer. For most callers this is invisible; for tight loops processing thousands of small archives it is a measurable cost.
-- **TFM choice:** for this library on this hardware, pick whichever TFM your downstream stack requires — the perf difference between net8 and net10 is within noise for us.
+- **Compression** is dominated by the LZMA codec running inside the native `7z` library. SevenZipSharper is within 2% of SharpSevenZip at Normal and Ultra, and 2–7% behind at Fastest, where the fixed per-call cost is a larger share of a 2 ms operation. That cost comes from `CompressAsync` going through an internal `Task.Run` while SharpSevenZip's `CompressStream` is fully synchronous.
+- **Extraction** is where the interop layer shows. SharpSevenZip is about 8% faster for 7z (219 vs 236 µs on net10) and 8–11% faster for Zip. Both resolve to the same native `Extract` call, so the gap is managed overhead: most likely the `Task.Run` that `ExtractEntryAsync` pays and SharpSevenZip's synchronous `ExtractFile` avoids (not isolated by a separate measurement).
+- **Runtime:** net10 and net11 are within noise for SevenZipSharper (236 vs 238 µs for 7z extraction, 3.05 vs 3.03 ms for Normal compression). SevenZipSharper uses `[GeneratedComInterface]` / `[GeneratedComClass]`, where all marshalling is emitted at compile time, so there is little runtime COM machinery for a newer runtime to speed up.
+- **Allocations:** SevenZipSharper allocates about 2 MB per compression call (~330–390× SharpSevenZip's ~5–6 KB) and about 1 MB per extraction call (~145–185× SharpSevenZip's ~6–7 KB). The large compression figure is dominated by the 2 MB output buffer written through our managed wrappers; the remainder is the `Result<T>` + `Task` + `IProgress<T>` layer. For most callers this is invisible; for tight loops processing thousands of small archives it is a measurable cost.
+- **Runtime choice:** for this library on this hardware, the performance difference between net10 and net11 is within noise; pick whichever your downstream stack requires.
+
+BenchmarkDotNet 0.15.8, the latest stable release, has no .NET 11 support, so these runs use the 0.16 preview. Earlier releases (2.x) published .NET 8 results.
 
 Results on x64 hardware and Linux/Windows may differ — the relative ordering should be similar but absolute timings will shift with hardware and codec performance.
 
