@@ -4,7 +4,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Configs;
 using Microsoft.Extensions.Logging.Abstractions;
 using SevenZipSharper.Compression;
 
