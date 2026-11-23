@@ -81,16 +81,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- ReferenceOutputAssembly=false: Native produces no DLL — this reference exists only to
-         emit a NuGet <dependency> in the packed .nuspec so consumers get the native binaries
-         automatically when they add DuraIT.SevenZipSharper.
-         SetTargetFramework: Native is net8.0-only; tell MSBuild which TFM to use when this
-         multi-targeting project resolves the dependency, avoiding a TFM negotiation error. -->
+    <!-- Native produces no assembly. This reference exists so the packed .nuspec lists
+         DuraIT.SevenZipSharper.Native as a dependency and consumers get the native binaries with a single
+         package reference. Do not add ReferenceOutputAssembly="false": NuGet then leaves the dependency out
+         of the nuspec (verified by the pack job in ci.yml). -->
     <ProjectReference
       Include="../SevenZipSharper.Native/SevenZipSharper.Native.csproj"
-      ReferenceOutputAssembly="false"
-      SkipGetTargetFrameworkProperties="true"
-      SetTargetFramework="TargetFramework=net8.0"
     />
   </ItemGroup>
 
