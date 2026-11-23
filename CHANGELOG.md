@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.5] - 2026-11-23
 
+### Fixed
+
+- `DuraIT.SevenZipSharper` now declares `DuraIT.SevenZipSharper.Native` as a dependency, so a
+  single package reference brings the native libraries, as the README describes. Earlier
+  releases left the dependency out of the package, and consumers had to reference
+  `DuraIT.SevenZipSharper.Native` themselves.
+
 ### Changed
 
 - The native libraries added by `DuraIT.SevenZipSharper.Native` are hidden in the project
