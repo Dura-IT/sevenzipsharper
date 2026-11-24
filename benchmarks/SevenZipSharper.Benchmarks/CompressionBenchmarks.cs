@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Jobs;
 using Microsoft.Extensions.Logging.Abstractions;
 using SevenZipSharper.Compression;
 
@@ -20,8 +19,7 @@ namespace SevenZipSharper.Benchmarks
     /// compress call itself is timed.
     /// </remarks>
     [MemoryDiagnoser]
-    [SimpleJob(RuntimeMoniker.Net80)]
-    [SimpleJob(RuntimeMoniker.Net10_0)]
+    [Config(typeof(RuntimeComparisonConfig))]
     public class CompressionBenchmarks
     {
         [Params(CompressionLevel.Fastest, CompressionLevel.Normal, CompressionLevel.Ultra)]

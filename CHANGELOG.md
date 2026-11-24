@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- **BREAKING:** `net8.0` is no longer a target framework (.NET 8 is out of support). The library and
+  `DuraIT.SevenZipSharper.Native` now target `net10.0`. Consumers still on .NET 8 stay on 2.x, which
+  gets no scheduled updates; a 2.x branch can be cut on request.
+
+### Changed
+
+- `Microsoft.Extensions.DependencyInjection.Abstractions` and `Microsoft.Extensions.Logging.Abstractions`
+  moved from 10.0.15 to 11.0.0.
+- Unit tests run on .NET 10 and .NET 11; the benchmarks compare .NET 10 with .NET 11 instead of .NET 8
+  with .NET 10 (this needs the BenchmarkDotNet 0.16 preview).
+
 ## [2.0.5] - 2026-11-23
 
 ### Fixed

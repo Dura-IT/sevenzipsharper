@@ -1,9 +1,0 @@
-<Project>
-  <!-- SevenZipSharper uses SetTargetFramework=net8.0 on its ProjectReference to this project,
-       which makes MSBuild treat the solution-level build (no TargetFramework global property) and
-       the dependency build (TargetFramework=net8.0 global property) as two distinct build requests.
-       Both run in parallel and race on IncrementalClean writing FileListAbsolute.txt.
-       NoTargets projects produce no compiled outputs, so IncrementalClean has nothing to do here.
-       Defined in Directory.Build.targets (imported after Sdk.targets) so it overrides the SDK. -->
-  <Target Name="IncrementalClean" />
-</Project>
