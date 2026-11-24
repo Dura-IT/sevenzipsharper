@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-11-24
+
 ### Removed
 
 - **BREAKING:** `net8.0` is no longer a target framework (.NET 8 is out of support). The library and
@@ -237,7 +239,8 @@ published as pre-release pending native library compilation for all supported pl
   `osx-x64`, `linux-x64`, `linux-arm64` via `NativeLibrary.SetDllImportResolver`
 - GitHub Actions CI: build + test on Ubuntu, Windows, macOS; pack job
 
-[Unreleased]: https://github.com/Dura-IT/SevenZipSharper/compare/v2.0.5...HEAD
+[Unreleased]: https://github.com/Dura-IT/SevenZipSharper/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/Dura-IT/SevenZipSharper/compare/v2.0.5...v3.0.0
 [2.0.5]: https://github.com/Dura-IT/SevenZipSharper/compare/v2.0.4...v2.0.5
 [2.0.4]: https://github.com/Dura-IT/SevenZipSharper/compare/v2.0.3...v2.0.4
 [2.0.3]: https://github.com/Dura-IT/SevenZipSharper/compare/v2.0.2...v2.0.3
