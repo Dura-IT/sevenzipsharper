@@ -112,7 +112,7 @@ function Build-WindowsDll {
     param(
         [string]$Rid,       # "win-x64"
         [string]$VcArch,    # vcvarsall argument: "x64", "x64_arm64" or "x64_x86"
-        [string]$Platform,  # nmake PLATFORM value; empty for x86 (the makefiles default to x86)
+        [string]$Platform,  # nmake PLATFORM value (vcvarsall also sets it in the environment)
         [string]$OutDir     # nmake output directory under Format7zF
     )
 
@@ -144,4 +144,4 @@ function Build-WindowsDll {
 
 Build-WindowsDll -Rid "win-x64"   -VcArch "x64"       -Platform "x64"   -OutDir "x64"
 Build-WindowsDll -Rid "win-arm64" -VcArch "x64_arm64" -Platform "arm64" -OutDir "arm64"
-Build-WindowsDll -Rid "win-x86"   -VcArch "x64_x86"   -Platform ""      -OutDir "o"
+Build-WindowsDll -Rid "win-x86"   -VcArch "x64_x86"   -Platform "x86"   -OutDir "x86"
