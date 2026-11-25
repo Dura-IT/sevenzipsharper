@@ -7,7 +7,9 @@
 #   ./scripts/fetch-natives.sh 2601      # override version
 #
 # Requirements: curl, tar (with xz support), make, a C++ compiler (clang or g++)
-# On Windows use fetch-natives.ps1 instead.
+# On Windows use fetch-natives.ps1 instead (it needs Visual Studio with the C++ tools).
+#
+# The build leaves out the RAR code (DISABLE_RAR=1), see the make call below.
 
 set -euo pipefail
 
@@ -103,7 +105,9 @@ CPUS="$(nproc 2>/dev/null || sysctl -n hw.logicalcpu 2>/dev/null || echo 4)"
 echo "--> Building with $CPUS CPUs..."
 
 # CC/CXX can be overridden by the caller for cross-compilation.
-make -C "$FORMAT_DIR" -f makefile.gcc -j"$CPUS"
+# DISABLE_RAR=1 leaves out the unRAR handlers, decoders and crypto: its licence restricts the code
+# to decompression and is not LGPL, so SevenZipSharper ships no RAR code at all.
+make -C "$FORMAT_DIR" -f makefile.gcc -j"$CPUS" DISABLE_RAR=1
 
 # ---------------------------------------------------------------------------
 # Copy output

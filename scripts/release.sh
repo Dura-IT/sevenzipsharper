@@ -6,7 +6,7 @@
 #
 # What it does:
 #   1. Validates the version (semver) and that the v<version> tag doesn't already exist.
-#   2. Confirms the matching natives-v<7zip-version> GitHub release exists (publish.yml needs it).
+#   2. Confirms the matching natives-v<7zip-version>-norar GitHub release exists (publish.yml needs it).
 #   3. Bumps <Version> in both SevenZipSharper and SevenZipSharper.Native csprojs.
 #   4. Commits the bump.
 #   5. Tags v<version> at HEAD.
@@ -59,7 +59,7 @@ if git ls-remote --tags origin "refs/tags/$TAG" | grep -q "$TAG"; then
 fi
 
 SEVENZIP_VERSION="$(cat scripts/7zip-version)"
-NATIVES_TAG="natives-v$SEVENZIP_VERSION"
+NATIVES_TAG="natives-v$SEVENZIP_VERSION-norar"
 
 if ! command -v gh >/dev/null; then
   echo "Error: gh CLI is required" >&2

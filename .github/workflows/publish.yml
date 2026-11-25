@@ -26,9 +26,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION=$(cat scripts/7zip-version)
-          gh release download "natives-v$VERSION" \
+          gh release download "natives-v$VERSION-norar" \
             --repo "${{ github.repository }}" \
-            --pattern "natives-v$VERSION.tar.gz" \
+            --pattern "natives-v$VERSION-norar.tar.gz" \
             --output natives.tar.gz
           tar xzf natives.tar.gz -C src/SevenZipSharper.Native/
           mkdir -p runtimes
