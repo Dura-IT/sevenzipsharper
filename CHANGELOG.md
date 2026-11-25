@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.1] - 2026-11-25
+
 ### Changed
 
 - The bundled native libraries no longer contain any RAR code. 7-Zip's unRAR source has its own licence, which is not LGPL, so it is left out of the build: `DISABLE_RAR=1` on Linux and macOS, and a patched `Arc.mak` on Windows. The managed API never exposed RAR, so no public API changes.
@@ -244,7 +246,8 @@ published as pre-release pending native library compilation for all supported pl
   `osx-x64`, `linux-x64`, `linux-arm64` via `NativeLibrary.SetDllImportResolver`
 - GitHub Actions CI: build + test on Ubuntu, Windows, macOS; pack job
 
-[Unreleased]: https://github.com/Dura-IT/SevenZipSharper/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/Dura-IT/SevenZipSharper/compare/v3.0.1...HEAD
+[3.0.1]: https://github.com/Dura-IT/SevenZipSharper/compare/v3.0.0...v3.0.1
 [3.0.0]: https://github.com/Dura-IT/SevenZipSharper/compare/v2.0.5...v3.0.0
 [2.0.5]: https://github.com/Dura-IT/SevenZipSharper/compare/v2.0.4...v2.0.5
 [2.0.4]: https://github.com/Dura-IT/SevenZipSharper/compare/v2.0.3...v2.0.4
