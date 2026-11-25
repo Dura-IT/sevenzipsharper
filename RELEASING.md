@@ -33,7 +33,7 @@ commits, tags `vX.Y.Z`, and pushes both. The tag push triggers `publish.yml`, wh
 and pushes both nupkgs to NuGet.org via Trusted Publishing.
 
 Preconditions the script enforces: valid semver, on `main`, clean tree, tag doesn't already
-exist locally or on origin, and the matching `natives-v<7zip-version>` GitHub release exists.
+exist locally or on origin, and the matching `natives-v<7zip-version>-norar` GitHub release exists.
 That release is created by dispatching `build-natives.yml` on the 7-Zip bump branch before it
 merges (README → Rebuilding native libraries); the natives version comes from
 `scripts/7zip-version`, not the SevenZipSharper version.

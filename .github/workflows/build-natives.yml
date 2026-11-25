@@ -118,22 +118,35 @@ jobs:
             cp -r "native-$rid/." "$dest/"
           done
 
+      - name: Verify no RAR code is present
+        run: |
+          failed=0
+          for f in src/SevenZipSharper.Native/runtimes/*/native/*; do
+            if grep -aqE 'NRar|Rar!' "$f"; then
+              echo "::error::$f still contains RAR code (NRar symbols or the Rar! signature)"
+              failed=1
+            else
+              echo "ok: $f"
+            fi
+          done
+          test "$failed" -eq 0
+
       - name: Create natives archive
         id: archive
         run: |
           VERSION=$(cat scripts/7zip-version)
           cd src/SevenZipSharper.Native
-          tar czf "natives-v$VERSION.tar.gz" runtimes/
+          tar czf "natives-v$VERSION-norar.tar.gz" runtimes/
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "path=src/SevenZipSharper.Native/natives-v$VERSION.tar.gz" >> "$GITHUB_OUTPUT"
+          echo "path=src/SevenZipSharper.Native/natives-v$VERSION-norar.tar.gz" >> "$GITHUB_OUTPUT"
 
       - name: Publish to GitHub release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION=${{ steps.archive.outputs.version }}
-          TAG="natives-v$VERSION"
-          ASSET="natives-v$VERSION.tar.gz"
+          TAG="natives-v$VERSION-norar"
+          ASSET="natives-v$VERSION-norar.tar.gz"
           if gh release view "$TAG" --repo "${{ github.repository }}" --json assets --jq '.assets[].name' 2>/dev/null | grep -qx "$ASSET"; then
             echo "::error::Asset $ASSET already exists on release $TAG. Native artifacts are immutable per 7-Zip version."
             echo "::error::To force a rebuild, explicitly delete the existing asset first:"
