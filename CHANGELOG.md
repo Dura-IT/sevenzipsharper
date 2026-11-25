@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The bundled native libraries no longer contain any RAR code. 7-Zip's unRAR source has its own licence, which is not LGPL, so it is left out of the build: `DISABLE_RAR=1` on Linux and macOS, and a patched `Arc.mak` on Windows. The managed API never exposed RAR, so no public API changes.
+- The Windows natives (`win-x64`, `win-arm64`, `win-x86`) are now built from the official 7-Zip source with MSVC instead of being extracted from the official installers, which always include RAR. The natives release is now named `natives-v<7-Zip version>-norar`.
+
 ## [3.0.0] - 2026-11-24
 
 ### Removed

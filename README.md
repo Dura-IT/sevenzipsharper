@@ -87,7 +87,7 @@ Native 7-Zip libraries for Windows x64/Arm64/x86, macOS Arm64/x64, and Linux x64
 | ISO (`.iso`) | Yes | — |
 
 > [!NOTE]
-> **RAR is not supported.** The unRAR source code carries a redistribution restriction that is incompatible with SevenZipSharper's LGPL licence. If you need RAR extraction, use a dedicated unRAR library alongside this one.
+> **RAR is not supported, and the bundled native libraries contain no RAR code.** The unRAR source that 7-Zip uses carries its own licence, which is not LGPL and forbids using the code to re-create the RAR compression algorithm. The natives are built without it (`DISABLE_RAR=1` on Linux and macOS, a patched makefile on Windows). If you need RAR extraction, use a dedicated unRAR library alongside this one.
 
 ### Format × method compatibility
 
@@ -256,11 +256,11 @@ services.AddSevenZipSharper();
 
 ## Rebuilding native libraries
 
-The bundled `7z.dll` / `7z.dylib` / `7z.so` binaries are built from the official [7-Zip source](https://github.com/ip7z/7zip) by the `build-natives.yml` workflow and published as a `natives-v<version>` GitHub release, which CI and the publish workflow download. They are not committed. To move to a new 7-Zip version:
+The bundled `7z.dll` / `7z.dylib` / `7z.so` binaries are built from the official [7-Zip source](https://github.com/ip7z/7zip) by the `build-natives.yml` workflow and published as a `natives-v<version>-norar` GitHub release, which CI and the publish workflow download. They are not committed. To move to a new 7-Zip version:
 
 1. On a branch, update `scripts/7zip-version` with the new four-digit version (e.g. `2409`).
-2. Compute SHA256 hashes of the new source tarball and Windows installers, and update `scripts/7zip-sha256`.
-3. Push the branch and run `gh workflow run build-natives.yml --ref <branch>`. It builds all seven RID targets and publishes `natives-v<version>`. CI on the pull request fails until that release exists.
+2. Compute the SHA256 hash of the new source tarball and update `scripts/7zip-sha256`.
+3. Push the branch and run `gh workflow run build-natives.yml --ref <branch>`. It builds all seven RID targets and publishes `natives-v<version>-norar`. CI on the pull request fails until that release exists.
 4. Open the pull request and merge once CI is green.
 
 To build the library for your own machine only, for local testing, run `bash scripts/fetch-natives.sh` (macOS / Linux) or `.\scripts\fetch-natives.ps1` (Windows).
